@@ -1,0 +1,51 @@
+{{- $fullName := include "app.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.domain }}
+      secretName: {{ .Values.ingress.tlsSecretName }}
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-static
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # remove "/static" from the path:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.domain }}
+      secretName: {{ .Values.ingress.tlsSecretName }}
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /static(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}-static
+                port:
+                  number: 80
