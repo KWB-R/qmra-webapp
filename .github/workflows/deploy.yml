@@ -31,6 +31,6 @@ jobs:
       run: |
         ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "\
         cd ${{ secrets.DEPLOY_PATH }} && git pull &&
-        microk8s ctr image import img.tar && rm img.tar &&
+        su - k8admin microk8s ctr image import img.tar && rm img.tar &&
         cd infra/helm &&
-        helm update qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }}"
+        su - k8admin helm upgrade qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }}"
