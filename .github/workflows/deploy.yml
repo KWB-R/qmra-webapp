@@ -12,11 +12,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-     
-    - name: Install and configure SSH
-      run: |
-        echo "${{ secrets.DEPLOY_SERVER_SSH_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
     - name: Build    
       uses: docker/build-push-action@v6
       with:
@@ -25,12 +20,21 @@ jobs:
         tags: qmra:local
         outputs: type=tar,dest=./img.tar
     - name: Push
-      run: |
-        scp -i private_key.pem -o StrictHostKeyChecking=no ./img.tar ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
+        source: "img.tar"
+        target: ${{ secrets.DEPLOY_PATH }}
     - name: Deploy
-      run: |
-        ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "\
-        cd ${{ secrets.DEPLOY_PATH }} && git pull &&
-        su - k8admin microk8s ctr image import img.tar && rm img.tar &&
-        cd infra/helm &&
-        su - k8admin helm upgrade qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }}"
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }} && git pull
+          su - k8admin microk8s ctr image import img.tar && rm img.tar
+          cd infra/helm
+          su - k8admin helm upgrade qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }}
