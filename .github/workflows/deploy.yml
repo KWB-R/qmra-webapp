@@ -18,7 +18,9 @@ jobs:
         context: .
         push: false
         tags: qmra:local
-        outputs: type=local,dest=- . > img.tar
+        outputs: type=local,dest=- > ./img.tar
+    - name: Save
+      run: docker save qmra > img.tar
     - name: Push
       uses: appleboy/scp-action@v0.1.7
       with:
