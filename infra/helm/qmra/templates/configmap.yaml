@@ -5,8 +5,8 @@ metadata:
   name: {{ .Values.configmap_name }}
 data:
   DEBUG: "true"
-  ALLOWED_HOSTS: "localhost,127.0.0.1,{{ .Values.domain }}"
-  DB_PATH: {{ .Values.sqlite.mount_path }}
+  DOMAIN_NAME: {{ .Values.domain }}
+  SQLITE_PATH: {{ .Values.sqlite.mount_path }}
   STATIC_ROOT: {{ .Values.static.mount_path }}
 ---
 apiVersion: v1
