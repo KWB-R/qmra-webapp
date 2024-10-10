@@ -14,7 +14,7 @@ jobs:
       with:
         python-version: '3.11'
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.txt && pip install -r requirements.test.txt
     - name: Test
       run: python manage.py test
   deploy:
