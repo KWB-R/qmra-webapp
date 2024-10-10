@@ -152,7 +152,8 @@ def risk_assessment_result(request):
 @login_required(login_url="/login")
 def inflows_plots_view(request):
     forms = InflowFormSet(request.POST, queryset=Inflow.objects.none(), prefix="inflow")
-    forms.is_valid()
+    if not forms.is_valid():
+        return render(request, "failed-plot.html", context=dict(form=forms, form_name="inflow"))
     print(forms.errors)
     inflows = forms.save(commit=False)
     for f in forms.deleted_forms:
@@ -165,8 +166,8 @@ def inflows_plots_view(request):
 @login_required(login_url="/login")
 def treatments_plots_view(request):
     forms = TreatmentFormSet(request.POST, prefix="treatments")
-    forms.is_valid()
-    print(forms.errors)
+    if not forms.is_valid():
+        return render(request, "failed-plot.html", context=dict(form=forms, form_name="treatment"))
     treatments = forms.save(commit=False)
     for f in forms.deleted_forms:
         f.instance.delete()

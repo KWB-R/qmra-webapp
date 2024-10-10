@@ -34,10 +34,11 @@
         hideAllTreatmentsForms();
         treatmentsFormset.querySelector(`[id='${formId}']`).removeAttribute('hidden');
     };
-    function addTreatmentSummary(treatmentName, formId){
+    function addTreatmentSummary(treatmentName, formId, isValid){
         const summaryDiv = treatmentsFormset.querySelector("[id=selected-treatments]");
         const button = document.createElement("button");
-        button.setAttribute("class", "btn btn-info");
+        button.setAttribute("class", "btn btn-info text-truncate w-100");
+        button.setAttribute("style", "");
         button.addEventListener("click", ev => {
             ev.preventDefault();
             focusOnTreatment(formId)
@@ -45,9 +46,20 @@
         button.appendChild(document.createTextNode(treatmentName));
         const deleteButton = document.createElement("button");
         deleteButton.appendChild(document.createTextNode("X"));
-        const div = document.createElement("div");
-        div.setAttribute("style", "display: flex;")
+        let div = document.createElement("div");
+        div.setAttribute("style", `display: flex; height: 42px; min-width: 100%; ${isValid ? '' : 'border: solid 2px var(--danger);'}`)
         div.append(button, deleteButton);
+        if (!isValid) {
+            const dummyInput = document.createElement("input");
+            dummyInput.setAttribute("hidden", "");
+            dummyInput.setAttribute("class", "is_invalid");
+            const message = document.createElement("span");
+            message.setAttribute("class", "invalid-feedback d-block");
+            message.appendChild(document.createTextNode("contains errors"));
+            topDiv = document.createElement("div");
+            topDiv.append(div, dummyInput, message);
+            div = topDiv;
+        }
         deleteButton.addEventListener("click", ev => {
             ev.preventDefault();
             const thisTreatment = treatmentsFormset.querySelector(`div[id=${formId}]`);
@@ -74,7 +86,7 @@
         newForm.innerHTML = newForm.innerHTML.replaceAll(
             new RegExp('__prefix__', "g"), `${nForms}`
         );
-        addTreatmentSummary(selectedTreatment, newFormId);
+        addTreatmentSummary(selectedTreatment, newFormId, true);
         treatmentsFormset.append(newForm);
         updateTreatmentsFormsCount(nForms+1);
         focusOnTreatment(newFormId);
@@ -87,7 +99,9 @@
         treatmentsFormset.querySelectorAll("[id*=treatments-n-]").forEach(form => {
             const formId = form.id;
             const treatmentName = form.querySelector("select[id*=name] option:checked").value;
-            addTreatmentSummary(treatmentName, formId);
+            const isValid = [...form.querySelectorAll("input")].every(i => !i.hasAttribute("aria-invalid"))
+            console.log(isValid);
+            addTreatmentSummary(treatmentName, formId, isValid);
             focusOnTreatment(formId);
         })
     })

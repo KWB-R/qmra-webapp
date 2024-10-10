@@ -32,8 +32,8 @@ def risk_plots(risk_assessment_results):
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
         # plot_bgcolor=bgcolor,
-        xaxis_title="",
-        yaxis_title="Probability of infection per year",
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="Probability of infection per year", showgrid=False),
         margin=dict(l=0, r=0, t=0, b=0),
         legend=dict(
             orientation="h",
@@ -44,6 +44,11 @@ def risk_plots(risk_assessment_results):
     )
     infection_prob_fig.update_yaxes(type="log")
     infection_prob_fig.add_hline(y=0.0001, line_dash="dashdot",
+                                 label=dict(
+                                     text="tolerable level",
+                                     textposition="end",
+                                     yanchor="top",
+                                 )
                                  # line=dict(color=lcolor, width=3)
                                  )
     infection_prob_fig.update_traces(
@@ -55,8 +60,8 @@ def risk_plots(risk_assessment_results):
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
         # plot_bgcolor=bgcolor,
-        xaxis_title="",
-        yaxis_title="DALYs pppy",
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="DALYs pppy", showgrid=False),
         margin=dict(l=0, r=0, t=0, b=0),
         legend=dict(
             orientation="h",
@@ -67,6 +72,11 @@ def risk_plots(risk_assessment_results):
     )
     dalys_fig.update_yaxes(type="log")
     dalys_fig.add_hline(y=0.000001, line_dash="dashdot",
+                        label=dict(
+                            text="tolerable level",
+                            textposition="end",
+                            yanchor="top",
+                        )
                         # line=dict(color=lcolor, width=3)
                         )
     dalys_fig.update_traces(
@@ -106,13 +116,14 @@ def inflows_plot(inflows):
     )
 
     fig2.update_layout(
+        autosize=True,
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
         yaxis_title="Source water concentrations in N/L",
         margin=dict(l=0, r=0, t=40, b=0),
     )
 
-    return plot(fig2, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)
+    return plot(fig2, output_type="div", config={'displayModeBar': False, "responsive": True}, include_plotlyjs=False)
 
 
 def treatments_plot(treatments):

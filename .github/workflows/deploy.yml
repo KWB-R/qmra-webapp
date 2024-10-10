@@ -6,7 +6,19 @@ on:
     branches:
       - main
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Test
+      run: python manage.py test
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -19,7 +31,7 @@ jobs:
       with:
         context: .
         push: false
-        tags: qmra:local
+        tags: qmra:${GITHUB_SHA::6}
         load: true
     - name: Save
       run: docker save qmra > img.tar
@@ -41,4 +53,4 @@ jobs:
           cd ${{ secrets.DEPLOY_PATH }} && git pull
           microk8s ctr image import img.tar && rm img.tar
           cd infra/helm
-          microk8s helm upgrade qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }}
+          microk8s helm upgrade qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }},image.tag=${GITHUB_SHA::6}

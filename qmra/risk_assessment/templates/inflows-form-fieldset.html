@@ -21,7 +21,7 @@
             {% for field in inflow_form.empty_form.hidden_fields %}
             {{field}}
             {% endfor %}
-            <div class="form-row">
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, .333333fr)) .05fr; gap: .5em">
                 {% crispy inflow_form.empty_form %}
                 <div id="div_id_inflow-__prefix__-DELETE" class="form-group">
                     <div class="col">
@@ -38,12 +38,19 @@
                 </div>
             </div>
         </div>
+        {% if inflow_form.non_form_errors %}
+        <input type="hidden" class="is-invalid">
+        <div class="invalid-feedback">there were errors validating the list of inflows:</div>
+        <span class="invalid-feedback">
+            <strong>{{inflow_form.non_form_errors }}</strong>
+        </span>
+        {% endif %}
         {% for form in inflow_form %}
         <div id="inflow-n-{{forloop.counter0}}">
             {% for field in form.hidden_fields %}
             {{field}}
             {% endfor %}
-            <div class="form-row">
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, .333333fr)) .05fr; gap: .5em">
                 {% crispy form %}
                 <div id="div_id_inflow-{{forloop.counter0}}-DELETE" class="form-group">
                     <div class="col">

@@ -1,0 +1,23 @@
+<div style="font-size: 1.5em;">
+    <input type="hidden" class="is-invalid">
+    <p class="invalid-feedback">Parameters validation failed!</p>
+    {% if form.non_form_errors %}
+        <p><span class="invalid-feedback d-block">{{form.non_form_errors.as_text}}</span></p>
+    {% endif %}
+    {% if form.total_error_count %}
+        <ul class="invalid-feedback d-block">{% for form in form.forms %}
+            {% if form.errors %}
+            <li>{{form_name}} {{forloop.counter}}
+                <ul class="invalid-feedback d-block">
+                    {% for key, err in form.errors.items %}
+
+                    <li><span>{{key}}: {{err}}</span></li>
+
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
