@@ -7,3 +7,5 @@ django-pandas
 crispy-bootstrap4
 django-prometheus
 Django~=5.0.6
+structlog
+django-structlog

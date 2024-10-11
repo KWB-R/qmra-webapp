@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
-from django.utils.crypto import get_random_string
+import structlog
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,7 +33,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     os.getenv("DOMAIN_NAME", ""),
     os.getenv("THIS_POD_IP", "")
-    ]
+]
 
 CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('DOMAIN_NAME', '')}"]
 CSRF_ALLOWED_ORIGINS = [f"https://{os.getenv('DOMAIN_NAME', '')}"]
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap4',
+    "django_structlog",
     "django_prometheus"
 ]
 
@@ -63,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_structlog.middlewares.RequestMiddleware",
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
@@ -111,8 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -134,3 +137,66 @@ STATIC_ROOT = os.getenv("STATIC_ROOT", "/var/cache/qmra/static")
 STATICFILES_DIRS = [
     BASE_DIR / "qmra/static"
 ]
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "json_formatter": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+        },
+        "plain_console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
+        },
+        "key_value": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.KeyValueRenderer(key_order=['timestamp', 'request', 'code', 'level', 'event']),
+        },
+    },
+    "handlers": {
+        # Important notes regarding handlers.
+        #
+        # 1. Make sure you use handlers adapted for your project.
+        # These handlers configurations are only examples for this library.
+        # See python's logging.handlers: https://docs.python.org/3/library/logging.handlers.html
+        #
+        # 2. You might also want to use different logging configurations depending of the environment.
+        # Different files (local.py, tests.py, production.py, ci.py, etc.) or only conditions.
+        # See https://docs.djangoproject.com/en/dev/topics/settings/#designating-the-settings
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "key_value",
+        },
+        "json_file": {
+            "class": "logging.StreamHandler",
+            # "filename": "logs/json.log",
+            "formatter": "json_formatter",
+        }
+    },
+    "loggers": {
+        "django_structlog": {
+            "handlers": ["json_file" if os.getenv("DOMAIN_NAME", False) else "console"],
+            "level": "INFO",
+        }
+    }
+}
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.filter_by_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        # structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
