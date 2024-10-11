@@ -13,7 +13,7 @@
 </script>
 <style type="text/css">
     .assessment-summary {
-        max-width: 100%;
+        max-width: 82%;
     }
 </style>
 {% csrf_token %}
@@ -32,7 +32,7 @@
     <button id="show-result-{{assessment.id}}" hidden
             data-toggle="modal" data-target="#assessment-result-{{assessment.id}}" data-show="true"></button>
     <div id="assessment-result-{{assessment.id}}" class="modal" role="dialog"></div>
-    <div class="media p-3 mt-3 custom-media "
+    <div class="media p-3 mt-3 custom-media w-75"
          style="border: 2px solid; border-radius: 5px; border-color: #d3d3d3 ">
         <div class="media-left mt-2 pr-3">
             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">

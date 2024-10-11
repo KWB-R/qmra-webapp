@@ -75,12 +75,11 @@ class InflowForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-
         if cleaned_data["min"] < 0:
             self.add_error("min", "this field must be positive or 0")
         if cleaned_data["max"] < 0:
             self.add_error("max", "this field must be positive or 0")
-        if cleaned_data["min"] >= cleaned_data["max"]:
+        if cleaned_data.get("min", 0) > cleaned_data.get("max", 0):
             msg = "minimum concentration must be less than maximum concentration"
             self.add_error("min", msg)
             self.add_error("max", msg)
@@ -107,7 +106,7 @@ class InflowFormSet(InflowFormSetBase):
 
     def clean(self):
         cleaned_data = [f for f in self.forms if not self._should_delete_form(f)]
-        unq_pathogens = {f.cleaned_data["pathogen"] for f in cleaned_data}
+        unq_pathogens = {f.cleaned_data["pathogen"] for f in cleaned_data if f.cleaned_data.get("pathogen", False)}
         if len(unq_pathogens) < len(cleaned_data):
             raise ValidationError("each pathogen must be unique")
 
@@ -175,11 +174,11 @@ class TreatmentForm(forms.ModelForm):
         if cleaned_data["protozoa_max"] < 0:
             self.add_error("protozoa_max", "this field must be positive or 0")
         msg = "min. must be less than max"
-        if cleaned_data["bacteria_min"] > cleaned_data["bacteria_max"]:
+        if cleaned_data.get("bacteria_min", 0) > cleaned_data.get("bacteria_max", 0):
             self.add_error("bacteria_min", msg)
-        if cleaned_data["viruses_min"] > cleaned_data["viruses_max"]:
+        if cleaned_data.get("viruses_min", 0) > cleaned_data.get("viruses_max", 0):
             self.add_error("viruses_min", msg)
-        if cleaned_data["protozoa_min"] > cleaned_data["protozoa_max"]:
+        if cleaned_data.get("protozoa_min", 0) > cleaned_data.get("protozoa_max", 0):
             self.add_error("protozoa_min", msg)
         return cleaned_data
 
