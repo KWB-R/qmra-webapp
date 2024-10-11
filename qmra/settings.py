@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import structlog
 
+from qmra.logs import json_stdout_handler, json_stderr_handler, console_stdout_handler, console_stderr_handler
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -138,7 +139,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "qmra/static"
 ]
 
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
@@ -153,7 +153,8 @@ LOGGING = {
         },
         "key_value": {
             "()": structlog.stdlib.ProcessorFormatter,
-            "processor": structlog.processors.KeyValueRenderer(key_order=['timestamp', 'request', 'code', 'level', 'event']),
+            "processor": structlog.processors.KeyValueRenderer(
+                key_order=['timestamp', 'request', 'code', 'level', 'event']),
         },
     },
     "handlers": {
@@ -166,20 +167,17 @@ LOGGING = {
         # 2. You might also want to use different logging configurations depending of the environment.
         # Different files (local.py, tests.py, production.py, ci.py, etc.) or only conditions.
         # See https://docs.djangoproject.com/en/dev/topics/settings/#designating-the-settings
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "key_value",
-        },
-        "json_file": {
-            "class": "logging.StreamHandler",
-            # "filename": "logs/json.log",
-            "formatter": "json_formatter",
-        }
+        "console_out": console_stdout_handler,
+        "console_err": console_stderr_handler,
+        "json_out": json_stdout_handler,
+        "json_err": json_stderr_handler,
     },
     "loggers": {
         "django_structlog": {
-            "handlers": ["json_file" if os.getenv("DOMAIN_NAME", False) else "console"],
+            "handlers": ["json_out", "json_err"] if os.getenv("DOMAIN_NAME", False)
+            else ["console_out", "console_err"],
             "level": "INFO",
+            'propagate': False,
         }
     }
 }
@@ -189,7 +187,7 @@ structlog.configure(
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),
-        # structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.StackInfoRenderer(),
