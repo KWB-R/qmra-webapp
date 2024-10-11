@@ -56,5 +56,6 @@ json_stdout_handler = {
 json_stderr_handler = {
     "class": "logging.StreamHandler",
     "formatter": "json_formatter",
+    "filters": [no_error_filter, no_health_filter],
     "stream": "ext://sys.stderr"
 }
