@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,12 +8,12 @@
     <title>{% block title %} QMRA {% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon.svg">
     <link rel="manifest" href="/static/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/static/favicon/safari-pinned-tab.svg" color="#5bbad5">
-    <link rel="shortcut icon" href="/static/favicon/favicon.ico">
+<!--    <link rel="mask-icon" href="/static/favicon/safari-pinned-tab.svg" color="#5bbad5">-->
+    <link rel="shortcut icon" href="/static/favicon/favicon.svg">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-config" content="/static/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
@@ -28,18 +29,11 @@
         <span class="navbar-toggler-icon" style="border-color: black;"></span>
     </button>
     <a class="navbar-brand" href="{%url 'index'%}">
-        <h1 class="kwb_headline"> QMRA </h1>
-        <!-- <img src="/static/qmratool/img/QMRA-1.png" width="66" height="66" class="d-inline-block align-top" alt=""> -->
+        <img src="{% static 'img/qmra-small-logo.svg' %}">
     </a>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-        <ul class="navbar-nav mr-auto">
+    <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
             {% if user.is_authenticated %}
-
-            <li class="nav-item active">
-                <a class="nav-link text_link_kwb" href="{%url 'index'%}"> My Risk Assessments</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav navbar-right">
             <li class="nav-item dropdown">
 
                 <button class="btn nav-item active text_link_kwb dropdown-toggle" type="button" id="dropdownMenuButton"
@@ -54,31 +48,20 @@
                         account</a>
                     <a class="dropdown-item nav-link text_link_kwb" href="{% url 'logout' %}">Log Out</a>
                 </div>
-
+            </li>
+            {% else %}
+            <li class="nav-item active">
+                <a class="dropdown-item nav-link text_link_kwb" href="{% url 'login' %}">Log In</a>
             </li>
             <li class="nav-item active">
-                {# <a class=" nav-link text_link_kwb " href="{% url 'qa' %}">QA/Info</a> #}
+                <a class="dropdown-item nav-link text_link_kwb" href="{% url 'register' %}">Register</a>
             </li>
+            {% endif %}
             <li class="nav-item active">
-                <a class=" nav-link text_link_kwb " href="https://qmra.readthedocs.io/en/latest/">About</a>
-            </li>
-
-
-        </ul>
-        {% else %}
-        <ul class="navbar-nav navbar-right">
-            <li class="nav-item active">
-                <a class="nav-link text_link_kwb" href="{% url 'login' %}">Log In</a>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link text_link_kwb" href="{% url 'register' %}">Register</a>
-            </li>
-            <li class="nav-item active">
+                {# <a class="dropdown-item nav-link text_link_kwb" href="{% url 'qa' %}">QA/Info</a> #}
                 <a class=" nav-link text_link_kwb " href="https://qmra.readthedocs.io/en/latest/">About</a>
             </li>
         </ul>
-        {% endif %}
-
     </div>
 </nav>
 <main class="main">

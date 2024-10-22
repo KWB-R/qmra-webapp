@@ -2,7 +2,7 @@
 <browserconfig>
     <msapplication>
         <tile>
-            <square150x150logo src="/qmratool/static/img/mstile-150x150.png"/>
+            <square150x150logo src="/qmratool/static/favicon-140.png"/>
             <TileColor>#da532c</TileColor>
         </tile>
     </msapplication>

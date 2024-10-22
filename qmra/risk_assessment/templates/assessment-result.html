@@ -1,68 +1,86 @@
 <div class="modal-dialog" role="document"
         style="max-width: 75vw !important;">
     <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Risk assessment results</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <h4 style="text-align: center">Risk per pathogen</h4>
-            <div class="w-50 m-auto">
-            <table class="table">
-                <tr><th>pathogen</th><th>risk of infection</th><th>risk in DALYs</th></tr>
-                {% for r in results %}
-                    <tr><td>{{r.pathogen}}</td>
-                        <td class={% if not r.infection_risk %} "table-success" {% else %} "table-danger" {% endif %}>{{r.infection_risk}}</td>
-                        <td class={% if not r.dalys_risk %} "table-success" {% else %} "table-danger" {% endif %}>{{r.dalys_risk}}</td>
-                    </tr>
-                {% endfor %}
-            </table>
+<!--        <div class="modal-header">-->
+<!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                <span aria-hidden="true">&times;</span>-->
+<!--            </button>-->
+<!--        </div>-->
+        <div class="modal-body p-5">
+            <h4 class="text-center">Risk assessment results</h4>
+            <div class="m-4 p-4 {{infection_risk}}-risk">
+                <div>The risk of this water reuse scenario can be compared to
+                     two commonly applied health-based targets (WHO 2022):
+                </div>
+                <ol>
+                    <li>1 in 10,000 infections per person per year</li>
+                    <li>0.000001 Disability Adjusted Life Years (DALY)</li>
+                </ol>
+                {% if infection_risk == "none" %}
+                    <div>
+                        The estimated probability of infection per year / DALYs pppy 
+                        does not exceed the tolerable risk level indicated by the WHO 
+                        neither calculating with the minimum nor the maximum LRV for 
+                        none of the considered pathogens.
+                    </div>
+                <br/>
+                <div>
+                        <strong>According to the estimation, the water reuse scenario 
+                        achieves a tolerable risk level.
+                        </strong>
+                    </div>
+                {% elif infection_risk == "min" %}
+                <div>
+                    The estimated probability of infection per year / DALYs pppy 
+                    from one or more pathogens exceeds the tolerable risk level
+                     indicated by the WHO calculated using the minimum LRV.
+                </div>
+                <br/>
+                <div>
+                    <strong>A closer look into the individual treatments 
+                    is necessary to evaluate the risk of the scenario.
+                    </strong>
+                </div>
+                {% elif infection_risk == "max" %}
+                <div>
+                    The estimated probability of infection per year / DALYs pppy 
+                    from one or more pathogens exceeds the tolerable risk level
+                     indicated by the WHO calculated using the maximum LRV.
+                </div>
+                <br/>
+                <div>
+                    <strong>More efficient treatments or additional treatment
+                         steps are necessary to achieve a tolerable risk level for the water reuse scenario.
+                    </strong>
+                </div>
+                {% endif %}
             </div>
-            <h4 style="text-align: center">Probability of infection per year</h4>
-            {% if infection_risk %}
-            <div class="alert alert-danger m-4" role="alert">
-                At least one pathogen exceeds tolerable infection risk value of 1/10000 pppy (red line)
-            </div>
-            {% else %}
-            <div class="alert alert-primary m-4" role="alert">
-                All risk simulations stay well below tolerable limits of 1/10000 pppy (blue line)
-            </div>
-            {% endif %}
+            <h4 class="text-center">Probability of infection per year</h4>
+            
             <div id="hero-graph" class="m-4">
                 {% autoescape off %}
                 {{ risk_plot }}
                 {% endautoescape %}
             </div>
-            {% if comparison %}
-            <div>
-                <p class="text_link_kwb mt-3 info"> For each pathogen, the outer boundaries of each barplot refer to the
-                    range between the maximum of the maximum LRV scenario and the minimum of the minimum risk scenario
-                    (maximal range).
-                    The inner range refers to the range between the mean of the maximum and the mean of the minimum risk
-                    scenario (difference in means).
-                    The mean of the distribution is often considered as the preferred point estimator, for deciding
-                    whether health targets are achieved.
-                </p>
-            </div>
-            {%endif%}
-            <h4 style="text-align: center">Risk in disability adjusted life years (DALYs) per person per year
+                    <h4 style="text-align: center">Risk in disability adjusted life years (DALYs) per person per year
                 (pppy)</h4>
-            {% if dalys_risk %}
-            <div class="alert alert-danger m-4" role="alert">
-                At least one pathogen exceeds tolerable DALY risk value of 1µDALY pppy (red line)
-            </div>
-            {%else %}
-            <div class="alert alert-primary m-4" role="alert">
-                All risk simulations stay well below tolerable limits of 1µDALY pppy (blue line)
-            </div>
-            {% endif %}
             <div id="hero-graph" class="m-4">
                 {% autoescape off %}
                 {{ daly_plot }}
                 {% endautoescape %}
             </div>
+            <!-- <h4 style="text-align: center">Risk per pathogen</h4>
+            <div class="w-50 m-auto">
+            <table class="table">
+                <tr><th>pathogen</th><th>risk of infection</th><th>risk in DALYs</th></tr>
+                {% for r in results %}
+                    <tr><td>{{r.pathogen}}</td>
+                        <td class="{{r.infection_risk}}-risk">{{r.infection_risk}}</td>
+                        <td class="{{r.dalys_risk}}-risk">{{r.dalys_risk}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            </div> -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

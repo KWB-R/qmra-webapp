@@ -32,29 +32,30 @@ class TestInflowForm(TestCase):
 
     def test_non_negative_constraints(self):
         given_form = InflowForm(
-            data=dict(min=-1, max=1, pathogen="Rotavirus")
+            data=dict(min=-1, max=1), initial=dict(pathogen="Rotavirus")
         )
         given_form.full_clean()
         assert_that(len(given_form.errors)).is_equal_to(1)
         assert_that(given_form.errors).contains_key("min")
 
         given_form = InflowForm(
-            data=dict(min=0, max=-1, pathogen="Rotavirus")
+            data=dict(min=0, max=-1), initial=dict(pathogen="Rotavirus")
         )
         given_form.full_clean()
-        assert_that(len(given_form.errors)).is_equal_to(1)
+        assert_that(len(given_form.errors)).is_equal_to(2)
+        assert_that(given_form.errors).contains_key("min")
         assert_that(given_form.errors).contains_key("max")
 
     def test_that_form_is_valid_when_min_max_eq(self):
         given_form = InflowForm(
-            data=dict(min=0, max=0, pathogen="Rotavirus")
+            data=dict(min=0, max=0), initial=dict(pathogen="Rotavirus")
         )
         given_form.full_clean()
         assert_that(len(given_form.errors)).is_equal_to(0)
 
     def test_that_min_needs_to_be_lower_than_max(self):
         given_form = InflowForm(
-            data=dict(min=10, max=1, pathogen="Rotavirus")
+            data=dict(min=10, max=1), initial=dict(pathogen="Rotavirus")
         )
         given_form.full_clean()
         assert_that(len(given_form.errors)).is_equal_to(2)
@@ -75,18 +76,6 @@ class TestInflowFormset(TestCase):
             data = {**data, **d}
         return data
 
-    def test_each_pathogen_unique(self):
-        given_data = self.make_formset_data([
-            dict(min=1, max=10, pathogen="Rotavirus"),
-            dict(min=1, max=10, pathogen="Rotavirus"),
-            dict(min=1, max=10, pathogen="Poliovirus")
-        ])
-        given_form = InflowFormSet(data=given_data)
-        given_form.full_clean()
-        errors = given_form.non_form_errors()
-        assert_that(len(errors)).is_equal_to(1)
-        assert_that(str(errors[0])).contains("pathogen", "unique")
-
 
 class TestTreatmentForm(TestCase):
     def test_non_negative_constraints(self):
@@ -105,7 +94,7 @@ class TestTreatmentForm(TestCase):
                 data = {**default_data, field: -1}
                 given_form = TreatmentForm(data=data)
                 given_form.full_clean()
-                assert_that(len(given_form.errors)).is_equal_to(1)
+                assert_that(len(given_form.errors)).is_equal_to(1 + int(sfx == "max"))
                 assert_that(given_form.errors).contains_key(field)
 
     def test_that_min_needs_to_be_less_than_max(self):

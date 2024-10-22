@@ -28,15 +28,5 @@ urlpatterns = [
         views.risk_assessment_result,
         name="assessment-result",
     ),
-    path(
-        "inflows-plot",
-        views.inflows_plots_view,
-        name="inflows-plot",
-    ),
-    path(
-        "treatments-plot",
-        views.treatments_plots_view,
-        name="treatments-plot",
-    ),
     path('', include('django_prometheus.urls')),
 ]

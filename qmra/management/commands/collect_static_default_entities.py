@@ -6,6 +6,7 @@ import pandas as pd
 
 def get_default_pathogens():
     pathogen = pd.read_csv("raw_public_data/tbl_pathogen.csv", encoding="windows-1251")
+    pathogen = pathogen[pathogen.id.isin((3, 32, 34))]
     health = pd.read_csv("raw_public_data/tbl_health.csv", encoding="windows-1251")
     # NOTE: HEALTH has been modified 'pathogen_id' is now 'pathogen_group'!!
     #       i.e. Rotavirus -> Viruses, jejuni -> Bacteria, parvum -> Protozoa
@@ -27,6 +28,7 @@ def get_default_inflows():
     sources = pd.read_csv("raw_public_data/tbl_waterSource.csv", encoding="windows-1251")
     inflows = pd.merge(inflows, sources, left_on="source_id", right_on="id", how="left").rename(columns={"name": "source_name"})
     inflows = pd.merge(inflows, pathogens, left_on="pathogen_id", right_on="id", how="left").rename(columns={"name": "pathogen_name"})
+    inflows = inflows[inflows.pathogen_id.isin((3, 32, 34))]
     return inflows.loc[:, ["source_name", "pathogen_name", "min", "max"]]
 
 

@@ -15,8 +15,8 @@ def get_annual_risk(
         n_years: int = 1000,
 ):
     inflow = np.random.normal(
-        loc=(np.log10(inflow_min + 10 ** (-8)) + np.log10(inflow_max))/2,
-        scale=(np.log10(inflow_max) - np.log10(inflow_min + 10 ** (-8)))/4,
+        loc=(np.log10(inflow_min + 10 ** (-8)) + np.log10(inflow_max)) / 2,
+        scale=(np.log10(inflow_max) - np.log10(inflow_min + 10 ** (-8))) / 4,
         size=n_events
     )
     lrv = np.ones((n_events,)) * log_removal
@@ -89,8 +89,9 @@ def assess_risk(risk_assessment: RiskAssessment, inflows, treatments, save=True)
         # make result
         results[inflow.pathogen] = RiskAssessmentResult(
             risk_assessment=risk_assessment,
-            infection_risk=(min_prob_mean + max_prob_mean) > (10 ** -4),
-            dalys_risk=to_dalys(min_prob_mean+max_prob_mean) > (10 ** -6),
+            infection_risk="max" if min_prob_mean > (10 ** -4) else ("min" if max_prob_mean > (10 ** -4) else "none"),
+            dalys_risk="max" if to_dalys(min_prob_mean) > (10 ** -6) else (
+                "min" if to_dalys(max_prob_mean) > (10 ** -6) else "none"),
             pathogen=inflow.pathogen,
             infection_maximum_lrv_min=maximum_lrv_min,
             infection_maximum_lrv_max=maximum_lrv_max,
