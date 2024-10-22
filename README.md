@@ -1,34 +1,34 @@
 # qmra
 Web-application for calculating microbial risk for drinking water and water reuse systems.
 
-# Installation
-This software can be found [here]("https://www.qmra.org"), but also can be run locally. 
-For local installation:
+## Installation
 
-    - install git
-    - setup and activate a virtual environment
-    - clone this repository
-    - cd into qmra/tools
-
-### Install django
-
+create a venv
 ```bash
-pip install django
-
+python -m venv venv
 ```
-### Install necessary requirements
 
+source it (Mac/Linux)
+```bash
+source venv/bin/activate
+```
+or on windows
+```bash
+source venv/Scripts/activate
+```
+
+then, install the requirements with 
 ```bash
 pip install -r requirements.txt
-
 ```
-### Create new superuser for admin page
 
+collect the statics and migrate with
 ```bash
-python manage.py createsuperuser
+python manage.py collectstatic
+python manage.py migrate
 ```
 
-### run app locally
+run the app locally
 
 ```bash
 python manage.py runserver
