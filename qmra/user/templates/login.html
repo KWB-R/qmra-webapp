@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block body %}
     {% if message %}
     <div class="alert alert-danger" role="alert">
@@ -7,9 +8,9 @@
     {% endif %} 
   <div class="container" style="padding: 5%">
     <div class="row">
-      <div class="col-sm-6">
-        <h1 class="title">Welcome!</h1>
-        <p>Please type in your username and passwort</p>
+      <div class="col">
+        <img src="{% static 'img/qmra-full-logo.svg' %}">
+        <p class="mt-4">Please type in your username and password</p>
           <form action="{% url 'login' %}" method="post">
               {% csrf_token %}
               <div class="form-group">
@@ -20,8 +21,8 @@
               </div>
               <input class="btn btn-primary" type="submit" value="Login">
           </form>
-          Don't have an account? <a class = "text_link_kwb" href="{% url 'register' %}">Register here.</a> Forgot password? 
-          <a class = "text_link_kwb" href="{% url 'password_reset' %}">Reset here</a>
+          <div class="my-1">Don't have an account? <a class = "text_link_kwb" href="{% url 'register' %}">Register here.</a></div>
+          <div class="my-1">Forgot password? <a class = "text_link_kwb" href="{% url 'password_reset' %}">Reset here</a></div>
         </div>
       <div class="col-sm-5 offset-sm-1" >
         <img class= "img-fluid" src="/static/qmratool/img/QMRA-1.png" alt="...">

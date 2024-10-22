@@ -198,7 +198,8 @@ class DefaultSources(StaticEntity):
 
     @classmethod
     def choices(cls):
-        grouped = {grp: list(v) for grp, v in groupby(sorted(cls.data.values(), key=lambda x: x.name), key=lambda x: x.name.split(",")[0])}
+        grouped = {grp: list(v) for grp, v in
+                   groupby(sorted(cls.data.values(), key=lambda x: x.name), key=lambda x: x.name.split(",")[0])}
         return [
             ("", "---------"),
             *[(k, [(x.name, x.name) for x in v]) for k, v in grouped.items()],
@@ -294,7 +295,8 @@ class DefaultExposures(StaticEntity):
 
     @classmethod
     def choices(cls):
-        grouped = {grp: list(v) for grp, v in groupby(sorted(cls.data.values(), key=lambda x: x.name), key=lambda x: x.name.split(",")[0])}
+        grouped = {grp: list(v) for grp, v in
+                   groupby(sorted(cls.data.values(), key=lambda x: x.name), key=lambda x: x.name.split(",")[0])}
         return [
             ("", "---------"),
             *[(k, [(x.name, x.name) for x in sorted(v, key=lambda x: x.name)]) for k, v in grouped.items()],
@@ -322,7 +324,8 @@ class RiskAssessment(models.Model):
 
     @property
     def infection_risk(self):
-        return any(r.infection_risk for r in self.results.all())
+        risks = {r.infection_risk for r in self.results.all()}
+        return 'max' if 'max' in risks else ("min" if 'min' in risks else 'none')
 
     @property
     def dalys_risk(self):
@@ -336,6 +339,9 @@ class RiskAssessment(models.Model):
     def treatments_labels(self):
         return ", ".join([treatment.name for treatment in self.treatments.all()])
 
+    def results_list(self):
+        return [r.as_dict() for r in self.results.all()]
+
     def __str__(self):
         return self.name
 
@@ -344,10 +350,8 @@ class RiskAssessmentResult(models.Model):
     risk_assessment = models.ForeignKey(RiskAssessment, on_delete=models.CASCADE, related_name="results")
 
     pathogen = models.CharField(choices=DefaultPathogens.choices(), max_length=256)
-
-    infection_risk = models.BooleanField()
-    dalys_risk = models.BooleanField()
-
+    infection_risk = models.CharField(choices=[("min", "min"), ("max", "max"), ("none", "none")], max_length=4)
+    dalys_risk = models.CharField(choices=[("min", "min"), ("max", "max"), ("none", "none")], max_length=4)
     infection_minimum_lrv_min = models.FloatField()
     infection_minimum_lrv_max = models.FloatField()
     infection_minimum_lrv_q1 = models.FloatField()
@@ -358,7 +362,6 @@ class RiskAssessmentResult(models.Model):
     infection_maximum_lrv_q1 = models.FloatField()
     infection_maximum_lrv_q3 = models.FloatField()
     infection_maximum_lrv_median = models.FloatField()
-
     dalys_minimum_lrv_min = models.FloatField()
     dalys_minimum_lrv_max = models.FloatField()
     dalys_minimum_lrv_q1 = models.FloatField()
@@ -369,3 +372,31 @@ class RiskAssessmentResult(models.Model):
     dalys_maximum_lrv_q1 = models.FloatField()
     dalys_maximum_lrv_q3 = models.FloatField()
     dalys_maximum_lrv_median = models.FloatField()
+
+    def as_dict(self):
+        return dict(
+            ra_name=self.risk_assessment.name,
+            pathogen=self.pathogen,
+            infection_risk=self.infection_risk,
+            dalys_risk=self.dalys_risk,
+            infection_minimum_lrv_min=self.infection_minimum_lrv_min,
+            infection_minimum_lrv_max=self.infection_minimum_lrv_max,
+            infection_minimum_lrv_q1=self.infection_minimum_lrv_q1,
+            infection_minimum_lrv_q3=self.infection_minimum_lrv_q3,
+            infection_minimum_lrv_median=self.infection_minimum_lrv_median,
+            infection_maximum_lrv_min=self.infection_maximum_lrv_min,
+            infection_maximum_lrv_max=self.infection_maximum_lrv_max,
+            infection_maximum_lrv_q1=self.infection_maximum_lrv_q1,
+            infection_maximum_lrv_q3=self.infection_maximum_lrv_q3,
+            infection_maximum_lrv_median=self.infection_maximum_lrv_median,
+            dalys_minimum_lrv_min=self.dalys_minimum_lrv_min,
+            dalys_minimum_lrv_max=self.dalys_minimum_lrv_max,
+            dalys_minimum_lrv_q1=self.dalys_minimum_lrv_q1,
+            dalys_minimum_lrv_q3=self.dalys_minimum_lrv_q3,
+            dalys_minimum_lrv_median=self.dalys_minimum_lrv_median,
+            dalys_maximum_lrv_min=self.dalys_maximum_lrv_min,
+            dalys_maximum_lrv_max=self.dalys_maximum_lrv_max,
+            dalys_maximum_lrv_q1=self.dalys_maximum_lrv_q1,
+            dalys_maximum_lrv_q3=self.dalys_maximum_lrv_q3,
+            dalys_maximum_lrv_median=self.dalys_maximum_lrv_median
+        )

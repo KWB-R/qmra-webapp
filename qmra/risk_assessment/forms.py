@@ -1,12 +1,15 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import modelformset_factory, HiddenInput
-from crispy_forms.bootstrap import AppendedText, Modal
+from django.forms import modelformset_factory
+from crispy_forms.bootstrap import AppendedText
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, Row, Column, Div, HTML, Button
+from crispy_forms.layout import Layout, Field, Row, Column, HTML
 
-from qmra.risk_assessment.models import Inflow, DefaultPathogens, DefaultTreatments, Treatment, \
+from qmra.risk_assessment.models import Inflow, DefaultTreatments, Treatment, \
     RiskAssessment
+
+
+def _zero_if_none(x): return x if x is not None else 0
 
 
 class RiskAssessmentForm(forms.ModelForm):
@@ -23,7 +26,7 @@ class RiskAssessmentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["source_name"].label = "Select a source type to add inflows"
+        self.fields["source_name"].label = "Select a source water type to add pathogen concentrations"
         self.fields['exposure_name'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].widget.attrs['min'] = 0
         self.helper = FormHelper(self)
@@ -53,14 +56,15 @@ class InflowForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.initial.update(kwargs.get("initial", {}))
         self.helper = FormHelper(self)
         self.helper.render_hidden_fields = False
         self.helper.render_unmentioned_fields = False
         self.helper.form_tag = False
         self.helper.disable_csrf = True
         self.helper.label_class = "text-muted small"
-        self.fields['pathogen'].choices = DefaultPathogens.choices()
-        self.fields['pathogen'].label = "Pathogen"
+        self.fields['pathogen'].disabled = True
+        self.fields['pathogen'].label = "Reference Pathogen"
         self.fields['min'].widget.attrs['min'] = 0
         self.fields['max'].widget.attrs['min'] = 0
         self.fields['min'].label = "Minimum concentration"
@@ -75,11 +79,12 @@ class InflowForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data["min"] < 0:
+        mn, mx = cleaned_data.get("min", 0), cleaned_data.get("max", 0)
+        if mn < 0:
             self.add_error("min", "this field must be positive or 0")
-        if cleaned_data["max"] < 0:
+        if mx < 0:
             self.add_error("max", "this field must be positive or 0")
-        if cleaned_data.get("min", 0) > cleaned_data.get("max", 0):
+        if mn > mx:
             msg = "minimum concentration must be less than maximum concentration"
             self.add_error("min", msg)
             self.add_error("max", msg)
@@ -88,16 +93,19 @@ class InflowForm(forms.ModelForm):
 
 InflowFormSetBase = modelformset_factory(
     Inflow, form=InflowForm,
-    extra=0, max_num=30, min_num=0,
-    can_delete=True, can_delete_extra=True
+    extra=0, max_num=3, min_num=3,
+    can_delete=False, can_delete_extra=False
 )
 
 
 class InflowFormSet(InflowFormSetBase):
-    def get_deletion_widget(self):
-        return forms.CheckboxInput(attrs=dict(label="remove"))
 
     def __init__(self, *args, **kwargs):
+        kwargs["initial"] = [
+                    {"pathogen": "Rotavirus"},
+                    {"pathogen": 'Campylobacter jejuni'},
+                    {"pathogen": "Cryptosporidium parvum"},
+                ]
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
@@ -146,7 +154,7 @@ class TreatmentForm(forms.ModelForm):
         self.fields['protozoa_max'].widget.attrs['min'] = 0
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
-            Field("name", css_class="disabled-input text-center"),
+            Field("name", css_class="disabled-input d-none"),
             Row(Column(HTML(f"<div></div>")),
                 Column(HTML(f"<label class='text-muted text-center w-100'>Minimum</label>")),
                 Column(HTML(f"<label class='text-muted text-center w-100'>Maximum</label>"))),
@@ -161,24 +169,30 @@ class TreatmentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data["bacteria_min"] < 0:
+        b_min = _zero_if_none(cleaned_data.get("bacteria_min", 0))
+        b_max = _zero_if_none(cleaned_data.get("bacteria_max", 0))
+        v_min = _zero_if_none(cleaned_data.get("viruses_min", 0))
+        v_max = _zero_if_none(cleaned_data.get("viruses_max", 0))
+        p_min = _zero_if_none(cleaned_data.get("protozoa_min", 0))
+        p_max = _zero_if_none(cleaned_data.get("protozoa_max", 0))
+        if b_min < 0:
             self.add_error("bacteria_min", "this field must be positive or 0")
-        if cleaned_data["bacteria_max"] < 0:
+        if b_max < 0:
             self.add_error("bacteria_max", "this field must be positive or 0")
-        if cleaned_data["viruses_min"] < 0:
+        if v_min < 0:
             self.add_error("viruses_min", "this field must be positive or 0")
-        if cleaned_data["viruses_max"] < 0:
+        if v_max < 0:
             self.add_error("viruses_max", "this field must be positive or 0")
-        if cleaned_data["protozoa_min"] < 0:
+        if p_min < 0:
             self.add_error("protozoa_min", "this field must be positive or 0")
-        if cleaned_data["protozoa_max"] < 0:
+        if p_max < 0:
             self.add_error("protozoa_max", "this field must be positive or 0")
         msg = "min. must be less than max"
-        if cleaned_data.get("bacteria_min", 0) > cleaned_data.get("bacteria_max", 0):
+        if b_min > b_max:
             self.add_error("bacteria_min", msg)
-        if cleaned_data.get("viruses_min", 0) > cleaned_data.get("viruses_max", 0):
+        if v_min > v_max:
             self.add_error("viruses_min", msg)
-        if cleaned_data.get("protozoa_min", 0) > cleaned_data.get("protozoa_max", 0):
+        if p_min > p_max:
             self.add_error("protozoa_min", msg)
         return cleaned_data
 

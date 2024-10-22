@@ -8,12 +8,12 @@ WORKDIR qmra
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apt update && apt upgrade -y
+RUN apt-get update -y && apt upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 # install dependencies
-RUN pip install --upgrade pip
 COPY ./requirements.txt .
-RUN pip install -r requirements.txt
-RUN pip install gunicorn
+RUN pip install --upgrade pip &&\
+    pip install --no-cache-dir -r requirements.txt &&\
+    pip install --no-cache-dir gunicorn
 
 # copy project
 COPY ./qmra ./qmra

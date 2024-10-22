@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
-
+{% load static %}
 {% block body %}
 <script type="text/javascript">
     const baseUrl = '/assessment'
     function deleteAssessment(assessmentId) {
         fetch(baseUrl + '/' + assessmentId, {
             method: "DELETE",
-            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+            headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
             mode: 'same-origin'
-        }).then( () => window.location.reload())
+        }).then(() => window.location.reload())
     }
 </script>
 <style type="text/css">
@@ -17,96 +17,81 @@
     }
 </style>
 {% csrf_token %}
-<div class="container" style="padding: 5%">
-    <div class="row action-panel">
+<div class="container w-75">
+    <div class="modal" id="comparison-modal" role="dialog">
+        <div class="modal-dialog" role="document" style="max-width: 75vw !important;">
+            <div class="modal-content">
+                <h4 class="mt-3 mx-5 text-center">Risk assessment comparison</h4>
+                <div id="comparison-plot" class="">
+                <div class="small text-muted mx-5 my-3">For each pathogen, the outer boundaries of each barplot refer to the range between the maximum of the maximum LRV scenario and the minimum of the minimum risk scenario (maximal range). The inner range refers to the range between the mean of the maximum and the mean of the minimum risk scenario (difference in means). The mean of the distribution is often considered as the preferred point estimator, for deciding whether health targets are achieved.
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row commands w-100">
         <div class="col">
-            <a class="btn btn-outline-primary mt-3" href="{%url 'assessment'%}">
+            <a class="btn btn-outline-primary mt-3 w-100" href="{%url 'assessment'%}">
                 Create new risk assessment
             </a>
         </div>
+        <div class="col">
+            <button class="btn btn-outline-secondary mt-3 w-100" id="compare-btn">
+                Compare selected assessments
+            </button>
+        </div>
     </div>
+    <button id="show-comparison-btn" hidden data-toggle="modal" data-target="#comparison-modal"
+        data-show="true"></button>
     {% if user.is_authenticated %}
-    <h4 class="mb-5 mt-5 kwb_headline"> My Risk Assessments</h4>
+    <h4 class="mb-5 mt-2 kwb_headline text-center"> My Risk Assessments</h4>
     {%for assessment in assessments%}
 
-    <button id="show-result-{{assessment.id}}" hidden
-            data-toggle="modal" data-target="#assessment-result-{{assessment.id}}" data-show="true"></button>
+    <button id="show-result-{{assessment.id}}" hidden data-toggle="modal"
+        data-target="#assessment-result-{{assessment.id}}" data-show="true"></button>
     <div id="assessment-result-{{assessment.id}}" class="modal" role="dialog"></div>
-    <div class="media p-3 mt-3 custom-media w-75"
-         style="border: 2px solid; border-radius: 5px; border-color: #d3d3d3 ">
+
+    <div class="media p-3 mt-3 custom-media w-100"
+        style="border: 2px solid; border-radius: 5px; border-color: #d3d3d3; align-items: stretch; position: relative;">
         <div class="media-left mt-2 pr-3">
-            <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.906006" y="0.361328" width="50" height="50" rx="4" fill="#0003e2"/>
-
-                <svg width="51" height="51" viewBox="-5 -2 40 40" fill="#0003e2"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.90601" y="1.64844" width="26" height="32" rx="3" stroke="white"
-                          stroke-width="2"/>
-                    <path d="M7.15601 8.89844L21.906 8.89844" stroke="white" stroke-width="2"
-                          stroke-linecap="round"/>
-                    <path d="M7.15601 14.7319L21.906 14.7319" stroke="white" stroke-width="2"
-                          stroke-linecap="round"/>
-                    <path d="M7.15601 20.5649L21.906 20.5649" stroke="white" stroke-width="2"
-                          stroke-linecap="round"/>
-                    <path d="M7.15601 26.3984L21.906 26.3984" stroke="white" stroke-width="2"
-                          stroke-linecap="round"/>
-                </svg>
-            </svg>
-
+            <div>
+                <img src="{% static 'img/ra.svg' %}">
+            </div>
         </div>
-        <div class="media-body assessment-summary"
-             id="assessment-summary-{{assessment.id}}"
-             data-assessment-id="{{assessment.id}}">
+        <div class="media-body assessment-summary" id="assessment-summary-{{assessment.id}}"
+            data-assessment-id="{{assessment.id}}" style="">
             <h4 class="media-heading text-truncate kwb_headline">
                 {{assessment.name|title}}&nbsp
             </h4>
-            <div class="justify-content-between">
-                <div>created at: {{assessment.created_at.date}}</div>
-            </div>
-            <div class="d-flex w-100">
-                <div class="w-25 text-muted">description:</div>
-                <div class="w-50 text-truncate">{{assessment.description}}</div>
-            </div>
-            <div class="d-flex w-100">
-                <div class="w-25 text-muted">source type:</div>
-                <div class="w-50 text-truncate">{{assessment.source_name}}</div>
-            </div>
-            <div class="d-flex w-100">
-                <div class="w-25 text-muted">exposure type:</div>
-                <div class="w-50 text-truncate">{{assessment.exposure_name}}</div>
-            </div>
-            <div class="d-flex w-100">
-                <div class="w-25 text-muted">pathogens:</div>
-                <div class="w-50 text-truncate">{{assessment.pathogens_labels}}</div>
-            </div>
-            <div class="d-flex w-100">
-                <div class="w-25 text-muted">treatments:</div>
-                <div class="w-50 text-truncate">{{assessment.treatments_labels}}</div>
+            <div class="d-flex w-100 h-75">
+                <div class="w-75 text-truncate">
+                    {% if assessment.description %}
+                    {{assessment.description}}
+                    {% else %}
+                    No description
+                    {% endif %}
+                </div>
             </div>
         </div>
-        <div style="width: 50px; height: 21px; display: flex; margin-left: auto">
-            <label>
-                <a href="{% url 'assessment' assessment.id %}">
-                    <svg fill="none" width="20" height="20">
-                        <circle cx="10" cy="10" r="10" fill="#AFAFAF"/>
-                        <path d="M4.76792 16.3104L5.98981 11.7283L13.7284 3.98966L17.0886 7.34985L9.35 15.0885L4.76792 16.3104Z"
-                              fill="white"/>
-                    </svg>
-                </a>
-            </label>
-            <label onclick="event.stopPropagation(); deleteAssessment('{{assessment.id}}')"
-                   style="cursor: pointer;">
+        <div style="height: 21px; display: flex; margin-left: auto; line-height: 0 !important">
+            <label class="text-muted small form-inline mb-0 mr-1">compare </label>
+            <input type="checkbox" class="select-assessment-btn mr-2" value="{{assessment.id}}"
+                style="width: 20px; height: 20px">
+            <a class="mr-1" href="{% url 'assessment' assessment.id %}">
+                <img src="{% static 'img/pen.svg' %}">
+            </a>
+            <label onclick="event.stopPropagation(); deleteAssessment('{{assessment.id}}')" style="cursor: pointer;">
                 <input type="submit" hidden="hidden">
 
-                <svg fill="none" width="30" height="20">
-                    <circle cx="16.0439" cy="10.4404" r="10" fill="#AFAFAF"/>
-                    <rect x="19.9143" y="4.34375" width="3.1485" height="14.0952"
-                          transform="rotate(45 19.9143 4.34375)" fill="white"/>
-                    <rect x="22.1406" y="14.3105" width="3.1485" height="14.0952"
-                          transform="rotate(135 22.1406 14.3105)" fill="white"/>
-                </svg>
+                <img src="{% static 'img/close.svg' %}">
             </label>
         </div>
+        <div class="text-right">
+            <div style="color: var(--kwb-lightblue); position: absolute; bottom: 4px; right: 16px;">
+                {{assessment.created_at.date}}
+            </div>
+        </div>
+        {{ assessment.results_list | json_script:assessment.id}}
     </div>
 
     {%empty%}
@@ -115,20 +100,167 @@
     {%endfor%}
 
 </div>
-
+<style type="text/css">
+    .commands {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: .5em 0 .5em 0;
+    }
+</style>
 <script type="text/javascript">
+    const colors = [['hsl(239, 100, 44)'], ['hsl(149, 90, 33)'], ['hsl(330, 100, 45)']];
+    var [l1, l2, l3] = [44, 33, 45];
+    for (let i of Array(6).keys()) {
+        [l1, l2, l3] = [(l1 + 15) % 100, (l2 + 15) % 100, (l3 + 15) % 100]
+        colors[0].push(`hsl(239, 100, ${l1})`)
+        colors[1].push(`hsl(129, 50, ${l2})`)
+        colors[2].push(`hsl(329, 100, ${l3})`)
+    }
     function getResults(id) {
         const content = fetch(`{% url 'assessment-result' %}?id=${id}`, {
             method: "GET",
-            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+            headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
             mode: 'same-origin'
-            }).then(r => r.text()).then(html => {
-                document.querySelector(`#assessment-result-${id}`).innerHTML = html;
-                document.querySelector(`#show-result-${id}`).click();
-                document.querySelector(`#assessment-result-${id}`).querySelectorAll("script").forEach(s => eval(s.innerHTML));
-            });
+        }).then(r => r.text()).then(html => {
+            document.querySelector(`#assessment-result-${id}`).innerHTML = html;
+            document.querySelector(`#show-result-${id}`).click();
+            document.querySelector(`#assessment-result-${id}`).querySelectorAll("script").forEach(s => eval(s.innerHTML));
+        });
     }
-    document.addEventListener('DOMContentLoaded', async function() {
+    class ResultPlot {
+        constructor(divId) {
+            this.divId = divId;
+            this.$div = document.querySelector(`#${divId}`);
+            this.width = this.$div.getBoundingClientRect().width;
+            console.log(window.getComputedStyle(this.$div).width);
+            this.data = [];
+            this.layout = {
+                datarevision: 0,
+                // grid: {rows: 1, columns: 1},
+                barmode: "group",
+                yaxis: {
+                    type: 'log',
+                    autorange: true,
+                    title: "infection prob",
+                    automargin: true,
+                    domain: [0., 1.]
+                },
+                shapes: [{
+                    type: 'line',
+                    label: {text: "tolerable level", font: {color: 'rgb(0, 3, 229)', size: 12}, textposition: "end"},
+                    x0: 0,
+                    y0: .0001,
+                    x1: 1,
+                    y1: .0001,
+                    xref: "paper",
+                    line: {
+                        color: 'rgb(0, 3, 229)',
+                        width: 2,
+                        dash: 'dashdot'
+                    }
+                }],
+                // annotations: [{
+                //     text: "tolerable level",
+                //     x: 0,
+                //     y: Math.log10(.0002),
+                //     xref: "paper", yref: "y", showarrow: false,
+                //     font: {
+                //         color: 'rgb(0, 3, 229)',
+                //     }
+                // }],
+                xaxis: {
+                    autorange: true,
+                    automargin: true
+                },
+                autosize: true,
+                font_color: "black",
+                margin: { t: 0 },
+                legend: {
+                    orientation: "h", yanchor: "bottom",
+                    xref: "container", yref: "container",
+                    xanchor: "center",
+                    x: 0.5, y: -2
+                },
+                bargroupgap: .1, bargap: .1
+            };
+            this.config = { displayModeBar: false, responsive: true };
+            Plotly.newPlot(divId, this.data, this.layout, this.config);
+            window.addEventListener("resize", () => {
+                Plotly.relayout(divId, {
+                    // width: window.innerWidth*.75,
+                    'xaxis.autorange': true,
+                    'yaxis.autorange': true
+                });
+            });
+        }
+        setTraces(allResults) {
+            const data = allResults.map((ra, i) => ra.map((x, j) => asTraces(x, i, j)).flat());
+            const layout = { ...this.layout }
+            // for (var i of [...Array(data.length).keys()]) {
+            //     if (i >= 0) {
+            //         layout[`xaxis${i> 0 ? i + 1 : ''}`] = { domain: [i*(1/data.length), (i+1)*(1/data.length)], autorange: true, anchor: 'y' }
+            //     }
+            // }
+            // layout.grid = { rows: 2, columns: allResults.length,
+            //      subplots: [['xy', 'x2y', 'x3y']], pattern: 'independent' }
+            layout.width = this.$div.getBoundingClientRect().width * .95;
+            layout.height = window.innerHeight * .75;
+            Plotly.react(this.divId, data.flat(), layout, this.config)
+        }
+
+    }
+    function asTraces(r, i, j) {
+        return [{
+            x: [r.ra_name],
+            // x0: (i + 1) * j,
+            // y: [r.infection_minimum_lrv_min, r.infection_maximum_lrv_max],
+            base: [r.infection_maximum_lrv_min],
+            y: [r.infection_minimum_lrv_max],
+            // q3: [r.infection_minimum_lrv_max],
+            // q1: [r.infection_maximum_lrv_min],
+            // median: [(r.infection_minimum_lrv_max +  r.infection_maximum_lrv_min)/2],
+            name: r.pathogen,
+            type: "bar",
+            xaxis: "x",
+            yaxis: "y",
+            marker: { color: colors[0][j], opacity: .75, fillmode: "overlay" },
+
+            showlegend: i === 0,
+            offsetgroup: r.pathogen,
+            legendgroup: "min - max range",
+            legendgrouptitle: { text: "min - max range" },
+            // width: .5,
+            // hoverinfo: "x+y",
+            hovertemplate: `max=%{y}, min=%{base}`
+        },
+        {
+            x: [r.ra_name],
+            // x0: (i + 1) * j,
+            base: [r.infection_maximum_lrv_median],
+            y: [r.infection_minimum_lrv_median],
+            // q3: [r.infection_minimum_lrv_median],
+            // q1: [r.infection_maximum_lrv_median],
+            // median: [(r.infection_minimum_lrv_median +  r.infection_maximum_lrv_median)/2],
+            // lowerfence: [r.infection_minimum_lrv_min, r.infection_maximum_lrv_min],
+            // upperfence: [r.infection_minimum_lrv_max, r.infection_maximum_lrv_max],
+            // q1: [r.infection_minimum_lrv_q1, r.infection_maximum_lrv_q1],
+            // q3: [r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
+            // median: [r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
+            name: r.pathogen,
+            type: "bar",
+            xaxis: "x",
+            yaxis: "y",
+            marker: { color: colors[2][j], opacity: .5, fillmode: "overlay" },
+            offsetgroup: r.pathogen,
+            showlegend: i === 0,
+            legendgroup: "mean range",
+            legendgrouptitle: { text: "mean range" },
+            hovertemplate: `max=%{y}, min=%{base}`
+        }
+        ]
+    }
+    document.addEventListener('DOMContentLoaded', async function () {
         document.querySelectorAll(".assessment-summary").forEach(n => {
             n.addEventListener("click", async ev => {
                 ev.preventDefault();
@@ -136,6 +268,16 @@
                 getResults(n.getAttribute("data-assessment-id"));
             });
         });
+        const plot = new ResultPlot("comparison-plot")
+        document.querySelector("#compare-btn").addEventListener("click", () => {
+            const selected = [...document.querySelectorAll(".select-assessment-btn")].filter(
+                btn => btn.checked).map(btn => JSON.parse(document.querySelector(`[id='${btn.value}']`).textContent));
+            console.log([...document.querySelectorAll(".select-assessment-btn")].filter(
+                btn => btn.checked).map(b => b.value))
+            document.querySelector("#show-comparison-btn").click();
+            plot.setTraces(selected);
+
+        })
     })
 </script>
 {%endif%}
@@ -143,4 +285,3 @@
 
 {% block side-list %}
 {% endblock %}
-        

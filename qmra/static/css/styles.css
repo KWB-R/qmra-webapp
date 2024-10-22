@@ -1,28 +1,60 @@
 :root {
-    --kwb-blue: #0003e2;
+    --kwb-blue: rgb(0, 3, 226);
+    --kwb-lightblue: #B1B2FF;
     --primary: var(--kwb-blue);
+}
+
+.info{
+color:grey;
+font-style: italic;
+font-size: small;
 }
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
   color: white !important;
-  background-color: #8081F1 !important;
-  border-color:#8081F1 !important;
-  }
-
-  .info{
-    color:grey;
-    font-style: italic;
-    font-size: small;
-  }
-
-.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
-  background-color: #8081F1 !important;
-  border-color: #8081F1 !important;
+  background-color: var(--kwb-blue) !important;
+  border-color: var(--kwb-blue) !important;
   }
 
 .btn-outline-primary, .btn-outline-primary:hover, .btn-outline-primary:active, .btn-outline-primary:visited {
   color: var(--kwb-blue);
   border-color: var(--kwb-blue);
+}
+.btn-outline-primary:hover {
+    color: white;
+    background-color: var(--kwb-blue);
+    border-color: var(--kwb-blue);
+}
+
+.btn-secondary, .btn-secondary:hover, .btn-secondary:active, .btn-secondary:visited {
+  color: white !important;
+  background-color: #B1B2FF !important;
+  border-color:#B1B2FF !important;
+  }
+
+.info{
+    color:grey;
+    font-style: italic;
+    font-size: small;
+}
+
+.btn-secondary, .btn-secondary:hover, .btn-secondary:active, .btn-secondary:visited {
+  background-color: #B1B2FF !important;
+  border-color: #B1B2FF !important;
+  }
+
+.btn-outline-secondary, .btn-outline-secondary:active, .btn-outline-secondary:visited {
+  color: #B1B2FF;
+  border-color: #B1B2FF;
+}
+.btn-outline-secondary:hover {
+    color: white;
+    background-color: #B1B2FF;
+    border-color: #B1B2FF;
+}
+
+.btn-outline-secondary:focus, .btn-secondary:focus {
+    box-shadow: 0 0 0 .2rem var(--kwb-blue) !important;
 }
 
 .text_link_kwb { color: var(--kwb-blue);  }
@@ -32,7 +64,15 @@
   font-weight: bold;
 
 }
-
+.form-control::placeholder {
+    color: var(--kwb-blue);
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
 :is(h1, h2, h3, h4, h5, h6) {
   color: #0003e2 !important;
   font-weight: bold !important;
@@ -112,3 +152,18 @@ footer {
         background-color: transparent !important; /* Green background, change as needed */
         color: black; /* White text color */
     }
+
+.max-risk {
+  background: #FFECF4;
+  color: #FF0532;
+}
+
+.min-risk {
+  background: #FFDDB5;
+  color: #ED5500;
+}
+
+.none-risk {
+  background: #E2FBAC;
+  color: #088B3C;
+}

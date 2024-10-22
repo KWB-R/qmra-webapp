@@ -5,10 +5,19 @@ from django.urls import reverse
 
 from qmra.risk_assessment.forms import InflowFormSet, RiskAssessmentForm, TreatmentFormSet, AddTreatmentForm
 from qmra.risk_assessment.models import Inflow, RiskAssessment, Treatment
-from qmra.risk_assessment.plots import risk_plots, inflows_plot, treatments_plot
+from qmra.risk_assessment.plots import risk_plots
 from qmra.risk_assessment.risk import assess_risk
 from django.db import transaction
 
+# - treatments categories
+# - calculator layout
+# - finish comparison doc
+# - inflows and treatments in results
+# - refresh / loading
+# - consistent icons
+# - styling login / registration
+# - more tests
+# - no crispy...
 
 @transaction.atomic
 def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_form):
@@ -27,7 +36,6 @@ def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_fo
     for treatment in treatments:
         treatment.risk_assessment = risk_assessment
         treatment.save()
-    # print(risk_assessment.inflows.values("pathogen").all(), risk_assessment.treatments.values("name").all())
     return risk_assessment
 
 
@@ -67,12 +75,13 @@ def risk_assessment_view(request, risk_assessment_id=None):
             for r in ra.results.all():
                 r.delete()
             ra = assess_and_save_results(ra)
-            return HttpResponseRedirect(reverse("assessment", kwargs=dict(risk_assessment_id=ra.id)))
+            return HttpResponseRedirect(reverse("assessments"))
         else:
             print(inflow_form.errors)
             print(treatment_form.errors)
             return render(request, "assessment-configurator.html",
                           context=dict(
+                              risk_assessment=RiskAssessment.objects.get(id=risk_assessment_id) if risk_assessment_id is not None else None,
                               risk_assessment_form=risk_assessment_form,
                               inflow_form=inflow_form,
                               add_treatment_form=AddTreatmentForm(),
@@ -107,8 +116,8 @@ def risk_assessment_view(request, risk_assessment_id=None):
 def risk_assessment_result(request):
     if request.method == "POST":
         risk_assessment_form = RiskAssessmentForm(request.POST, instance=None, prefix="ra")
-        inflow_form = InflowFormSet(request.POST, queryset=Inflow.objects.none(), prefix="inflow")
-        treatment_form = TreatmentFormSet(request.POST, queryset=Treatment.objects.none(), prefix="treatments")
+        inflow_form = InflowFormSet(request.POST, prefix="inflow")
+        treatment_form = TreatmentFormSet(request.POST, prefix="treatments")
         if risk_assessment_form.is_valid() and \
                 inflow_form.is_valid() and \
                 treatment_form.is_valid():
@@ -123,11 +132,12 @@ def risk_assessment_result(request):
             results = assess_risk(ra,
                                   inflows,
                                   treatments, save=False)
-            plots = risk_plots(results.values())
+            risks = {r.infection_risk for r in results.values()}
+            risk_category = 'max' if 'max' in risks else ("min" if 'min' in risks else 'none')
+            plots = risk_plots(results.values(), risk_category)
             return render(request, "assessment-result.html",
                           context=dict(results=results.values(),
-                                       infection_risk=any(r.infection_risk for r in results.values()),
-                                       dalys_risk=any(r.dalys_risk for r in results.values()),
+                                       infection_risk=risk_category,
                                        risk_plot=plots[0], daly_plot=plots[1]))
         else:
             print(inflow_form.errors)
@@ -141,36 +151,8 @@ def risk_assessment_result(request):
             if not any(risk_assessment.results.all()):
                 risk_assessment = assess_and_save_results(risk_assessment)
             results = risk_assessment.results.all()
-            plots = risk_plots(results)
+            plots = risk_plots(results, risk_assessment.infection_risk)
             return render(request, "assessment-result.html",
                           context=dict(results=results,
                                        infection_risk=risk_assessment.infection_risk,
-                                       dalys_risk=risk_assessment.dalys_risk,
                                        risk_plot=plots[0], daly_plot=plots[1]))
-
-
-@login_required(login_url="/login")
-def inflows_plots_view(request):
-    forms = InflowFormSet(request.POST, queryset=Inflow.objects.none(), prefix="inflow")
-    if not forms.is_valid():
-        return render(request, "failed-plot.html", context=dict(form=forms, form_name="inflow"))
-    print(forms.errors)
-    inflows = forms.save(commit=False)
-    for f in forms.deleted_forms:
-        f.instance.delete()
-    plot = inflows_plot(inflows)
-    return render(request, "inflows-plot.html",
-                  context=dict(plot=plot))
-
-
-@login_required(login_url="/login")
-def treatments_plots_view(request):
-    forms = TreatmentFormSet(request.POST, prefix="treatments")
-    if not forms.is_valid():
-        return render(request, "failed-plot.html", context=dict(form=forms, form_name="treatment"))
-    treatments = forms.save(commit=False)
-    for f in forms.deleted_forms:
-        f.instance.delete()
-    plot = treatments_plot(treatments)
-    return render(request, "treatments-plot.html",
-                  context=dict(plot=plot))

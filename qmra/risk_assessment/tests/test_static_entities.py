@@ -5,7 +5,7 @@ from qmra.risk_assessment.models import DefaultPathogens, DefaultPathogenModel, 
 
 
 class TestDefaultPathogens(TestCase):
-    expected_length = 37
+    expected_length = 3
     def test_properties(self):
         under_test = DefaultPathogens
 

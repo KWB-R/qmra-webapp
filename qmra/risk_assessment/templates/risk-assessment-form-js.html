@@ -1,6 +1,38 @@
 {% load static %}
-<script type="application/json" src="{% static 'data/default-exposures.json' %}"></script>
 <script type="text/javascript">
+    function getResultsNoSave() {
+            const formElement = document.querySelector("form[id=configurator]");
+            const frm = new FormData(formElement);
+            return fetch("{% url 'assessment-result' %}", {
+                method: "POST",
+                redirect: 'follow',
+                headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+                mode: 'same-origin',
+                body: frm
+                }).then(r => {
+                    if (r.ok) return r.text();
+                    throw new Error("422");
+                }).then(html => {
+                    document.querySelector("#assessment-result").innerHTML = html;
+                    document.querySelector("#show-result-modal").click();
+                    document.querySelector("#assessment-result").querySelectorAll("script").forEach(s => eval(s.innerHTML));
+                    document.querySelector("#assessment-result").classList.add("up-to-date");
+                    return true;
+                }).catch(err => {
+                    document.querySelector("#save-risk-assessment-btn").click();
+                    return false;
+                });
+        }
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.querySelector("#assess-risk-btn").addEventListener("click", async ev => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                getResultsNoSave()
+            });
+            document.querySelectorAll("input").forEach(n => {
+                n.addEventListener("change", () => document.querySelector("#assessment-result").classList.remove("up-to-date"));
+            })
+        })
     let defaultExposures = null;
     let exposureForm = null;
 
@@ -11,8 +43,8 @@
         return document.querySelector("div[id='exposure-form-fieldset']");
     };
     function setExposureFormValues(exposureForm, values) {
-        exposureForm.querySelector("input[id*='events_per_year']").setAttribute("value", values.events_per_year);
-        exposureForm.querySelector("input[id*='volume_per_event']").setAttribute("value", values.volume_per_event);
+        exposureForm.querySelector("input[id*=events_per_year]").value = values.events_per_year;
+        exposureForm.querySelector("input[id*=volume_per_event]").value = values.volume_per_event;
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
@@ -29,3 +61,4 @@
     })
 
 </script>
+<script type="application/json" src="{% static 'data/default-exposures.json' %}"></script>

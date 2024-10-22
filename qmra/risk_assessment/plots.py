@@ -3,11 +3,33 @@ from plotly.offline import plot
 from plotly import express as px
 import pandas as pd
 
+RISK_CATEGORY_BG_COLORS = dict(
+    none='#E2FBAC', min='#FFDDB5', max='#FFECF4'
+)
+MAX_COLOR_SEQ = ["#FF0532",
+                 "#FF506F",
+                 "#FF8DA2"
+                 ]
 
-def risk_plots(risk_assessment_results):
+MIN_COLOR_SEQ = [
+    "#FF873F",
+    "#FFA570",
+    "#ED5500"
+]
+
+NONE_COLOR_SEQ = [
+    "#1B6638",
+    "#46A16A",
+    "#88D0A5"
+]
+
+COLOR_SEQS = dict(min=MIN_COLOR_SEQ, max=MAX_COLOR_SEQ, none=NONE_COLOR_SEQ)
+
+
+def risk_plots(risk_assessment_results, risk_category="none"):
     infection_prob_fig = go.Figure()
     dalys_fig = go.Figure()
-    for r in risk_assessment_results:
+    for i, r in enumerate(risk_assessment_results):
         infection_prob_fig.add_trace(go.Box(
             x=["Minimum LRV", "Maximum LRV"],
             lowerfence=[r.infection_minimum_lrv_min, r.infection_maximum_lrv_min],
@@ -16,6 +38,7 @@ def risk_plots(risk_assessment_results):
             q3=[r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
             median=[r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
             name=r.pathogen,
+            marker=dict(color=COLOR_SEQS[r.infection_risk][i % 3])
         ))
         dalys_fig.add_trace(go.Box(
             x=["Minimum LRV", "Maximum LRV"],
@@ -25,15 +48,17 @@ def risk_plots(risk_assessment_results):
             q3=[r.dalys_minimum_lrv_q3, r.dalys_maximum_lrv_q3],
             median=[r.dalys_minimum_lrv_median, r.dalys_maximum_lrv_median],
             name=r.pathogen,
+            marker=dict(color=COLOR_SEQS[r.dalys_risk][i % 3])
         ))
 
     infection_prob_fig.update_layout(
         boxmode='group',
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
-        # plot_bgcolor=bgcolor,
+        plot_bgcolor=RISK_CATEGORY_BG_COLORS[risk_category],
         xaxis=dict(title="", showgrid=False),
-        yaxis=dict(title="Probability of infection per year", showgrid=False),
+        yaxis=dict(title="Probability of infection per year",
+                   showgrid=False),
         margin=dict(l=0, r=0, t=0, b=0),
         legend=dict(
             orientation="h",
@@ -48,8 +73,9 @@ def risk_plots(risk_assessment_results):
                                      text="tolerable level",
                                      textposition="end",
                                      yanchor="top",
-                                 )
-                                 # line=dict(color=lcolor, width=3)
+                                     font=dict(color="rgb(0, 3, 226)")
+                                 ),
+                                 line=dict(color="rgb(0, 3, 226)", width=3)
                                  )
     infection_prob_fig.update_traces(
         marker_size=8
@@ -59,7 +85,7 @@ def risk_plots(risk_assessment_results):
         boxmode='group',
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
-        # plot_bgcolor=bgcolor,
+        plot_bgcolor=RISK_CATEGORY_BG_COLORS[risk_category],
         xaxis=dict(title="", showgrid=False),
         yaxis=dict(title="DALYs pppy", showgrid=False),
         margin=dict(l=0, r=0, t=0, b=0),
@@ -76,8 +102,9 @@ def risk_plots(risk_assessment_results):
                             text="tolerable level",
                             textposition="end",
                             yanchor="top",
-                        )
-                        # line=dict(color=lcolor, width=3)
+                            font=dict(color="rgb(0, 3, 226)")
+                        ),
+                        line=dict(color="rgb(0, 3, 226)", width=3)
                         )
     dalys_fig.update_traces(
         marker_size=8
@@ -86,86 +113,3 @@ def risk_plots(risk_assessment_results):
     return plot(infection_prob_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False), \
         plot(dalys_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)
 
-
-def inflows_plot(inflows):
-    df = pd.DataFrame.from_records([i.__dict__ for i in inflows])
-    # print(df.head())
-    # reshaping dataframe for plotting
-    df_inflow2 = pd.melt(
-        df,
-        ("pathogen",), value_vars=("min", "max")
-    )
-
-    df_inflow2 = df_inflow2.rename(
-        columns={"pathogen": "Pathogen", "variable": ""}
-    )
-    fig2 = px.bar(
-        df_inflow2,
-        x="",
-        y="value",
-        log_y=True,
-        facet_col="Pathogen",
-        barmode="group",
-        # color_discrete_sequence=risk_colors_extended,
-    )
-
-    fig2.for_each_annotation(
-        lambda a: a.update(
-            text=a.text.split("=")[-1], font=dict(size=10, color="black"),
-        )
-    )
-
-    fig2.update_layout(
-        autosize=True,
-        # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
-        font_color="black",
-        yaxis_title="Source water concentrations in N/L",
-        margin=dict(l=0, r=0, t=40, b=0),
-    )
-
-    return plot(fig2, output_type="div", config={'displayModeBar': False, "responsive": True}, include_plotlyjs=False)
-
-
-def treatments_plot(treatments):
-    # reshaping
-    df = pd.DataFrame.from_records([i.__dict__ for i in treatments])
-    # print(df.head().loc[:, ["bacteria_min", "name", "viruses_max"]])
-    df = pd.melt(df,
-                 ("name",), value_vars=(
-            "bacteria_min", "bacteria_max", "viruses_min", "viruses_max", "protozoa_min", "protozoa_max"
-        ),
-                 var_name="metric"
-                 )
-    splitted = df.metric.str.split("_", expand=True)
-    df["Pathogen Group"] = splitted[0]
-    df[""] = splitted[1]
-    df = df.rename(
-        columns={
-            "name": "Treatment",
-        }
-    )
-    # print(df.head())
-    fig = px.bar(
-        df,
-        x="",
-        y="value",
-        color="Treatment",
-        facet_col="Pathogen Group",
-        category_orders={"Pathogen Group": ["viruses", "bacteria", "protozoa"]},
-        # color_discrete_sequence=risk_colors_extended,
-    )
-
-    fig.for_each_annotation(
-        lambda a: a.update(text=a.text.split("=")[-1], font=dict(size=13))
-    )
-    fig.update_layout(
-        margin=dict(l=0, r=0, t=20, b=0),
-        legend=dict(orientation="h", yanchor="top",
-                    xanchor="center",
-                    x=0.5, ),
-        # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
-        font_color="black",
-        yaxis_title="Logremoval of individual treatment step",
-    )
-
-    return plot(fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)

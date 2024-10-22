@@ -4,105 +4,326 @@
     let defaultTreatments = null;
     let focusedTreatment = null;
     let treatmentsFormset = null;
-
-    function getTreatmentData(name) {
-        return {...defaultTreatments[name]};
-    };
-    function getTreatmentsFormset() {
-        return document.querySelector("fieldset[id='treatments-formset-fieldset']");
-    };
-    function getTreatmentsFormsCount() {
-        return treatmentsFormset.querySelectorAll("div[id*='treatments-n-']").length;
-    };
-    function updateTreatmentsFormsCount(count) {
-        treatmentsFormset.querySelector("input[id*='TOTAL_FORMS']").setAttribute('value', count);
-    };
-    function hideAllTreatmentsForms() {
-        treatmentsFormset.querySelectorAll("div[id*='treatments-n-']").forEach(e => e.setAttribute("hidden", ""));
-    };
-    function setTreatmentFormValues(treatmentForm, values) {
-        // treatmentForm.querySelector(`option[value='']`).removeAttribute("selected");
-        treatmentForm.querySelector(`option[value='${values.name}']`).setAttribute("selected", "");
-        treatmentForm.querySelector("input[id*='bacteria_min']").setAttribute("value", values.bacteria_min);
-        treatmentForm.querySelector("input[id*='bacteria_max']").setAttribute("value", values.bacteria_max);
-        treatmentForm.querySelector("input[id*='viruses_min']").setAttribute("value", values.viruses_min);
-        treatmentForm.querySelector("input[id*='viruses_max']").setAttribute("value", values.viruses_max);
-        treatmentForm.querySelector("input[id*='protozoa_min']").setAttribute("value", values.protozoa_min);
-        treatmentForm.querySelector("input[id*='protozoa_max']").setAttribute("value", values.protozoa_max);
-    }
-    function focusOnTreatment(formId){
-        hideAllTreatmentsForms();
-        treatmentsFormset.querySelector(`[id='${formId}']`).removeAttribute('hidden');
-    };
-    function addTreatmentSummary(treatmentName, formId, isValid){
-        const summaryDiv = treatmentsFormset.querySelector("[id=selected-treatments]");
-        const button = document.createElement("button");
-        button.setAttribute("class", "btn btn-info text-truncate w-100");
-        button.setAttribute("style", "");
-        button.addEventListener("click", ev => {
-            ev.preventDefault();
-            focusOnTreatment(formId)
-        })
-        button.appendChild(document.createTextNode(treatmentName));
-        const deleteButton = document.createElement("button");
-        deleteButton.appendChild(document.createTextNode("X"));
-        let div = document.createElement("div");
-        div.setAttribute("style", `display: flex; height: 42px; min-width: 100%; ${isValid ? '' : 'border: solid 2px var(--danger);'}`)
-        div.append(button, deleteButton);
-        if (!isValid) {
-            const dummyInput = document.createElement("input");
-            dummyInput.setAttribute("hidden", "");
-            dummyInput.setAttribute("class", "is_invalid");
-            const message = document.createElement("span");
-            message.setAttribute("class", "invalid-feedback d-block");
-            message.appendChild(document.createTextNode("contains errors"));
-            topDiv = document.createElement("div");
-            topDiv.append(div, dummyInput, message);
-            div = topDiv;
+    class TreatmentForm {
+        fields = {
+            id: {
+                selector: null,
+                getter: (elem) => elem.id,
+                setter: (elem, x) => null
+            },
+            name: { selector: "select", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            bacteria_min: { selector: "input[id*='bacteria_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            bacteria_max: { selector: "input[id*='bacteria_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            viruses_min: { selector: "input[id*='viruses_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            viruses_max: { selector: "input[id*='viruses_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            protozoa_min: { selector: "input[id*='protozoa_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            protozoa_max: { selector: "input[id*='protozoa_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
         }
-        deleteButton.addEventListener("click", ev => {
-            ev.preventDefault();
-            const thisTreatment = treatmentsFormset.querySelector(`div[id=${formId}]`);
-            // set DELETE to checked
-            thisTreatment.querySelector(`input[name*=DELETE]`).setAttribute("checked", "");
-            // hide
-            thisTreatment.setAttribute("hidden", "");
-            // remove from summary div
-            summaryDiv.removeChild(div);
-            })
-        summaryDiv.append(div)
-    };
-    function getSelectedTreatment(){
-        return document.querySelector("select[id*=select_treatment] option:checked").value;
-    };
-    function addNewTreatmentForm(selectedTreatment, data = null){
-        if (data === null) data = getTreatmentData(selectedTreatment);
-        let newForm = treatmentsFormset.querySelector("[id='treatment-empty']").cloneNode(true);
-        setTreatmentFormValues(newForm, data);
-        let nForms = getTreatmentsFormsCount();
-        const newFormId = `treatments-n-${nForms}`
-        newForm.setAttribute("id", newFormId);
-        newForm.removeAttribute("hidden");
-        newForm.innerHTML = newForm.innerHTML.replaceAll(
-            new RegExp('__prefix__', "g"), `${nForms}`
-        );
-        addTreatmentSummary(selectedTreatment, newFormId, true);
-        treatmentsFormset.append(newForm);
-        updateTreatmentsFormsCount(nForms+1);
-        focusOnTreatment(newFormId);
-        return newForm;
-    };
+        constructor(div) {
+            this.$form = div
+            this.$inputs = {}
+            for (let k of Object.keys(this.fields)) {
+                const selector = this.fields[k].selector;
+                this.$inputs[k] = selector === null ? div : div.querySelector(selector);
+            }
+        }
+        setValues(values) {
+            for (let k of Object.keys(this.fields)) {
+                const v = values[k];
+                this.fields[k].setter(this.$inputs[k], v);
+                this.$inputs[k].dispatchEvent(new Event("change"));
+            }
+        }
+        getValues() {
+            const values = {}
+            for (let [k, elem] of Object.entries(this.$inputs)) {
+                values[k] = this.fields[k].getter(elem)
+            }
+            return values;
+        }
+        bindCallback(field_name, callback) {
+            this.$inputs[field_name].addEventListener("change", ev => callback(ev.target.value))
+        }
+        isValid() {
+            return [...this.$form.querySelectorAll("input")].every(i => !i.hasAttribute("aria-invalid"))
+        }
+        delete() {
+            this.$form.setAttribute("hidden", "");
+            this.$form.querySelector(`input[name*=DELETE]`).checked = true;
+        }
+        hide() {
+            this.$form.setAttribute("hidden", "");
+        }
+        show() {
+            this.$form.removeAttribute("hidden")
+        }
+    }
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    class TreatmentsList {
+        constructor(divId) {
+            this.divId = divId
+            this.$div = document.querySelector(`#${divId}`);
+            if (this.$div.children.length === 0) this.$div.innerHTML = "None"
+        }
+        addSummary(treatmentValues, isValid, onfocus, ondelete) {
+            console.log(treatmentValues);
+            const values = treatmentValues;
+            const template = document.createElement("template");
+            var innerHTML = `
+            <div class='pr-2 mt-2' ${isValid ? "id='summary-" + values.id + "'" : ""} style='position: relative; display: flex; height: 42px; min-width: 100%; ${isValid ? "" : "border: solid 2px var(--danger);"}'>
+                <button id='focus-${values.id}' class='btn btn-secondary text-truncate w-100'>${values.name}</button>
+                <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 999999;'><img src='/static/img/close.svg'></button>
+            </div>
+            `.trim();
+            if (!isValid) {
+                innerHTML = `
+                <div>
+                    <input type='hidden' class='is_invalid'>
+                    ${innerHTML}
+                    <span class='invalid-feedback d-block'>contains errors</span>
+                </div>
+                `.trim();
+            }
+            template.innerHTML = innerHTML;
+            if (this.$div.innerHTML === "None") this.$div.innerHTML = "";
+            this.$div.append(template.content.cloneNode(true));
+            const btn = this.$div.querySelector(`button[id=focus-${values.id}]`)
+            btn.addEventListener("click", ev => {
+                ev.preventDefault();
+                // this.$div.querySelectorAll("button[id*=focus-]").forEach(b => b.classList.remove("active"))
+                // btn.classList.add("active", "focus");
+                onfocus();
+            })
+            this.$div.querySelectorAll("button").forEach(b => b.classList.remove("focus"))
+            btn.focus();
+            // btn.classList.add("focus");
+            this.$div.querySelector(`#delete-${values.id}`).addEventListener("click", ev => {
+                ev.preventDefault();
+                this.$div.querySelector(`#summary-${values.id}`).remove();
+                if (this.$div.children.length === 0) {
+                    this.$div.innerHTML = "None"
+                }
+                ondelete();
+            })
+        }
+    }
+
+    class TreatmentFormset {
+        form_class = TreatmentForm
+        root_selector = "fieldset[id='treatments-formset-fieldset']"
+        form_selector = "div[id*='treatments-n-']"
+        empty_form_selector = "[id='treatment-empty']"
+        management_form_selector = "#treatments-management"
+
+        constructor() {
+            this.$root = document.querySelector(this.root_selector);
+            this.$forms = [...this.$root.querySelectorAll(this.form_selector)];
+            this.forms = Object.fromEntries([...this.$forms].map(f => {
+                const form = new this.form_class(f)
+                return [form.getValues().id, form]
+            }))
+            this.$empty_form = document.querySelector(this.empty_form_selector)
+            this.$management_form = document.querySelector(this.management_form_selector);
+            this.$summaryDiv = this.$root.querySelector("[id=selected-treatments]");
+        }
+        createForm(values) {
+            let newForm = this.$empty_form.cloneNode(true);
+            let nForms = this.$forms.length;
+            const newFormId = `treatments-n-${nForms}`
+            newForm.setAttribute("id", newFormId);
+            newForm.removeAttribute("hidden");
+            newForm.innerHTML = newForm.innerHTML.replaceAll(
+                new RegExp('__prefix__', "g"), `${nForms}`
+            );
+            this.$root.append(newForm);
+            this.$forms.push(newForm);
+            Object.values(this.forms).map(f => f.hide())
+            this.forms[newFormId] = new this.form_class(newForm)
+            this.updateFormsCount(nForms + 1);
+            return this.forms[newFormId];
+        }
+        updateFormsCount(count) {
+            this.$management_form.querySelector("input[id*='TOTAL_FORMS']").value = count;
+        }
+    }
+    class TreatmentTrace {
+        constructor({ name = '', bacteria_min = 0, viruses_min = 0, protozoa_min = 0, bacteria_max = 0, viruses_max = 0, protozoa_max = 0, color = "#FFFFFF" }) {
+            this.data = {
+                viruses: {
+                    name: name, x: ['min', 'max'], y: [viruses_min, viruses_max], type: 'bar',
+                    xaxis: "x", yaxis: "y", marker: { color: color }, showlegend: true
+                },
+                bacteria: {
+                    name: name, x: ['min', 'max'], y: [bacteria_min, bacteria_max], type: 'bar',
+                    xaxis: "x2", yaxis: "y", marker: { color: color }, showlegend: false
+                },
+                protozoa: {
+                    name: name, x: ['min', 'max'], y: [protozoa_min, protozoa_max], type: 'bar',
+                    xaxis: "x3", yaxis: "y", marker: { color: color }, showlegend: false
+                }
+            }
+            this.updates = {
+                pathogen_name: x => { this.data.name = x },
+                viruses_min: x => { this.data.viruses.y[0] = x },
+                bacteria_min: x => { this.data.bacteria.y[0] = x },
+                protozoa_min: x => { this.data.protozoa.y[0] = x },
+                viruses_max: x => { this.data.viruses.y[1] = x },
+                bacteria_max: x => { this.data.bacteria.y[1] = x },
+                protozoa_max: x => { this.data.protozoa.y[1] = x },
+            }
+        }
+        update(key, value) {
+            if (!Object.keys(this.updates).includes(key)) {
+                throw new Error(`'key' must be one of ${[...Object.keys(this.updates)]}. Got: '${key}'`)
+            }
+            this.updates[key](value);
+        }
+    }
+    class TreatmentPlot {
+        constructor(divId) {
+            this.divId = divId;
+            this.$div = document.querySelector(`#${divId}`)
+            this.traces = {}
+            this.data = [];
+            this.layout = {
+                datarevision: 0,
+                grid: { rows: 1, columns: 3, subplots: [["xy", "x2y", "x3y"]] },
+                barmode: 'stack',
+                width: this.$div.parentElement.clientWidth * .9,
+                height: this.$div.parentElement.clientHeight * .9,
+                yaxis: {
+                    type: 'log',
+                    autorange: true,
+                    title: "Logremoval of individual treatment steps",
+                },
+                xaxis: {
+                    autorange: true, domain: [0., 0.33333]
+                },
+                xaxis2: {
+                    autorange: true, domain: [.33333, .6666666]
+                },
+                xaxis3: {
+                    autorange: true, domain: [.666666666, 1.]
+                },
+                autosize: true,
+                font_color: "black",
+                margin: { l: 60, r: 0, t: 20, b: 20 },
+                legend: {
+                    orientation: "h", yanchor: "top",
+                    xanchor: "center",
+                    x: 0.5
+                },
+                annotations: [{
+                    text: "Viruses",
+                    font: {
+                        size: 16,
+                    },
+                    showarrow: false,
+                    align: 'center',
+                    x: 0.5, //position in x domain
+                    y: 1.05, //position in y domain
+                    xref: 'x',
+                    yref: 'paper',
+                    yanchor: 'top'
+                },
+                {
+                    text: "Bacteria",
+                    font: {
+                        size: 16,
+                    },
+                    showarrow: false,
+                    align: 'center',
+                    x: 0.5, //position in x domain
+                    y: 1.05,  // position in y domain
+                    xref: 'x2',
+                    yref: 'paper',
+                    yanchor: 'top'
+                },
+                {
+                    text: "Protozoa",
+                    font: {
+                        size: 16,
+                    },
+                    showarrow: false,
+                    align: 'center',
+                    x: 0.5, //position in x domain
+                    y: 1.05,  // position in y domain
+                    xref: 'x3',
+                    yref: 'paper',
+                    yanchor: 'top'
+                }
+                ]
+            };
+            this.config = { displayModeBar: false, responsive: true };
+            this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
+            window.addEventListener("resize", () => {
+                console.log(this.$div.getBoundingClientRect().width)
+                Plotly.relayout(divId, {
+                    'xaxis.autorange': true,
+                    'yaxis.autorange': true
+                });
+            });
+        }
+        update() {
+            this.layout.datarevision += 1;
+            Plotly.react(this.divId, this.data, this.layout, this.config);
+        }
+    }
+    class TreatmentController {
+        constructor(list, formset, plot) {
+            this.list = list;
+            this.formset = formset;
+            this.plot = plot;
+        }
+        addTreatment(form) {
+            const formValues = form.getValues();
+            console.log(formValues)
+            const idx = parseInt(formValues.id.split("-").pop());
+            const trace = new TreatmentTrace({ ...formValues, color: `hsl(229, 100, ${(44 + idx * 20) % 100})` });
+            const summary = this.list.addSummary(formValues, form.isValid(),
+                () => {
+                    Object.values(this.formset.forms).map(f => f.hide());
+                    form.show()
+                },
+                () => {
+                    form.delete()
+                    const startIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.viruses)
+                    const stopIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.protozoa)
+                    this.plot.data.splice(startIndex, stopIndex + 1);
+                    delete this.plot.traces[formValues.id];
+                    this.plot.update()
+                }
+            )
+            this.plot.traces[formValues.id] = trace;
+            this.plot.data.push(...Object.values(this.plot.traces[formValues.id].data))
+            for (let field of Object.keys(form.fields)) {
+                form.bindCallback(field, newValue => {
+                    this.plot.traces[formValues.id].updates[field](newValue);
+                    this.plot.update()
+                })
+            }
+            this.plot.update()
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
         defaultTreatments = await fetch("{% static 'data/default-treatments.json' %}").then(resp => resp.json());
-        treatmentsFormset = getTreatmentsFormset();
-        treatmentsFormset.querySelectorAll("[id*=treatments-n-]").forEach(form => {
-            const formId = form.id;
-            const treatmentName = form.querySelector("select[id*=name] option:checked").value;
-            const isValid = [...form.querySelectorAll("input")].every(i => !i.hasAttribute("aria-invalid"))
-            console.log(isValid);
-            addTreatmentSummary(treatmentName, formId, isValid);
-            focusOnTreatment(formId);
+        const formset = new TreatmentFormset();
+        const list = new TreatmentsList("selected-treatments");
+        const treatmentsPlots = new TreatmentPlot("treatments-plot");
+        const treatmentController = new TreatmentController(list, formset, treatmentsPlots);
+        var lastForm = null
+        for (let form of Object.values(formset.forms)) {
+            treatmentController.addTreatment(form)
+            form.hide()
+            lastForm = form
+        }
+        if (lastForm !== null) { lastForm.show() }
+        document.querySelector("#add-treatment-btn").addEventListener("click", ev => {
+            const values = { ...defaultTreatments[document.querySelector("#id_select_treatment").value] }
+            const form = formset.createForm(values);
+            form.setValues(values);
+            treatmentController.addTreatment(form)
         })
     })
 

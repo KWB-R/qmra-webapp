@@ -3,61 +3,164 @@
 <script type="application/json" src="{% static 'data/default-sources.json' %}"></script>
 <script type="application/json" src="{% static 'data/default-inflows.json' %}"></script>
 <script type="text/javascript">
+
+    // name: , key: , selector: , getter: (elem) , setter: (elem, value), [disabled: ], 
+
+    class InflowForm {
+        fields = {
+            pathogen_name: {selector: "select", getter: elem => elem.value, setter: (elem, x) => {return}},
+            min: {selector: "input[id*=min]", getter: elem => elem.value, setter: (elem, x) => {elem.value = x}},
+            max: {selector: "input[id*=max]", getter: elem => elem.value, setter: (elem, x) => {elem.value = x}}
+        }
+        constructor(div) {
+            this.$form = div
+            this.$inputs = {}
+            for (let k of Object.keys(this.fields)) {
+                this.$inputs[k] = div.querySelector(this.fields[k].selector);
+            }
+        }
+        setValues(values) {
+            for (let k of Object.keys(this.fields)) {
+                const v = values[k];
+                this.fields[k].setter(this.$inputs[k], v);
+                this.$inputs[k].dispatchEvent(new Event("change"));
+            }
+        }
+        getValues(){
+            const values = {}
+            for (let [k, elem] of Object.entries(this.$inputs)){
+                values[k] = this.fields[k].getter(elem)
+            }
+            return values;
+        }
+        bindCallback(field_name, callback) {
+            this.$inputs[field_name].addEventListener("change", ev => callback(ev.target.value))
+        }
+    }
+
+    class InflowsFormset {
+        form_class = InflowForm;
+        root_selector = "fieldset[id='inflows-formset-fieldset']"
+        form_selector = "div[id*=inflow-n]"
+        empty_form_selector = "[id='inflow-empty']"
+
+        constructor(){
+            this.$root = document.querySelector(this.root_selector);
+            this.$forms = this.$root.querySelectorAll(this.form_selector);
+            this.forms = Object.fromEntries([...this.$forms].map(f => {
+                const form = new this.form_class(f)
+                return [form.getValues().pathogen_name, form]
+            }))
+        }
+    }
+    class InflowTrace {
+        constructor({pathogen_name='', min=0, max=0, color="#FFFFFF"}){
+            this.data = { name: pathogen_name, x: ['min', 'max'], y: [min, max], type: 'bar', marker: {color: color}}
+            this.updates = {
+                pathogen_name: x => {this.data.name = x},
+                min: x => {this.data.y[0] = x},
+                max: x => {this.data.y[1] = x},
+            }
+        }
+        update(key, value){
+            if (!Object.keys(this.updates).includes(key)) {
+                    throw new Error(`'key' must be one of ${[...Object.keys(this.updates)]}. Got: '${key}'`)
+            }
+            this.updates[key](value);
+        }
+    }
+    class InflowPlot {
+        constructor(divId) {
+            this.divId = divId;
+            this.$div = document.querySelector(`#${divId}`)
+            this.traces = {}
+            this.data = [];
+            this.layout = {
+                datarevision: 0,
+                // grid: {rows: 1, columns: 1},
+                barmode: 'group',
+                width: this.$div.parentElement.clientWidth*.9,
+                height: this.$div.parentElement.clientHeight*.8,
+                yaxis: {
+                    type: 'log',
+                    autorange: true,
+                    title: "Source water concentrations in N/L",
+                },
+                xaxis: {
+                    autorange: true
+                },
+                autosize: true,
+                font_color:"black",
+                margin: {l: 60, r: 0, t: 20, b: 20},
+                // legend: {orientation:"v", yanchor:"paper",
+                //     xanchor:"right",
+                //     x:1. }
+            };
+            this.config = {displayModeBar: false, responsive: true};
+            this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
+            window.addEventListener("resize", () => {
+                // console.log(this.$div.getBoundingClientRect().width)
+                Plotly.relayout(divId, {
+                    // width: window.innerWidth*.75,
+                    // height: window.innerHeight*.3333,
+                    'xaxis.autorange': true,
+                    'yaxis.autorange': true
+                });
+            });
+        }
+        update(){
+            this.layout.datarevision += 1;
+            Plotly.react(this.divId, this.data, this.layout, this.config);
+        }
+    }
+
+    class InflowController {
+        constructor(form, plot) {
+            this.inflows = []
+            this.form = form
+            this.plot = plot
+        }
+        
+    }
+</script>
+<script type="text/javascript">
     let defaultSources = null;
     let defaultInflows = null;
     let inflowsFormset = null;
 
     function getSourceData(name) {
-        return {...defaultSources[name], inflows: [...defaultInflows[name]]};
+        return { ...defaultSources[name], inflows: [...defaultInflows[name]] };
     };
-    function getInflowsFormset() {
-        return document.querySelector("fieldset[id='inflows-formset-fieldset']");
-    };
-    function getInflowsFormsCount() {
-        return inflowsFormset.querySelectorAll("div[id*='inflow-n']").length;
-    };
-    function updateInflowsFormsCount(count) {
-        inflowsFormset.querySelector("input[id*='TOTAL_FORMS']").setAttribute('value', count);
-    };
-    function removeAllInflowsForms() {
-        inflowsFormset.querySelectorAll("div[id*='inflow-n']").forEach(e => e.remove());
-        updateInflowsFormsCount(0);
-    };
-    function addNewInflowForm(){
-        let newForm = inflowsFormset.querySelector("[id='inflow-empty']").cloneNode(true);
-        let nForms = getInflowsFormsCount();
-        newForm.setAttribute("id", `inflow-n-${nForms}`);
-        newForm.removeAttribute("hidden");
-        newForm.innerHTML = newForm.innerHTML.replaceAll(
-            new RegExp('__prefix__', "g"), `${nForms}`
-        );
-        inflowsFormset.insertBefore(
-            newForm, inflowsFormset.querySelector("[id='add-inflow-btn']")
-        );
-        updateInflowsFormsCount(nForms+1);
-        return newForm;
-    };
-    function setInflowFormValues(inflowForm, values) {
-        inflowForm.querySelector(`option[value='']`).removeAttribute("selected");
-        inflowForm.querySelector(`option[value='${values.pathogen_name}']`).setAttribute("selected", "");
-        inflowForm.querySelector("input[id*='min']").setAttribute("value", values.min);
-        inflowForm.querySelector("input[id*='max']").setAttribute("value", values.max);
-    }
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         defaultSources = await fetch("{% static 'data/default-sources.json' %}").then(resp => resp.json());
         defaultInflows = await fetch("{% static 'data/default-inflows.json' %}").then(resp => resp.json());
-
-        inflowsFormset = getInflowsFormset();
+        let colors = ["hsl(49, 100, 88)", "hsl(49, 100, 77)", "hsl(49, 100, 66)"]
+        const formset = new InflowsFormset();
+        const plot = new InflowPlot("inflows-plot")
+        const controller = new InflowController(formset, plot);
+        var ci = 0;
+        for (let [k, v] of Object.entries(formset.forms)) {
+            plot.traces[k] = new InflowTrace({...v.getValues(), color: colors[ci]})
+            ci += 1;
+            plot.data.push(plot.traces[k].data)
+            for (let field of Object.keys(v.fields)){
+                v.bindCallback(field, newValue => { 
+                    plot.traces[k].updates[field](newValue);
+                    plot.update()
+                })
+            }
+        }
+        plot.data = plot.data.reverse();
+        plot.update();
+        // formset.getAllForms().map(f => controller.addInflowFromForm(f))
 
         document.querySelectorAll("select[id*='source_name'] option").forEach(el => {
-            el.addEventListener("click", function() {
+            el.addEventListener("click", function () {
                 const data = getSourceData(el.value);
-                removeAllInflowsForms();
-                data.inflows.forEach((e, i) => {
-                    let newForm = addNewInflowForm();
-                    setInflowFormValues(newForm, e);
-                });
+                for (let inflow of data.inflows){
+                    formset.forms[inflow.pathogen_name].setValues(inflow);
+                }
             });
         });
     })
