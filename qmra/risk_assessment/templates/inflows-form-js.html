@@ -92,9 +92,7 @@
                 autosize: true,
                 font_color:"black",
                 margin: {l: 60, r: 0, t: 20, b: 20},
-                // legend: {orientation:"v", yanchor:"paper",
-                //     xanchor:"right",
-                //     x:1. }
+                legend: {traceorder: "normal"}
             };
             this.config = {displayModeBar: false, responsive: true};
             this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
@@ -135,7 +133,7 @@
     document.addEventListener('DOMContentLoaded', async function () {
         defaultSources = await fetch("{% static 'data/default-sources.json' %}").then(resp => resp.json());
         defaultInflows = await fetch("{% static 'data/default-inflows.json' %}").then(resp => resp.json());
-        let colors = ["hsl(49, 100, 88)", "hsl(49, 100, 77)", "hsl(49, 100, 66)"]
+        let colors = ["hsl(229, 100, 44)", "hsl(229, 100, 66)", "hsl(229, 100, 88)"]
         const formset = new InflowsFormset();
         const plot = new InflowPlot("inflows-plot")
         const controller = new InflowController(formset, plot);
@@ -151,7 +149,6 @@
                 })
             }
         }
-        plot.data = plot.data.reverse();
         plot.update();
         // formset.getAllForms().map(f => controller.addInflowFromForm(f))
 

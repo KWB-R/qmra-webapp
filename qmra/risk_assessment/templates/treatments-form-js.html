@@ -72,7 +72,7 @@
             var innerHTML = `
             <div class='pr-2 mt-2' ${isValid ? "id='summary-" + values.id + "'" : ""} style='position: relative; display: flex; height: 42px; min-width: 100%; ${isValid ? "" : "border: solid 2px var(--danger);"}'>
                 <button id='focus-${values.id}' class='btn btn-secondary text-truncate w-100'>${values.name}</button>
-                <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 999999;'><img src='/static/img/close.svg'></button>
+                <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 1000;'><img src='/static/img/close.svg'></button>
             </div>
             `.trim();
             if (!isValid) {
@@ -211,7 +211,8 @@
                 legend: {
                     orientation: "h", yanchor: "top",
                     xanchor: "center",
-                    x: 0.5
+                    x: 0.5,
+                    traceorder: "normal",
                 },
                 annotations: [{
                     text: "Viruses",
@@ -279,7 +280,7 @@
             const formValues = form.getValues();
             console.log(formValues)
             const idx = parseInt(formValues.id.split("-").pop());
-            const trace = new TreatmentTrace({ ...formValues, color: `hsl(229, 100, ${(44 + idx * 20) % 100})` });
+            const trace = new TreatmentTrace({ ...formValues, color: `hsl(229, 100, ${(44 + idx * 22) % 100})` });
             const summary = this.list.addSummary(formValues, form.isValid(),
                 () => {
                     Object.values(this.formset.forms).map(f => f.hide());

@@ -29,6 +29,7 @@ class RiskAssessmentForm(forms.ModelForm):
         self.fields["source_name"].label = "Select a source water type to add pathogen concentrations"
         self.fields['exposure_name'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].widget.attrs['min'] = 0
+        self.fields['volume_per_event'].label = "Volume per event in liters"
         self.helper = FormHelper(self)
         self.helper.form_tag = False
         self.helper.label_class = "text-muted small"

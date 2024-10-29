@@ -45,6 +45,7 @@
     function setExposureFormValues(exposureForm, values) {
         exposureForm.querySelector("input[id*=events_per_year]").value = values.events_per_year;
         exposureForm.querySelector("input[id*=volume_per_event]").value = values.volume_per_event;
+        exposureForm.querySelector("input[id*=volume_per_event]").step = values.volume_per_event;
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
