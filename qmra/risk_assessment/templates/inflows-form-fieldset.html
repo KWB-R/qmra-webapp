@@ -12,9 +12,9 @@
         </button>
     </div>
 </nav>
-<div class="tab-content " id="inflow-content">
+<div class="configurator-section" id="inflow-content">
     <fieldset id="inflows-formset-fieldset"
-              class="tab-pane fade show active configurator-section"
+              class="col-8"
               role="tabpanel"
               style="height: 320px;"
               aria-labelledby="nav-inflows-params-tab"
@@ -33,15 +33,15 @@
             {% for field in form.hidden_fields %}
             {{field}}
             {% endfor %}
-            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, .333333fr)) .05fr; gap: .5em">
+            <div style="display: flex; gap: 5px">
                 {% crispy form %}
             </div>
         </div>
         {% endfor %}
     </fieldset>
     <div id="inflows-plot"
-         class="tab-pane fade show configurator-section" role="tabpanel"
-         style="height: 300px;"
+         class="my-auto mx-1" role="tabpanel"
+         style="height: 320px;"
          aria-labelledby="nav-inflows-plot-tab">
     </div>
 </div>

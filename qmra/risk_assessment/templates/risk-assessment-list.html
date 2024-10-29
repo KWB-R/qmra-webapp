@@ -133,7 +133,6 @@
             this.divId = divId;
             this.$div = document.querySelector(`#${divId}`);
             this.width = this.$div.getBoundingClientRect().width;
-            console.log(window.getComputedStyle(this.$div).width);
             this.data = [];
             this.layout = {
                 datarevision: 0,
@@ -272,8 +271,6 @@
         document.querySelector("#compare-btn").addEventListener("click", () => {
             const selected = [...document.querySelectorAll(".select-assessment-btn")].filter(
                 btn => btn.checked).map(btn => JSON.parse(document.querySelector(`[id='${btn.value}']`).textContent));
-            console.log([...document.querySelectorAll(".select-assessment-btn")].filter(
-                btn => btn.checked).map(b => b.value))
             document.querySelector("#show-comparison-btn").click();
             plot.setTraces(selected);
 

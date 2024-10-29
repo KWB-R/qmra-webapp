@@ -123,12 +123,8 @@ def risk_assessment_result(request):
                 treatment_form.is_valid():
             ra = risk_assessment_form.save(commit=False)
             # print(inflow_form.is_valid(), treatment_form.is_valid())
-            inflows = inflow_form.save(commit=False)
-            for deleted in inflow_form.deleted_forms:
-                deleted.instance.delete()
-            treatments = treatment_form.save(commit=False)
-            for deleted in treatment_form.deleted_forms:
-                deleted.instance.delete()
+            inflows = [f.instance for f in inflow_form.forms if f not in inflow_form.deleted_forms]
+            treatments = [f.instance for f in treatment_form.forms if f not in treatment_form.deleted_forms]
             results = assess_risk(ra,
                                   inflows,
                                   treatments, save=False)

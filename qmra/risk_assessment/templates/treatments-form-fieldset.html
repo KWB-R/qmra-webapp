@@ -1,22 +1,22 @@
 {% load crispy_forms_tags %}
 {% load static %}
-<nav id="treatment-nav">
-    <div class="nav nav-tabs" id="treatments-nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-treatments-params-tab" data-toggle="tab"
-                data-target="#treatments-formset-fieldset" type="button" role="tab"
-                aria-controls="treatments-formset-fieldset" aria-selected="true">input parameters
-        </button>
-        <button class="nav-link" id="nav-treatments-plot-tab" data-toggle="tab"
-                data-target="#treatments-plot" type="button" role="tab"
-                aria-controls="treatments-plot" aria-selected="false">plots
-        </button>
-    </div>
-</nav>
-<div class="tab-content" id="treatment-content">
+<!--<nav id="treatment-nav">-->
+<!--    <div class="nav nav-tabs" id="treatments-nav-tab" role="tablist">-->
+<!--        <button class="nav-link active" id="nav-treatments-params-tab" data-toggle="tab"-->
+<!--                data-target="#treatments-formset-fieldset" type="button" role="tab"-->
+<!--                aria-controls="treatments-formset-fieldset" aria-selected="true">input parameters-->
+<!--        </button>-->
+<!--        <button class="nav-link" id="nav-treatments-plot-tab" data-toggle="tab"-->
+<!--                data-target="#treatments-plot" type="button" role="tab"-->
+<!--                aria-controls="treatments-plot" aria-selected="false">plots-->
+<!--        </button>-->
+<!--    </div>-->
+<!--</nav>-->
+<div class="configurator-section d-flex" id="treatment-content">
 
-    <fieldset id="treatments-formset-fieldset" class="tab-pane fade show active configurator-section mb-4"
+    <fieldset id="treatments-formset-fieldset" class="col-8 mb-4"
               role="tabpanel"
-              style="height: 500px;"
+              style="height: 360px;"
               aria-labelledby="nav-treatments-params-tab">
 
         <div id="treatments-management">
@@ -58,10 +58,10 @@
 
     </fieldset>
     <div id="treatments-plot"
-         class="tab-pane fade show configurator-section"
+         class="my-auto mx-1"
          role="tabpanel"
          aria-labelledby="nav-treatments-plot-tab"
-         style="height: 500px;"
+         style="height: 360px;"
          ></div>
 </div>
 {% include "treatments-form-js.html" %}

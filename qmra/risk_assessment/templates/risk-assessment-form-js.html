@@ -1,6 +1,9 @@
 {% load static %}
 <script type="text/javascript">
     function getResultsNoSave() {
+            const showResult = document.querySelector("#show-result");
+            showResult.setAttribute("hidden", "");
+            document.querySelector("main").appendChild(showResult);
             const formElement = document.querySelector("form[id=configurator]");
             const frm = new FormData(formElement);
             return fetch("{% url 'assessment-result' %}", {
@@ -14,7 +17,7 @@
                     throw new Error("422");
                 }).then(html => {
                     document.querySelector("#assessment-result").innerHTML = html;
-                    document.querySelector("#show-result-modal").click();
+<!--                    document.querySelector("#show-result-modal").click();-->
                     document.querySelector("#assessment-result").querySelectorAll("script").forEach(s => eval(s.innerHTML));
                     document.querySelector("#assessment-result").classList.add("up-to-date");
                     return true;
@@ -27,11 +30,17 @@
             document.querySelector("#assess-risk-btn").addEventListener("click", async ev => {
                 ev.preventDefault();
                 ev.stopPropagation();
-                getResultsNoSave()
+                getResultsNoSave();
+                window.scrollTo(0, 0);
             });
-            document.querySelectorAll("input").forEach(n => {
-                n.addEventListener("change", () => document.querySelector("#assessment-result").classList.remove("up-to-date"));
-            })
+            document.querySelector("form").addEventListener("change", (ev) => {
+                const showResult = document.querySelector("#show-result");
+                showResult.removeAttribute("hidden")
+                const result = document.querySelector("#assessment-result")
+                result.classList.remove("up-to-date")
+                result.innerHTML = "";
+                result.appendChild(showResult);
+                });
         })
     let defaultExposures = null;
     let exposureForm = null;
@@ -53,12 +62,11 @@
 
         exposureForm = getExposureForm();
 
-        document.querySelectorAll("select[id*='exposure_name'] option").forEach(el => {
-            el.addEventListener("click", function() {
-                const data = getExposureData(el.value);
+        document.querySelector("select[id*='exposure_name']")
+            .addEventListener("change", function(ev) {
+                const data = getExposureData(ev.target.value);
                 setExposureFormValues(exposureForm, data);
             });
-        });
     })
 
 </script>

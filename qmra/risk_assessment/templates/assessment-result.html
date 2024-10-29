@@ -1,89 +1,71 @@
-<div class="modal-dialog" role="document"
-        style="max-width: 75vw !important;">
-    <div class="modal-content">
-<!--        <div class="modal-header">-->
-<!--            <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                <span aria-hidden="true">&times;</span>-->
-<!--            </button>-->
-<!--        </div>-->
-        <div class="modal-body p-5">
-            <h4 class="text-center">Risk assessment results</h4>
-            <div class="m-4 p-4 {{infection_risk}}-risk">
-                <div>The risk of this water reuse scenario can be compared to
-                     two commonly applied health-based targets (WHO 2022):
-                </div>
-                <ol>
-                    <li>1 in 10,000 infections per person per year</li>
-                    <li>0.000001 Disability Adjusted Life Years (DALY)</li>
-                </ol>
-                {% if infection_risk == "none" %}
-                    <div>
-                        The estimated probability of infection per year / DALYs pppy 
-                        does not exceed the tolerable risk level indicated by the WHO 
-                        neither calculating with the minimum nor the maximum LRV for 
-                        none of the considered pathogens.
-                    </div>
-                <br/>
-                <div>
-                        <strong>According to the estimation, the water reuse scenario 
-                        achieves a tolerable risk level.
-                        </strong>
-                    </div>
-                {% elif infection_risk == "min" %}
-                <div>
-                    The estimated probability of infection per year / DALYs pppy 
-                    from one or more pathogens exceeds the tolerable risk level
-                     indicated by the WHO calculated using the minimum LRV.
-                </div>
-                <br/>
-                <div>
-                    <strong>A closer look into the individual treatments 
-                    is necessary to evaluate the risk of the scenario.
-                    </strong>
-                </div>
-                {% elif infection_risk == "max" %}
-                <div>
-                    The estimated probability of infection per year / DALYs pppy 
-                    from one or more pathogens exceeds the tolerable risk level
-                     indicated by the WHO calculated using the maximum LRV.
-                </div>
-                <br/>
-                <div>
-                    <strong>More efficient treatments or additional treatment
-                         steps are necessary to achieve a tolerable risk level for the water reuse scenario.
-                    </strong>
-                </div>
-                {% endif %}
-            </div>
-            <h4 class="text-center">Probability of infection per year</h4>
-            
-            <div id="hero-graph" class="m-4">
-                {% autoescape off %}
-                {{ risk_plot }}
-                {% endautoescape %}
-            </div>
-                    <h4 style="text-align: center">Risk in disability adjusted life years (DALYs) per person per year
-                (pppy)</h4>
-            <div id="hero-graph" class="m-4">
-                {% autoescape off %}
-                {{ daly_plot }}
-                {% endautoescape %}
-            </div>
-            <!-- <h4 style="text-align: center">Risk per pathogen</h4>
-            <div class="w-50 m-auto">
-            <table class="table">
-                <tr><th>pathogen</th><th>risk of infection</th><th>risk in DALYs</th></tr>
-                {% for r in results %}
-                    <tr><td>{{r.pathogen}}</td>
-                        <td class="{{r.infection_risk}}-risk">{{r.infection_risk}}</td>
-                        <td class="{{r.dalys_risk}}-risk">{{r.dalys_risk}}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-            </div> -->
+<div class="">
+    <h4 class="">Result</h4>
+    <div class="p-2 {{infection_risk}}-risk mb-3" style="font-size: 90%;">
+        <div>The risk of this water reuse scenario can be compared to
+            two commonly applied health-based targets (WHO 2022):
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <ol>
+            <li>1 in 10,000 infections per person per year</li>
+            <li>0.000001 Disability Adjusted Life Years (DALY)</li>
+        </ol>
+        {% if infection_risk == "none" %}
+        <div>
+            The estimated probability of infection per year / DALYs pppy
+            does not exceed the tolerable risk level indicated by the WHO
+            neither calculating with the minimum nor the maximum LRV for
+            none of the considered pathogens.
         </div>
+        <div>
+            <strong>According to the estimation, the water reuse scenario
+                achieves a tolerable risk level.
+            </strong>
+        </div>
+        {% elif infection_risk == "min" %}
+        <div>
+            The estimated probability of infection per year / DALYs pppy
+            from one or more pathogens exceeds the tolerable risk level
+            indicated by the WHO calculated using the minimum LRV.
+        </div>
+        <div>
+            <strong>A closer look into the individual treatments
+                is necessary to evaluate the risk of the scenario.
+            </strong>
+        </div>
+        {% elif infection_risk == "max" %}
+        <div>
+            The estimated probability of infection per year / DALYs pppy
+            from one or more pathogens exceeds the tolerable risk level
+            indicated by the WHO calculated using the maximum LRV.
+        </div>
+        <br/>
+        <div>
+            <strong>More efficient treatments or additional treatment
+                steps are necessary to achieve a tolerable risk level for the water reuse scenario.
+            </strong>
+        </div>
+        {% endif %}
     </div>
+    <div id="hero-graph" class="mb-3">
+        {% autoescape off %}
+        {{ risk_plot }}
+        {% endautoescape %}
+    </div>
+    <div id="hero-graph" class="mb-3">
+        {% autoescape off %}
+        {{ daly_plot }}
+        {% endautoescape %}
+    </div>
+    <!-- <h4 style="text-align: center">Risk per pathogen</h4>
+    <div class="w-50 m-auto">
+    <table class="table">
+        <tr><th>pathogen</th><th>risk of infection</th><th>risk in DALYs</th></tr>
+        {% for r in results %}
+            <tr><td>{{r.pathogen}}</td>
+                <td class="{{r.infection_risk}}-risk">{{r.infection_risk}}</td>
+                <td class="{{r.dalys_risk}}-risk">{{r.dalys_risk}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    </div> -->
 </div>
+

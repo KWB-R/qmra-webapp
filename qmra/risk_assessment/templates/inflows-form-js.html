@@ -9,8 +9,23 @@
     class InflowForm {
         fields = {
             pathogen_name: {selector: "select", getter: elem => elem.value, setter: (elem, x) => {return}},
-            min: {selector: "input[id*=min]", getter: elem => elem.value, setter: (elem, x) => {elem.value = x}},
-            max: {selector: "input[id*=max]", getter: elem => elem.value, setter: (elem, x) => {elem.value = x}}
+            min: {selector: "input[id*=min]", getter: elem => elem.value, setter: (elem, x) => {
+                elem.value = x;
+                const y = parseFloat(x);
+                var step = "1";
+                if (y < 1 && y > 0){
+                    step = "."+"0".repeat(-Math.floor(Math.log(y)/Math.log(10))-1)+"1";
+                   }
+                elem.step = step;
+                }},
+            max: {selector: "input[id*=max]", getter: elem => elem.value, setter: (elem, x) => {
+                elem.value = x;
+                const y = parseFloat(x);
+                var step = "1";
+                if (y < 1 && y > 0)
+                step = "."+"0".repeat(-Math.floor(Math.log(y)/Math.log(10))-1)+"1";
+                elem.step = step;
+                }}
         }
         constructor(div) {
             this.$form = div
@@ -79,8 +94,8 @@
                 datarevision: 0,
                 // grid: {rows: 1, columns: 1},
                 barmode: 'group',
-                width: this.$div.parentElement.clientWidth*.9,
-                height: this.$div.parentElement.clientHeight*.8,
+                width: this.$div.parentElement.clientWidth*.3,
+                height: this.$div.clientHeight,
                 yaxis: {
                     type: 'log',
                     autorange: true,
@@ -91,8 +106,14 @@
                 },
                 autosize: true,
                 font_color:"black",
-                margin: {l: 60, r: 0, t: 20, b: 20},
-                legend: {traceorder: "normal"}
+                margin: {l: 60, r: 0, t: 50, b: 20},
+                legend: {traceorder: "normal",
+                    orientation: "h", yanchor: "top",
+                    xanchor: "center",
+                    x: 0.5,
+                    },
+                plot_bgcolor:"#F6F6FF",
+                paper_bgcolor:"#F6F6FF"
             };
             this.config = {displayModeBar: false, responsive: true};
             this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
@@ -127,7 +148,10 @@
     let inflowsFormset = null;
 
     function getSourceData(name) {
-        return { ...defaultSources[name], inflows: [...defaultInflows[name]] };
+        if (name in defaultInflows){
+            return { ...defaultSources[name], inflows: [...defaultInflows[name]] };
+        }
+        return {inflows: []};
     };
 
     document.addEventListener('DOMContentLoaded', async function () {
@@ -152,14 +176,13 @@
         plot.update();
         // formset.getAllForms().map(f => controller.addInflowFromForm(f))
 
-        document.querySelectorAll("select[id*='source_name'] option").forEach(el => {
-            el.addEventListener("click", function () {
-                const data = getSourceData(el.value);
+        document.querySelector("select[id*='source_name']")
+            .addEventListener("change", function (evt) {
+                const data = getSourceData(evt.target.value);
                 for (let inflow of data.inflows){
                     formset.forms[inflow.pathogen_name].setValues(inflow);
                 }
             });
-        });
     })
 
 </script>

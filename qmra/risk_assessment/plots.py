@@ -53,13 +53,14 @@ def risk_plots(risk_assessment_results, risk_category="none"):
 
     infection_prob_fig.update_layout(
         boxmode='group',
+        height=350,
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
         plot_bgcolor="#F6F6FF",
         xaxis=dict(title="", showgrid=False),
         yaxis=dict(title="Probability of infection per year",
                    showgrid=False),
-        margin=dict(l=0, r=0, t=0, b=0),
+        margin=dict(l=0, r=0, t=30, b=30),
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -83,12 +84,13 @@ def risk_plots(risk_assessment_results, risk_category="none"):
 
     dalys_fig.update_layout(
         boxmode='group',
+        height=350,
         # font_family="Helvetica Neue, Helvetica, Arial, sans-serif",
         font_color="black",
         plot_bgcolor="#F6F6FF",
         xaxis=dict(title="", showgrid=False),
         yaxis=dict(title="DALYs pppy", showgrid=False),
-        margin=dict(l=0, r=0, t=0, b=0),
+        margin=dict(l=0, r=0, t=30, b=30),
         legend=dict(
             orientation="h",
             yanchor="top",

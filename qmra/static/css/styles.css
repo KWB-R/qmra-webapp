@@ -56,7 +56,9 @@ font-size: small;
 .btn-outline-secondary:focus, .btn-secondary:focus {
     box-shadow: 0 0 0 .2rem var(--kwb-blue) !important;
 }
-
+.custom-select {
+    padding: .375rem .75rem;
+}
 .text_link_kwb { color: var(--kwb-blue);  }
 
 .kwb_headline {
