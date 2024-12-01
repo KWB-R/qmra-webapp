@@ -49,7 +49,10 @@
 
     <button id="show-result-{{assessment.id}}" hidden data-toggle="modal"
         data-target="#assessment-result-{{assessment.id}}" data-show="true"></button>
-    <div id="assessment-result-{{assessment.id}}" class="modal" role="dialog"></div>
+    <div id="assessment-result-{{assessment.id}}" class="modal" role="dialog">
+            <div class="modal-dialog" role="document" style="max-width: 75vw !important;">
+        </div>
+    </div>
 
     <div class="media p-3 mt-3 custom-media w-100"
         style="border: 2px solid; border-radius: 5px; border-color: #d3d3d3; align-items: stretch; position: relative;">
@@ -123,7 +126,8 @@
             headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
             mode: 'same-origin'
         }).then(r => r.text()).then(html => {
-            document.querySelector(`#assessment-result-${id}`).innerHTML = html;
+            document.querySelector(`#assessment-result-${id}`).querySelector(".modal-dialog").innerHTML = html;
+            document.querySelector(`#assessment-result-${id}`).querySelector(".modal-dialog").firstChild.classList.add("modal-content", "px-5");
             document.querySelector(`#show-result-${id}`).click();
             document.querySelector(`#assessment-result-${id}`).querySelectorAll("script").forEach(s => eval(s.innerHTML));
         });
