@@ -147,12 +147,6 @@ class TreatmentForm(forms.ModelForm):
         self.fields['viruses_max'].label = ""
         self.fields['protozoa_min'].label = ""
         self.fields['protozoa_max'].label = ""
-        self.fields['bacteria_min'].widget.attrs['min'] = 0
-        self.fields['bacteria_max'].widget.attrs['min'] = 0
-        self.fields['viruses_min'].widget.attrs['min'] = 0
-        self.fields['viruses_max'].widget.attrs['min'] = 0
-        self.fields['protozoa_min'].widget.attrs['min'] = 0
-        self.fields['protozoa_max'].widget.attrs['min'] = 0
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
             Field("name", css_class="disabled-input d-none"),
@@ -176,18 +170,6 @@ class TreatmentForm(forms.ModelForm):
         v_max = _zero_if_none(cleaned_data.get("viruses_max", 0))
         p_min = _zero_if_none(cleaned_data.get("protozoa_min", 0))
         p_max = _zero_if_none(cleaned_data.get("protozoa_max", 0))
-        if b_min < 0:
-            self.add_error("bacteria_min", "this field must be positive or 0")
-        if b_max < 0:
-            self.add_error("bacteria_max", "this field must be positive or 0")
-        if v_min < 0:
-            self.add_error("viruses_min", "this field must be positive or 0")
-        if v_max < 0:
-            self.add_error("viruses_max", "this field must be positive or 0")
-        if p_min < 0:
-            self.add_error("protozoa_min", "this field must be positive or 0")
-        if p_max < 0:
-            self.add_error("protozoa_max", "this field must be positive or 0")
         msg = "min. must be less than max"
         if b_min > b_max:
             self.add_error("bacteria_min", msg)

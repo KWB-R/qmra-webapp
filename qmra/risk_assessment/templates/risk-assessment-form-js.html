@@ -17,7 +17,6 @@
                     throw new Error("422");
                 }).then(html => {
                     document.querySelector("#assessment-result").innerHTML = html;
-<!--                    document.querySelector("#show-result-modal").click();-->
                     document.querySelector("#assessment-result").querySelectorAll("script").forEach(s => eval(s.innerHTML));
                     document.querySelector("#assessment-result").classList.add("up-to-date");
                     return true;
@@ -26,22 +25,22 @@
                     return false;
                 });
         }
-        document.addEventListener('DOMContentLoaded', async function() {
-            document.querySelector("#assess-risk-btn").addEventListener("click", async ev => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                getResultsNoSave();
-                window.scrollTo(0, 0);
+    document.addEventListener('DOMContentLoaded', async function() {
+        document.querySelector("#assess-risk-btn").addEventListener("click", async ev => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            getResultsNoSave();
+            window.scrollTo(0, 0);
+        });
+        document.querySelector("form").addEventListener("change", (ev) => {
+            const showResult = document.querySelector("#show-result");
+            showResult.removeAttribute("hidden")
+            const result = document.querySelector("#assessment-result")
+            result.classList.remove("up-to-date")
+            result.innerHTML = "";
+            result.appendChild(showResult);
             });
-            document.querySelector("form").addEventListener("change", (ev) => {
-                const showResult = document.querySelector("#show-result");
-                showResult.removeAttribute("hidden")
-                const result = document.querySelector("#assessment-result")
-                result.classList.remove("up-to-date")
-                result.innerHTML = "";
-                result.appendChild(showResult);
-                });
-        })
+    })
     let defaultExposures = null;
     let exposureForm = null;
 
@@ -51,22 +50,45 @@
     function getExposureForm() {
         return document.querySelector("div[id='exposure-form-fieldset']");
     };
+    function getExposureInfo() {
+        return document.querySelector("div[id=exposure-info]");
+    }
     function setExposureFormValues(exposureForm, values) {
         exposureForm.querySelector("input[id*=events_per_year]").value = values.events_per_year;
         exposureForm.querySelector("input[id*=volume_per_event]").value = values.volume_per_event;
         exposureForm.querySelector("input[id*=volume_per_event]").step = values.volume_per_event;
     }
+    function setExposureInfoValues(exposureInfo, values, references) {
+        exposureInfo.querySelector("#exposure-info-name").innerHTML = values.name;
+        exposureInfo.querySelector("#exposure-info-description").innerHTML = values.description;
+        exposureInfo.querySelector("#exposure-info-values").innerHTML = `
+        <div><strong>Events per Year:</strong> ${values.events_per_year}<sup>[1]</sup></div>
+        <div><strong>Volume per event:</strong> ${values.volume_per_event}<sup>[1]</sup></div>
+        `;
+        const ref = references[values.ReferenceID];
+        const $ref = exposureInfo.querySelector("#exposure-info-reference");
+        if (ref){
+            $ref.setAttribute("href", ref.ReferenceLink);
+            $ref.innerHTML = ref.ReferenceName;
+        } else {
+            $ref.setAttribute("href", "");
+            $ref.innerHTML = "n.a.";
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', async function() {
         defaultExposures = await fetch("{% static 'data/default-exposures.json' %}").then(resp => resp.json());
-
+        defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         exposureForm = getExposureForm();
+        exposureInfo = getExposureInfo();
 
         document.querySelector("select[id*='exposure_name']")
             .addEventListener("change", function(ev) {
                 const data = getExposureData(ev.target.value);
                 setExposureFormValues(exposureForm, data);
+                setExposureInfoValues(exposureInfo, data, defaultReferences);
             });
+        setExposureInfoValues(exposureInfo, getExposureData(document.querySelector("select[id*='exposure_name']").value), defaultReferences)
     })
 
 </script>

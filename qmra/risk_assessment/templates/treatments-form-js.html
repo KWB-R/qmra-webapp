@@ -164,6 +164,7 @@
                 }
             }
             this.updates = {
+                id: x => {},
                 pathogen_name: x => { this.data.name = x },
                 viruses_min: x => { this.data.viruses.y[0] = x },
                 bacteria_min: x => { this.data.bacteria.y[0] = x },
@@ -273,13 +274,17 @@
         }
     }
     class TreatmentController {
-        constructor(list, formset, plot) {
+        constructor(list, formset, plot, info, references) {
             this.list = list;
             this.formset = formset;
             this.plot = plot;
+            this.info = info;
+            this.treatments = [];
+            this.references = references;
         }
-        addTreatment(form) {
+        addTreatment(form, values) {
             const formValues = form.getValues();
+            this.treatments.push(values);
             const idx = parseInt(formValues.id.split("-").pop());
             const trace = new TreatmentTrace({ ...formValues, color: `hsl(229, 100, ${(44 + idx * 22) % 100})` });
             const summary = this.list.addSummary(formValues, form.isValid(),
@@ -292,8 +297,11 @@
                     const startIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.viruses)
                     const stopIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.protozoa)
                     this.plot.data.splice(startIndex, stopIndex + 1);
+                    const start = this.treatments.indexOf(values)
+                    this.treatments.splice(start, 1);
                     delete this.plot.traces[formValues.id];
                     this.plot.update()
+                    this.renderInfos()
                 }
             )
             this.plot.traces[formValues.id] = trace;
@@ -305,18 +313,67 @@
                 })
             }
             this.plot.update()
+            this.renderInfos()
+        }
+        renderInfos() {
+            const uniques = new Set();
+            var inner = "";
+            for (const treatment of this.treatments){
+                if (!uniques.has(treatment.name)){
+                    const virus_ref = this.references[treatment.viruses_reference]
+                    const bacteria_ref = this.references[treatment.bacteria_reference]
+                    const protozoa_ref = this.references[treatment.protozoa_reference]
+                    uniques.add(treatment.name)
+                    inner += `<li>
+                    <h5>${treatment.name}</h5>
+                    <div class="text-muted small mb-4">${treatment.description}</div>
+                    <table class="table small">
+                        <tr>
+                            <th>Pathogen group</th>
+                            <th>Minimum LRV<sup>[1]</sup></th>
+                            <th>Maximum LRV<sup>[1]</sup></th>
+                        </tr>
+                        <tr>
+                            <td>Viruses</td>
+                            <td>${treatment.viruses_min}</td>
+                            <td>${treatment.viruses_max}</td>
+                        </tr>
+                        <tr>
+                            <td>Bacteria</td>
+                            <td>${treatment.bacteria_min}</td>
+                            <td>${treatment.bacteria_max}</td>
+                        </tr>
+                        <tr>
+                            <td>Protozoa</td>
+                            <td>${treatment.protozoa_min}</td>
+                            <td>${treatment.protozoa_max}</td>
+                        </tr>
+                        
+                    </table>
+                    <div class="small"><sup>[1]</sup>values taken from <a href="${virus_ref.ReferenceLink}">${virus_ref.ReferenceName}</a></p>
+                    </li>
+                    `
+                }
+            }
+            this.info.innerHTML = `<h4>Treatments</h4><ul>${inner}</ul>`;
         }
     }
 
+    function getTreatmentInfo() {
+        document.querySelector("#treatment-info");
+    }
+
+
     document.addEventListener('DOMContentLoaded', async function () {
         defaultTreatments = await fetch("{% static 'data/default-treatments.json' %}").then(resp => resp.json());
+        defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const formset = new TreatmentFormset();
         const list = new TreatmentsList("selected-treatments");
         const treatmentsPlots = new TreatmentPlot("treatments-plot");
-        const treatmentController = new TreatmentController(list, formset, treatmentsPlots);
+        const treatmentController = new TreatmentController(list, formset, treatmentsPlots, document.querySelector("#treatment-info"), defaultReferences);
         var lastForm = null
         for (let form of Object.values(formset.forms)) {
-            treatmentController.addTreatment(form)
+            treatmentController.addTreatment(form, { ...defaultTreatments[form.getValues().name] })
             form.hide()
             lastForm = form
         }
@@ -325,7 +382,7 @@
             const values = { ...defaultTreatments[document.querySelector("#id_select_treatment").value] }
             const form = formset.createForm(values);
             form.setValues(values);
-            treatmentController.addTreatment(form)
+            treatmentController.addTreatment(form, values)
         })
     })
 

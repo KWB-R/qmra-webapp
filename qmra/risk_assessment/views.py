@@ -23,6 +23,9 @@ from django.db import transaction
 def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_form):
     risk_assessment = risk_assessment_form.save(commit=False)
     risk_assessment.user = user
+    with_same_name = RiskAssessment.objects.filter(user=user, name=risk_assessment.name).first()
+    if with_same_name is not None and risk_assessment.id != with_same_name.id is not None:
+        risk_assessment.name = risk_assessment.name + " (2)"
     risk_assessment.save()
     inflows = inflow_form.save(commit=False)
     for deleted in inflow_form.deleted_forms:

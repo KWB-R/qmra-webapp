@@ -1,18 +1,17 @@
 {% load static %}
 <script type="application/json" src="{% static 'data/default-pathogens.json' %}"></script>
 <script type="application/json" src="{% static 'data/default-sources.json' %}"></script>
-<script type="application/json" src="{% static 'data/default-inflows.json' %}"></script>
 <script type="text/javascript">
 
-    // name: , key: , selector: , getter: (elem) , setter: (elem, value), [disabled: ], 
+    // name: , key: , selector: , getter: (elem) , setter: (elem, value), [disabled: ],
 
     class InflowForm {
         fields = {
             pathogen_name: {selector: "select", getter: elem => elem.value, setter: (elem, x) => {return}},
             min: {selector: "input[id*=min]", getter: elem => elem.value, setter: (elem, x) => {
                 elem.value = x;
-                const y = parseFloat(x);
-                var step = "1";
+                const y = parseFloat(x.toFixed(4));
+                var step = "any";
                 if (y < 1 && y > 0){
                     step = "."+"0".repeat(-Math.floor(Math.log(y)/Math.log(10))-1)+"1";
                    }
@@ -20,10 +19,11 @@
                 }},
             max: {selector: "input[id*=max]", getter: elem => elem.value, setter: (elem, x) => {
                 elem.value = x;
-                const y = parseFloat(x);
-                var step = "1";
-                if (y < 1 && y > 0)
-                step = "."+"0".repeat(-Math.floor(Math.log(y)/Math.log(10))-1)+"1";
+                const y = parseFloat(x.toFixed(4));
+                var step = "any";
+                if (y < 1 && y > 0){
+                    step = "."+"0".repeat(-Math.floor(Math.log(y)/Math.log(10))-1)+"1";
+                }
                 elem.step = step;
                 }}
         }
@@ -139,10 +139,8 @@
             this.form = form
             this.plot = plot
         }
-        
+
     }
-</script>
-<script type="text/javascript">
     let defaultSources = null;
     let defaultInflows = null;
     let inflowsFormset = null;
@@ -153,21 +151,40 @@
         }
         return {inflows: []};
     };
+    function getSourceInfo(){
+        return document.querySelector("div[id=source-info]");
+    }
+    function setSourceInfoValues(sourceInfo, values, references){
+        sourceInfo.querySelector("#source-info-name").innerHTML = values.name;
+        const inflowTable = sourceInfo.querySelector("#source-info-inflows");
+        values.inflows.forEach(inflow => {
+            const pathogen = inflow.pathogen_name.split(" ")[0];
+            inflowTable.querySelector(`#${pathogen}-min-info`).innerHTML = inflow.min.toFixed(3);
+            inflowTable.querySelector(`#${pathogen}-max-info`).innerHTML = inflow.max.toFixed(3);
+        })
+        sourceInfo.querySelector("#source-info-description").innerHTML = values.description;
+        const ref = sourceInfo.querySelector("#source-info-reference");
+        ref.setAttribute("href", references[values.inflows[0].ReferenceID].ReferenceLink);
+        ref.innerHTML = references[values.inflows[0].ReferenceID].ReferenceName;
+    };
 
     document.addEventListener('DOMContentLoaded', async function () {
         defaultSources = await fetch("{% static 'data/default-sources.json' %}").then(resp => resp.json());
         defaultInflows = await fetch("{% static 'data/default-inflows.json' %}").then(resp => resp.json());
+        defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
+        const sourceInfo = getSourceInfo();
         let colors = ["hsl(229, 100, 44)", "hsl(229, 100, 66)", "hsl(229, 100, 88)"]
         const formset = new InflowsFormset();
         const plot = new InflowPlot("inflows-plot")
         const controller = new InflowController(formset, plot);
+        
         var ci = 0;
         for (let [k, v] of Object.entries(formset.forms)) {
             plot.traces[k] = new InflowTrace({...v.getValues(), color: colors[ci]})
             ci += 1;
             plot.data.push(plot.traces[k].data)
             for (let field of Object.keys(v.fields)){
-                v.bindCallback(field, newValue => { 
+                v.bindCallback(field, newValue => {
                     plot.traces[k].updates[field](newValue);
                     plot.update()
                 })
@@ -175,14 +192,20 @@
         }
         plot.update();
         // formset.getAllForms().map(f => controller.addInflowFromForm(f))
-
+        const loadedSource = document.querySelector("select[id*='source_name']").value;
+        if (loadedSource) {
+            setSourceInfoValues(sourceInfo, getSourceData(loadedSource), defaultReferences);
+        }
         document.querySelector("select[id*='source_name']")
             .addEventListener("change", function (evt) {
                 const data = getSourceData(evt.target.value);
                 for (let inflow of data.inflows){
                     formset.forms[inflow.pathogen_name].setValues(inflow);
                 }
+                setSourceInfoValues(sourceInfo, data, defaultReferences);
             });
     })
 
+</script>
+<script type="application/json" src="{% static 'data/default-inflows.json' %}"></script>
 </script>

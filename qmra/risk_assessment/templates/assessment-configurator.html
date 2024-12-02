@@ -3,29 +3,95 @@
 {% load static %}
 {% block body %}
 <div class="d-flex mt-3">
-        {% if user.is_authenticated %}
-        <form id="configurator" class="col-7"
-         action="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}" method="post">
-            <h4 class="ml-3">Risk assessment parameters</h4>
-            {% include "risk-assessment-form-fieldset.html" with risk_assessment_form=risk_assessment_form %}
-            {% include "inflows-form-fieldset.html" with inflow_form=inflow_form source_name_field=risk_assessment_form.source_name %}
-            {% include "treatments-form-fieldset.html" with treatment_form=treatment_form add_treatment_form=add_treatment_form %}
-            <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 1000">
-                <div class="col ">
-                    <input id="save-risk-assessment-btn" type="submit"
-                           class="btn btn-primary w-100 my-2" value="Save">
-                </div>
+    {% if user.is_authenticated %}
+    <form id="configurator" class="col-7"
+        action="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}"
+        method="post">
+        <h4 class="ml-3">Risk assessment parameters</h4>
+        {% include "risk-assessment-form-fieldset.html" with risk_assessment_form=risk_assessment_form %}
+        {% include "inflows-form-fieldset.html" with inflow_form=inflow_form source_name_field=risk_assessment_form.source_name %}
+        {% include "treatments-form-fieldset.html" with treatment_form=treatment_form add_treatment_form=add_treatment_form %}
+        <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 1000">
+            <div class="col ">
+                <input id="save-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2" value="Save">
+            </div>
         </div>
-        </form>
-            <div id="assessment-result"
-                 class="col mr-3"
-                 role="dialog">
+    </form>
+    <div class="w-100">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-toggle="tab" data-target="#assessment-result" type="button"
+                    role="tab" aria-controls="home" aria-selected="true">
+                    Result
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-toggle="tab" data-target="#info" type="button" role="tab"
+                    aria-controls="home" aria-selected="false">
+                    References
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-toggle="tab" data-target="#guide" type="button" role="tab"
+                    aria-controls="home" aria-selected="false">
+                    User guide
+                </button>
+            </li>
+        </ul>
+        <div class="w-100 tab-content" style="height: 100%; width: 100%">
+            <div id="assessment-result" class="w-100 tab-pane fade show active" role="dialog" style="height: 100%;">
+                <div class="col mr-3" style="height: 100%;">
                 <div id="show-result" class="col" style="position: sticky; top: 50%">
-                    <button id="assess-risk-btn" class="btn btn-outline-secondary w-100 m-2">Show assessment results</button>
+                    <button id="assess-risk-btn" class="btn btn-outline-secondary w-100 m-2">Show assessment
+                        results</button>
+                </div>
                 </div>
             </div>
-        <button id="show-result-modal" hidden data-toggle="modal" data-target="#assessment-result" data-show="true"></button>
-        {% endif %}
+            <div id="info" class="tab-pane fade mt-4" style="max-height: 100%">
+                <div id="exposure-info">
+                    <h4>Exposure: <span id="exposure-info-name"></span></h4>
+                    <div class="test-muted small mb-4" id="exposure-info-description"></div>
+                    <div class="mb-4" id="exposure-info-values"></div>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="exposure-info-reference" href=""></a></div>
+                </div>
+                <div id="source-info">
+                    <h4>Source water: <span id="source-info-name"></span></h4>
+                    <div class="test-muted small mb-4" id="source-info-description"></div>
+                    <div id="source-info-inflows">
+                        <table class="table small">
+                            <tr>
+                                <th>Pathogen</th>
+                                <th>Min. concentration<sup>[1]</sup></th>
+                                <th>Max. concentration<sup>[1]</sup></th>
+                            </tr>
+                            <tr>
+                                <td>Rotavirus</td>
+                                <td id="Rotavirus-min-info"></td>
+                                <td id="Rotavirus-max-info"></td>
+                            </tr>
+                            <tr>
+                                <td>Campylobacter jejuni</td>
+                                <td id="Campylobacter-min-info"></td>
+                                <td id="Campylobacter-max-info"></td>
+                            </tr>
+                            <tr>
+                                <td>Cryptosporidium parvum</td>
+                                <td id="Cryptosporidium-min-info"></td>
+                                <td id="Cryptosporidium-max-info"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="source-info-reference" href=""></a></div>
+                </div>
+                <div id="treatment-info">
+                    <h4>Treatments</h4>
+                </div>
+                <div class="test-muted small" id="treatments-info"></div>
+            </div>
+            <div id="guide" class="tab-pane fade"></div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 {% block script %}
@@ -40,26 +106,26 @@
             }
         })
         document.addEventListener("DOMContentLoaded", () => {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (true){
-            document.querySelector("#inflow-nav").setAttribute("hidden", "");
-            const inflowContent = document.querySelector("#inflow-content");
-            const clsList = inflowContent.classList;
-            clsList.remove("tab-content");
-            clsList.add("d-flex");
-            const inflowFieldset = document.querySelector("#inflows-formset-fieldset")
-            inflowFieldset.classList.remove("tab-pane")
-            const inflowPlotDiv = document.querySelector("#inflows-plot")
-            inflowPlotDiv.classList.remove("tab-pane")
-            const treatmentContent = document.querySelector("#treatment-content");
-            const clsList2 = treatmentContent.classList;
-            clsList2.remove("tab-content");
-            clsList2.add("d-flex");
-            const treatmentFieldset = document.querySelector("#treatments-formset-fieldset")
-            treatmentFieldset.classList.remove("tab-pane")
-            const treatmentPlotDiv = document.querySelector("#treatments-plot")
-            treatmentPlotDiv.classList.remove("tab-pane")
-        }
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (true) {
+                document.querySelector("#inflow-nav").setAttribute("hidden", "");
+                const inflowContent = document.querySelector("#inflow-content");
+                const clsList = inflowContent.classList;
+                clsList.remove("tab-content");
+                clsList.add("d-flex");
+                const inflowFieldset = document.querySelector("#inflows-formset-fieldset")
+                inflowFieldset.classList.remove("tab-pane")
+                const inflowPlotDiv = document.querySelector("#inflows-plot")
+                inflowPlotDiv.classList.remove("tab-pane")
+                const treatmentContent = document.querySelector("#treatment-content");
+                const clsList2 = treatmentContent.classList;
+                clsList2.remove("tab-content");
+                clsList2.add("d-flex");
+                const treatmentFieldset = document.querySelector("#treatments-formset-fieldset")
+                treatmentFieldset.classList.remove("tab-pane")
+                const treatmentPlotDiv = document.querySelector("#treatments-plot")
+                treatmentPlotDiv.classList.remove("tab-pane")
+            }
         })
     </script>
     <style type="text/css">
@@ -67,6 +133,7 @@
             margin: 16px 32px 0 50px;
             border-bottom: 0;
         }
+
         nav .nav-tabs button {
             border-bottom: 0;
             border-radius: 12px 12px 0 0;
@@ -80,56 +147,69 @@
             border: 1px solid #CECFFF;
             border-radius: 2px;
         }
+
         textarea#id_ra-description {
             max-height: 38px;
         }
-        .disabled-input{
+
+        .disabled-input {
             pointer-events: none;
             background: #e9ecef;
         }
+
         div[id*=inflow-n] label {
             display: none;
         }
-        div[id=inflow-n-0] label, div[id*=inflow-n] {
+
+        div[id=inflow-n-0] label,
+        div[id*=inflow-n] {
             display: initial;
         }
-        input[type="checkbox"]{
+
+        input[type="checkbox"] {
             -webkit-appearance: initial;
             appearance: initial;
             position: relative;
             width: 44px;
         }
+
         input[type="checkbox"]:checked {
             color: #721c24;
             background-color: #f8d7da;
         }
+
         input[type="checkbox"]:checked:after {
             content: "X";
             color: #000;
             position: absolute;
             left: 50%;
             top: 50%;
-            -webkit-transform: translate(-50%,-50%);
-            -moz-transform: translate(-50%,-50%);
-            -ms-transform: translate(-50%,-50%);
-            transform: translate(-50%,-50%);
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
         }
-        .custom-select:disabled, .input-group-append, .input-group-text {
+
+        .custom-select:disabled,
+        .input-group-append,
+        .input-group-text {
             background: #E4E5FF;
             border: 1px solid #CECFFF;
         }
+
         .custom-select {
             min-width: min-content;
         }
-        .input-group-text  {
+
+        .input-group-text {
             padding: 0 .75rem;
         }
+
         #configurator-commands {
             position: sticky;
             bottom: 10px;
             background: #F6F6FF;
         }
-
     </style>
     {% include "risk-assessment-form-js.html" %}
 </div>

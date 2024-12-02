@@ -78,24 +78,20 @@ class TestInflowFormset(TestCase):
 
 
 class TestTreatmentForm(TestCase):
-    def test_non_negative_constraints(self):
-        default_data = dict(
+    def test_that_negative_are_allowed(self):
+        data = dict(
             name="Primary treatment",
-            bacteria_min=0,
-            bacteria_max=0,
-            viruses_min=0,
-            viruses_max=0,
-            protozoa_min=0,
-            protozoa_max=0
+            bacteria_min=-2,
+            bacteria_max=-1,
+            viruses_min=-2,
+            viruses_max=-1,
+            protozoa_min=-2,
+            protozoa_max=-1
         )
-        for prfx in ["bacteria", "viruses", "protozoa"]:
-            for sfx in ["min", "max"]:
-                field = "_".join([prfx, sfx])
-                data = {**default_data, field: -1}
-                given_form = TreatmentForm(data=data)
-                given_form.full_clean()
-                assert_that(len(given_form.errors)).is_equal_to(1 + int(sfx == "max"))
-                assert_that(given_form.errors).contains_key(field)
+        given_form = TreatmentForm(data=data)
+        given_form.full_clean()
+        print(given_form.errors)
+        assert_that(len(given_form.errors)).is_equal_to(0)
 
     def test_that_min_needs_to_be_less_than_max(self):
         default_data = dict(

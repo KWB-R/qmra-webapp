@@ -24,27 +24,38 @@ def get_default_sources():
 
 def get_default_inflows():
     inflows = pd.read_csv("raw_public_data/tbl_inflow.csv", encoding="windows-1251")
+    inflows.ReferenceID = inflows.ReferenceID.astype(pd.StringDtype())
     pathogens = pd.read_csv("raw_public_data/tbl_pathogen.csv", encoding="windows-1251")
     sources = pd.read_csv("raw_public_data/tbl_waterSource.csv", encoding="windows-1251")
     inflows = pd.merge(inflows, sources, left_on="source_id", right_on="id", how="left").rename(columns={"name": "source_name"})
     inflows = pd.merge(inflows, pathogens, left_on="pathogen_id", right_on="id", how="left").rename(columns={"name": "pathogen_name"})
     inflows = inflows[inflows.pathogen_id.isin((3, 32, 34))]
-    return inflows.loc[:, ["source_name", "pathogen_name", "min", "max"]]
+    return inflows.loc[:, ["source_name", "pathogen_name", "min", "max", "ReferenceID"]]
 
 
 def get_default_treatments():
     treatments = pd.read_csv("raw_public_data/tbl_treatment.csv", encoding="windows-1251")
     logremovals = pd.read_csv("raw_public_data/tbl_logRemoval.csv", encoding="windows-1251")
-    logremovals = logremovals.loc[:, ["treatment_id", "min", "max", "pathogen_group"]]
+    logremovals.reference = logremovals.reference.astype(pd.StringDtype())
+    logremovals = logremovals.loc[:, ["treatment_id", "min", "max", "pathogen_group", "reference"]]
     for grp_name, grp in logremovals.groupby("pathogen_group"):
-        grp = grp.loc[:, ["treatment_id", "min", "max"]].rename(
-            columns=dict(treatment_id="id", min=f"{grp_name.lower()}_min", max=f"{grp_name.lower()}_max"))
+        grp = grp.loc[:, ["treatment_id", "min", "max", "reference"]].rename(
+            columns=dict(treatment_id="id",
+                         reference=f"{grp_name.lower()}_reference",
+                         min=f"{grp_name.lower()}_min",
+                         max=f"{grp_name.lower()}_max"))
         treatments = pd.merge(treatments, grp, on="id", how="outer")
     return treatments
 
 
 def get_default_exposures():
-    return pd.read_csv("raw_public_data/tbl_ingestion.csv", encoding="windows-1251")
+    exposures = pd.read_csv("raw_public_data/tbl_ingestion.csv", encoding="windows-1251")
+    exposures.ReferenceID = exposures.ReferenceID.astype(pd.Int16Dtype()).astype(pd.StringDtype())
+    return exposures
+
+
+def get_default_references():
+    return pd.read_csv("raw_public_data/tbl_reference.csv", encoding="windows-1251")
 
 
 def save_as_json(data: dict, destination: str):
@@ -71,6 +82,7 @@ class Command(BaseCommand):
         default_exposures = get_default_exposures()
         default_exposures = {d["name"]: d for d in default_exposures.replace({float("nan"): None}).to_dict(orient="records")}
         save_as_json(default_exposures, "qmra/static/data/default-exposures.json")
+        save_as_json({d["ReferenceID"]: d for d in get_default_references().to_dict(orient="records")}, "qmra/static/data/default-references.json")
 
 
 if __name__ == '__main__':
