@@ -34,7 +34,7 @@ class RiskAssessmentForm(forms.ModelForm):
         self.helper.form_tag = False
         self.helper.label_class = "text-muted small"
         self.helper.layout = Layout(
-            Row(Column("name"), Column("description")),
+            Row(Column("name"), Column("description"), css_id="name-and-description"),
             Row(Column("exposure_name"), Column("events_per_year"), Column("volume_per_event"), css_id="exposure-form-fieldset"),
             # Row("source_name", css_id="source-form")
         )

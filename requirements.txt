@@ -2,6 +2,7 @@ django-import-export
 numpy
 pandas
 plotly~=5.22.0
+kaleido==0.0.1 # required to save plotly figures as bytes
 django-crispy-forms~=2.1
 django-pandas
 crispy-bootstrap4

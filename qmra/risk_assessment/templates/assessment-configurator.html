@@ -11,7 +11,7 @@
         {% include "risk-assessment-form-fieldset.html" with risk_assessment_form=risk_assessment_form %}
         {% include "inflows-form-fieldset.html" with inflow_form=inflow_form source_name_field=risk_assessment_form.source_name %}
         {% include "treatments-form-fieldset.html" with treatment_form=treatment_form add_treatment_form=add_treatment_form %}
-        <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 1000">
+        <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 98">
             <div class="col ">
                 <input id="save-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2" value="Save">
             </div>
@@ -20,19 +20,19 @@
     <div class="w-100">
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active" data-toggle="tab" data-target="#assessment-result" type="button"
+                <button class="nav-link active" id="result-button" data-toggle="tab" data-target="#assessment-result" type="button"
                     role="tab" aria-controls="home" aria-selected="true">
                     Result
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-toggle="tab" data-target="#info" type="button" role="tab"
+                <button class="nav-link" id="references-button" data-toggle="tab" data-target="#info" type="button" role="tab"
                     aria-controls="home" aria-selected="false">
                     References
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-toggle="tab" data-target="#guide" type="button" role="tab"
+                <button id="start-user-guide" class="nav-link" data-toggle="tab" data-target="#guide" type="button" role="tab"
                     aria-controls="home" aria-selected="false">
                     User guide
                 </button>
@@ -96,6 +96,7 @@
 {% endblock %}
 {% block script %}
 <div>
+    {% include "guided-tour.html" %}
     <script type="text/javascript">
         document.addEventListener(`keypress`, evt => {
             const form = evt.target.closest(`#configurator`);

@@ -45,16 +45,31 @@
         </div>
         {% endif %}
     </div>
+    {% if risk_plot is not None %}
     <div id="hero-graph" class="mb-3">
         {% autoescape off %}
         {{ risk_plot }}
         {% endautoescape %}
     </div>
+    {% endif %}
+    {% if daly_plot is not None %}
     <div id="hero-graph" class="mb-3">
         {% autoescape off %}
         {{ daly_plot }}
         {% endautoescape %}
     </div>
+    {% endif %}
+    {% if risk_plot_data is not None %}
+    <div class="mb-3">
+        <img src="data:image/png;charset=utf-8;base64, {{risk_plot_data}}">
+    </div>
+    {% endif %}
+    {% if daly_plot_data is not None %}
+    <div class="mb-3">
+        <img src="data:image/png;charset=utf-8;base64, {{daly_plot_data}}">
+    </div>
+    {% endif %}
+
     <!-- <h4 style="text-align: center">Risk per pathogen</h4>
     <div class="w-50 m-auto">
     <table class="table">

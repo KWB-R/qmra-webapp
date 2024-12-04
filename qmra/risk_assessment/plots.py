@@ -26,7 +26,7 @@ NONE_COLOR_SEQ = [
 COLOR_SEQS = dict(min=MIN_COLOR_SEQ, max=MAX_COLOR_SEQ, none=NONE_COLOR_SEQ)
 
 
-def risk_plots(risk_assessment_results, risk_category="none"):
+def risk_plots(risk_assessment_results, output_type="div"):
     infection_prob_fig = go.Figure()
     dalys_fig = go.Figure()
     for i, r in enumerate(risk_assessment_results):
@@ -111,7 +111,7 @@ def risk_plots(risk_assessment_results, risk_category="none"):
     dalys_fig.update_traces(
         marker_size=8
     )
-
-    return plot(infection_prob_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False), \
-        plot(dalys_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)
-
+    if output_type == "div":
+        return plot(infection_prob_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False), \
+            plot(dalys_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)
+    return infection_prob_fig.to_image(format=output_type), dalys_fig.to_image(format=output_type)

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "head.html" %}
+<body>
+<div class="container">
+    {% include "assessment-result.html" with results=results infection_risk=infection_risk risk_plot_data=risk_plot_data daly_plot_data=daly_plot_data %}
+</div>
+</body>
+<style type="text/css">
+
+    .max-risk {
+      background: #FFECF4;
+      color: #FF0532;
+    }
+
+    .min-risk {
+      background: #FFDDB5;
+      color: #ED5500;
+    }
+
+    .none-risk {
+      background: #E2FBAC;
+      color: #088B3C;
+    }
+</style>
+</html>

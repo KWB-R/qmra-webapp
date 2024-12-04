@@ -1,8 +1,11 @@
+import io
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 
+from qmra.risk_assessment import exports
 from qmra.risk_assessment.forms import InflowFormSet, RiskAssessmentForm, TreatmentFormSet, AddTreatmentForm
 from qmra.risk_assessment.models import Inflow, RiskAssessment, Treatment
 from qmra.risk_assessment.plots import risk_plots
@@ -155,3 +158,18 @@ def risk_assessment_result(request):
                           context=dict(results=results,
                                        infection_risk=risk_assessment.infection_risk,
                                        risk_plot=plots[0], daly_plot=plots[1]))
+
+
+@login_required(login_url="/login")
+def export_risk_assessment(request, risk_assessment_id=None):
+    if risk_assessment_id is not None:
+        risk_assessment = RiskAssessment.objects.get(id=risk_assessment_id)
+        if not any(risk_assessment.results.all()):
+            risk_assessment = assess_and_save_results(risk_assessment)
+        response = HttpResponse(content_type="application/zip")
+        response["Content-Disposition"] = (
+                "attachment; filename=" + str(risk_assessment.name) + ".zip"
+        )
+        exports.risk_assessment_as_zip(response, risk_assessment)
+        return response
+    return HttpResponse(status=422)

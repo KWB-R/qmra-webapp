@@ -1,0 +1,57 @@
+<script type="text/javascript">
+        const steps = [
+        {
+            title: "Name and description",
+            content: "Before configuring your first QMRA model, give the risk assessment an informative name. It is also helpful to add some information on the scope and purpose of the risk assessment, for which you can use the provided text field. The text will be part of the final report, so you may adapt the level of detail to the target group of people, you want to share the report with. Don't worry, both can be adapted even after the model is configured.",
+            target: "#name-and-description",
+            order: 0
+        },
+        {
+            title: "Exposure",
+            content: "A QMRA model always contain an exposure assessment. Within exposure assessment the frequency of exposure is defined as the number of exposure events. The ingested volume defines the magnitude of exposure per event.\nWhen you select an exposure name, default values for the number of events and the volume per event will be set. You can modify these values as you wish.",
+            target: "#exposure-form-fieldset",
+            order: 1
+        },
+        {
+            title: "Source water and inflows",
+            content: "In this section you can define the type of source water and the concentrations of reference pathogens for your QMRA model. When you select a source water type, the app will fill default values for the reference pathogens Rotavirus, Cryptosporidium spp. and Campylobacter jejuni. Once again, you can modify these values as you wish.",
+            target: "#inflow-content",
+            order: 2
+        },
+        {
+            title: "Treatments",
+            content: "The last step of a QMRA model is the configuration of the planned or implemented treatment processes. Each treatment is associated with a certain logremoval value (LRV) for viruses, bacteria, and protozoan parasites, respectively. When you add a treatment to your model, it is initialized with default LRVs collected from international guideline documents. Note, however, that the most reliable results may be achieved by providing locally obtained removal rates. Note also that treatments can be non-technical barriers or contain negative LRV for simulating recontamination.",
+            target: "#treatment-content",
+            order: 3
+        },
+        {
+            title: "Results",
+            content: "Clicking on this tab will allow you to display the result of your risk assessment.",
+            target: "#result-button",
+            order: 4
+        },
+        {
+            title: "Save",
+            content: "Once the parameters for the exposure and the inflows are set (an assessment can contain zero or more treatments), you can save your risk assessment. This will take you to your list of risk assessment where you can compare multiple scenarios to each other and export assessments as zip archives.",
+            target: "#configurator-commands",
+            order: 5
+        },
+        {
+            title: "References",
+            content: "You can inspect the references for the default values of the elements you selected (exposure, source water, treatments) by clicking on this tab. Note that any change you made to the default values will not be reflected in this section.",
+            target: "#references-button",
+            order: 6
+        },
+        ];
+        document.addEventListener("DOMContentLoaded", () => {
+            const tg = new tourguide.TourGuideClient({
+                steps: steps
+            })
+            tg.onAfterExit(() => {
+                document.querySelector("#result-button").click();
+            })
+            document.querySelector("#start-user-guide").addEventListener("click", ev => {
+                tg.start();
+            })
+        })
+</script>

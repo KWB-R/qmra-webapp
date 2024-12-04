@@ -24,6 +24,11 @@ urlpatterns = [
         name="assessment-result",
     ),
     path(
+        "assessment/<uuid:risk_assessment_id>/export",
+        views.export_risk_assessment,
+        name="assessment-export",
+    ),
+    path(
         "assessment/results",
         views.risk_assessment_result,
         name="assessment-result",
