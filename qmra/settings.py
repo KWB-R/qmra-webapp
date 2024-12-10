@@ -174,8 +174,7 @@ LOGGING = {
     },
     "loggers": {
         "django_structlog": {
-            "handlers": ["json_err"] if os.getenv("DOMAIN_NAME", False)
-            else ["console_out", "console_err"],
+            "handlers": ["console_out", "console_err"],
             "level": "INFO",
             'propagate': False,
         }

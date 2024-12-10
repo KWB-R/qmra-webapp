@@ -3,7 +3,6 @@
 {% load static %}
 {% block body %}
 <div class="d-flex mt-3">
-    {% if user.is_authenticated %}
     <form id="configurator" class="col-7"
         action="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}"
         method="post">
@@ -11,11 +10,13 @@
         {% include "risk-assessment-form-fieldset.html" with risk_assessment_form=risk_assessment_form %}
         {% include "inflows-form-fieldset.html" with inflow_form=inflow_form source_name_field=risk_assessment_form.source_name %}
         {% include "treatments-form-fieldset.html" with treatment_form=treatment_form add_treatment_form=add_treatment_form %}
+        {% if request.user.is_authenticated %}
         <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 98">
             <div class="col ">
                 <input id="save-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2" value="Save">
             </div>
         </div>
+        {% endif %}
     </form>
     <div class="w-100">
         <ul class="nav nav-tabs" role="tablist">
@@ -91,7 +92,6 @@
             <div id="guide" class="tab-pane fade"></div>
         </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 {% block script %}

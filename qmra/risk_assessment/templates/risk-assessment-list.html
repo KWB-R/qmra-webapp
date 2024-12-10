@@ -77,10 +77,10 @@
             </div>
         </div>
         <div style="height: 21px; display: flex; margin-left: auto; line-height: 0 !important">
-            <a class="mr-1" href="{% url 'assessment-export' assessment.id %}" style="line-height: 1.25;">ZIP</a>
             <label class="text-muted small form-inline mb-0 mr-1">compare </label>
             <input type="checkbox" class="select-assessment-btn mr-2" value="{{assessment.id}}"
                 style="width: 20px; height: 20px">
+            <a class="mr-1" href="{% url 'assessment-export' assessment.id %}"><img src="{% static 'img/download.svg' %}"></a>
             <a class="mr-1" href="{% url 'assessment' assessment.id %}">
                 <img src="{% static 'img/pen.svg' %}">
             </a>

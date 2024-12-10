@@ -60,8 +60,19 @@ def list_risk_assessment_view(request):
                   context=dict(assessments=request.user.risk_assessments.order_by("-created_at").all()))
 
 
-@login_required(login_url="/login")
+# @login_required(login_url="/login")
 def risk_assessment_view(request, risk_assessment_id=None):
+    if not request.user.is_authenticated:
+        # free trial, no save button
+        return render(request, "assessment-configurator.html",
+                      context=dict(
+                          risk_assessment_form=RiskAssessmentForm(
+                              prefix="ra",
+                              initial=dict(name=f"Assessment")),
+                          inflow_form=InflowFormSet(queryset=Inflow.objects.none(), prefix="inflow"),
+                          add_treatment_form=AddTreatmentForm(),
+                          treatment_form=TreatmentFormSet(prefix="treatments")
+                      ))
     if request.method == "POST":
         if risk_assessment_id is not None:
             instance = RiskAssessment.objects.get(id=risk_assessment_id)
@@ -118,7 +129,7 @@ def risk_assessment_view(request, risk_assessment_id=None):
                   ))
 
 
-@login_required(login_url="/login")
+# @login_required(login_url="/login")
 def risk_assessment_result(request):
     if request.method == "POST":
         risk_assessment_form = RiskAssessmentForm(request.POST, instance=None, prefix="ra")
@@ -136,7 +147,7 @@ def risk_assessment_result(request):
                                   treatments, save=False)
             risks = {r.infection_risk for r in results.values()}
             risk_category = 'max' if 'max' in risks else ("min" if 'min' in risks else 'none')
-            plots = risk_plots(results.values(), risk_category)
+            plots = risk_plots(results.values())
             return render(request, "assessment-result.html",
                           context=dict(results=results.values(),
                                        infection_risk=risk_category,
@@ -153,7 +164,7 @@ def risk_assessment_result(request):
             if not any(risk_assessment.results.all()):
                 risk_assessment = assess_and_save_results(risk_assessment)
             results = risk_assessment.results.all()
-            plots = risk_plots(results, risk_assessment.infection_risk)
+            plots = risk_plots(results)
             return render(request, "assessment-result.html",
                           context=dict(results=results,
                                        infection_risk=risk_assessment.infection_risk,

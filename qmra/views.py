@@ -11,7 +11,7 @@ def index(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse("assessments"))
     else:
-        return HttpResponseRedirect(reverse("login"))
+        return render(request, "index.html")
 
 
 def dsgvo(request):

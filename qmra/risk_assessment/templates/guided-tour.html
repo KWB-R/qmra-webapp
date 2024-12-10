@@ -31,17 +31,19 @@
             order: 4
         },
         {
+            title: "References",
+            content: "You can inspect the references for the default values of the elements you selected (exposure, source water, treatments) by clicking on this tab. Note that any change you made to the default values will not be reflected in this section.",
+            target: "#references-button",
+            order: 5
+        },
+        {% if request.user.is_authenticated %}
+        {
             title: "Save",
             content: "Once the parameters for the exposure and the inflows are set (an assessment can contain zero or more treatments), you can save your risk assessment. This will take you to your list of risk assessment where you can compare multiple scenarios to each other and export assessments as zip archives.",
             target: "#configurator-commands",
             order: 5
-        },
-        {
-            title: "References",
-            content: "You can inspect the references for the default values of the elements you selected (exposure, source water, treatments) by clicking on this tab. Note that any change you made to the default values will not be reflected in this section.",
-            target: "#references-button",
-            order: 6
-        },
+        }
+        {% endif %}
         ];
         document.addEventListener("DOMContentLoaded", () => {
             const tg = new tourguide.TourGuideClient({
