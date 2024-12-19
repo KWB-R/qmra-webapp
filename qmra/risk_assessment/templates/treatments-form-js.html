@@ -71,7 +71,7 @@
             var innerHTML = `
             <div class='pr-2 mt-2' ${isValid ? "id='summary-" + values.id + "'" : ""} style='position: relative; display: flex; height: 42px; min-width: 100%; ${isValid ? "" : "border: solid 2px var(--danger);"}'>
                 <button id='focus-${values.id}' class='btn btn-secondary text-truncate w-100'>${values.name}</button>
-                <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 1000;'><img src='/static/img/close.svg'></button>
+                <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 90;'><img src='/static/img/close.svg'></button>
             </div>
             `.trim();
             if (!isValid) {
