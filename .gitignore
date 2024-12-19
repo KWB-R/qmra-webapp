@@ -2,6 +2,7 @@
 __pycache__/
 venv/
 .idea
+.static
 qmra.db
 qmra-prod.db
 dump*

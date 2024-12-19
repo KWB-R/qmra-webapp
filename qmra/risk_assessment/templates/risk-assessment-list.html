@@ -29,7 +29,13 @@
             </div>
         </div>
     </div>
-    <div class="row commands w-100" style="z-index: 1000;">
+    <div class="row">
+        <div class="col my-3">
+            <div id="textIntroduction"></div>
+            <a href="#" id="toggleIntroduction" onclick="toggleText()"></a>
+        </div>
+    </div>
+    <div class="row commands w-100" style="z-index: 1000; height: 80px">
         <div class="col">
             <a class="btn btn-outline-primary mt-3 w-100" href="{%url 'assessment'%}">
                 Create new risk assessment
@@ -44,7 +50,7 @@
     <button id="show-comparison-btn" hidden data-toggle="modal" data-target="#comparison-modal"
         data-show="true"></button>
     {% if user.is_authenticated %}
-    <h4 class="mb-5 mt-2 kwb_headline text-center"> My Risk Assessments</h4>
+    <h4 class="my-3 kwb_headline text-center" style="height:60px"> My Risk Assessments</h4>
     {%for assessment in assessments%}
 
     <button id="show-result-{{assessment.id}}" hidden data-toggle="modal"
@@ -113,6 +119,42 @@
     }
 </style>
 <script type="text/javascript">
+    var status = {% if assessments %} "more" {% else %} "less" {% endif %};
+
+    function toggleText()
+    {
+        const less="Welcome to the QMRA Tool for Water Reuse!</br>";
+        const more = `Welcome to the QMRA Tool for Water Reuse</br>
+                This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
+                context of water reuse. Whether you're evaluating the safety of treated wastewater or other reclaimed
+                water sources, this tool helps you assess potential health risks associated with microbial contaminants.</br>
+                </br>
+                Free and User-Friendly</br>
+                </br>
+                Our QMRA tool is completely free to use, offering you a powerful resource to assess microbial risks in
+                water reuse schemes. You can use the tool without logging in, making it quick and easy to get started.</br>
+                </br>
+                Enhanced Features for Registered Users</br>
+                </br>
+                Now that you have an account, you can:
+            <ul>
+                <li>Save Your Assessments: Store your risk assessments for future reference.</li>
+                <li>Compare Results: Analyze and compare multiple risk assessments side by side.</li>
+                <li>Export Options: Download and share your results in convenient formats.</li>
+            </ul>`
+
+        if (status == "less") {
+            document.getElementById("textIntroduction").innerHTML = more;
+            document.getElementById("toggleIntroduction").innerText = "Show Less";
+            status = "more";
+        } else if (status == "more") {
+            document.getElementById("textIntroduction").innerHTML = less;
+            document.getElementById("toggleIntroduction").innerText = "Show More";
+            status = "less";
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function(){ toggleText()});
+
     const colors = [['hsl(239, 100, 44)'], ['hsl(149, 90, 33)'], ['hsl(330, 100, 45)']];
     var [l1, l2, l3] = [44, 33, 45];
     for (let i of Array(6).keys()) {

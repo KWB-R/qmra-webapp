@@ -9,28 +9,53 @@
 <div class="container" style="padding: 5%">
     <div class="row">
         <div class="col">
-            <img src="{% static 'img/qmra-full-logo.svg' %}">
-            <p class="mt-4">Try out without registering</p>
-            <a class="btn btn-primary" href="{% url 'assessment' %}" >Try out</a>
-
-            <p class="mt-4">or enter your username and password to login</p>
-            <form action="{% url 'login' %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <input autofocus class="form-control" type="text" name="username" placeholder="Username">
-                </div>
-                <div class="form-group">
-                    <input class="form-control" type="password" name="password" placeholder="Password">
-                </div>
-                <input class="btn btn-primary" type="submit" value="Login">
-            </form>
-            <div class="my-1">Don't have an account? <a class="text_link_kwb" href="{% url 'register' %}">Register
-                here.</a></div>
-            <div class="my-1">Forgot password? <a class="text_link_kwb" href="{% url 'password_reset' %}">Reset here</a>
+            <div>
+                <img src="{% static 'img/qmra-full-logo.svg' %}">
             </div>
-        </div>
-        <div class="col-sm-5 offset-sm-1">
-            <img class="img-fluid" src="/static/qmratool/img/QMRA-1.png" alt="...">
+            <a class="btn btn-primary" href="{% url 'assessment' %}">Try out</a>
+            <p class="mt-4">
+                Welcome to the QMRA Tool for Water Reuse</br>
+                This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
+                context of water reuse. Whether you're evaluating the safety of treated wastewater or other reclaimed
+                water sources, this tool helps you assess potential health risks associated with microbial contaminants.</br>
+                </br>
+                Free and User-Friendly</br>
+                </br>
+                Our QMRA tool is completely free to use, offering you a powerful resource to assess microbial risks in
+                water reuse schemes. You can use the tool without logging in, making it quick and easy to get started.</br>
+                </br>
+                Enhanced Features for Registered Users</br>
+                </br>
+                If you choose to log in, you'll unlock additional features that enhance your experience:
+            <ul>
+                <li>Save Your Assessments: Store your risk assessments for future reference.</li>
+                <li>Compare Results: Analyze and compare multiple risk assessments side by side.</li>
+                <li>Export Options: Download and share your results in convenient formats.</li>
+            </ul>
+            With or without an account, this tool provides robust risk estimations. Let's get started on your risk
+            assessment journey!
+            </p>
+            <div class="row">
+                <div class="col-4">
+
+                    <p class="mt-4">If you already have an account, enter your username and password to login</p>
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input autofocus class="form-control" type="text" name="username" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" type="password" name="password" placeholder="Password">
+                        </div>
+                        <input class="btn btn-primary" type="submit" value="Login">
+                    </form>
+                    <div class="my-1">Don't have an account? <a class="text_link_kwb" href="{% url 'register' %}">Register
+                        here.</a></div>
+                    <div class="my-1">Forgot password? <a class="text_link_kwb" href="{% url 'password_reset' %}">Reset
+                        here</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -1,47 +1,35 @@
 <script type="text/javascript">
         const steps = [
         {
-            title: "Name and description",
-            content: "Before configuring your first QMRA model, give the risk assessment an informative name. It is also helpful to add some information on the scope and purpose of the risk assessment, for which you can use the provided text field. The text will be part of the final report, so you may adapt the level of detail to the target group of people, you want to share the report with. Don't worry, both can be adapted even after the model is configured.",
+            title: "Step 1: Name and description",
+            content: "Begin by giving your risk assessment an informative name that clearly reflects the focus of your risk assessment. Additionally, provide a brief description that outlines the scope and purpose of the assessment. Use the provided text box to add as much detail as necessary, keeping in mind that this text will be included in the final report. You can tailor the level of detail to match the needs of your target audience. Don’t worry—both the name and description can be adjusted later, even after the risk assessment has been configured.",
             target: "#name-and-description",
             order: 0
         },
         {
-            title: "Exposure",
-            content: "A QMRA model always contain an exposure assessment. Within exposure assessment the frequency of exposure is defined as the number of exposure events. The ingested volume defines the magnitude of exposure per event.\nWhen you select an exposure name, default values for the number of events and the volume per event will be set. You can modify these values as you wish.",
+            title: "Step 2: Exposure",
+            content: "Now, conduct the exposure assessment. In this step, you'll define how the treated water will be used, which determines the potential exposure risk to humans. This is the starting point of your risk assessment. For a number of common use cases, the frequency of exposure (the number of exposure events) and the volume ingested per event, which together characterize the magnitude of exposure, are provided based on literature data. You also have the option to create a custom exposure scenario. Simply add your own values for “events per year” and “volume per event in liters” for any of the exposures. Safe the risk assessment if you want to get back to your custom exposure assessment later on.",
             target: "#exposure-form-fieldset",
             order: 1
         },
         {
-            title: "Source water and inflows",
-            content: "In this section you can define the type of source water and the concentrations of reference pathogens for your QMRA model. When you select a source water type, the app will fill default values for the reference pathogens Rotavirus, Cryptosporidium spp. and Campylobacter jejuni. Once again, you can modify these values as you wish.",
+            title: "Step 3: Source",
+            content: "Next, define the source water concentration of pathogens by selecting one of the source waters provided. The QMRA tool offers default values for key reference pathogens such as <em>Rotavirus</em>, <em>Cryptosporidium parvum</em>, and <em>Campylobacter jejuni</em>, for a number of common source waters, that are based on established literature data. If you prefer, you can customize this step by defining your own source water. Simply add you own minimum and maximum concentrations for <em>Rotavirus</em>, <em>Cryptosporidium parvum</em> and <em>Campylobacter jejuni</em>.",
             target: "#inflow-content",
             order: 2
         },
         {
-            title: "Treatments",
-            content: "The last step of a QMRA model is the configuration of the planned or implemented treatment processes. Each treatment is associated with a certain logremoval value (LRV) for viruses, bacteria, and protozoan parasites, respectively. When you add a treatment to your model, it is initialized with default LRVs collected from international guideline documents. Note, however, that the most reliable results may be achieved by providing locally obtained removal rates. Note also that treatments can be non-technical barriers or contain negative LRV for simulating recontamination.",
+            title: "Step 4: Treatment",
+            content: "Finally, select the treatment processes that have been planned or are currently implemented in your system to complete your risk assessment. Each treatment option is associated with a specific Log Removal Value (LRV) for viruses, bacteria, and protozoan parasites. The QMRA tool includes a range of default LRVs derived from international guidance documents for both wastewater and drinking water technologies. For the most accurate results, consider using locally obtained removal values. The tool is highly customizable, allowing you to add your own treatments by clicking on “My Treatments” in the navigation bar, include non-technical barriers (e.g. hygiene practices), or even apply a negative LRV to simulate recontamination scenarios.",
             target: "#treatment-content",
             order: 3
-        },
-        {
-            title: "Results",
-            content: "Clicking on this tab will allow you to display the result of your risk assessment.",
-            target: "#result-button",
-            order: 4
-        },
-        {
-            title: "References",
-            content: "You can inspect the references for the default values of the elements you selected (exposure, source water, treatments) by clicking on this tab. Note that any change you made to the default values will not be reflected in this section.",
-            target: "#references-button",
-            order: 5
         },
         {% if request.user.is_authenticated %}
         {
             title: "Save",
-            content: "Once the parameters for the exposure and the inflows are set (an assessment can contain zero or more treatments), you can save your risk assessment. This will take you to your list of risk assessment where you can compare multiple scenarios to each other and export assessments as zip archives.",
+            content: "Once the parameters for the exposure and the source water are set (an assessment can contain zero or more treatments), you can save your risk assessment. This will take you to your list of risk assessment where you can compare multiple scenarios to each other and export assessments as zip archives.",
             target: "#configurator-commands",
-            order: 5
+            order: 4
         }
         {% endif %}
         ];
