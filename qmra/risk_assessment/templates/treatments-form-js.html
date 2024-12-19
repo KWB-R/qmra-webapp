@@ -324,6 +324,10 @@
                     const bacteria_ref = this.references[treatment.bacteria_reference]
                     const protozoa_ref = this.references[treatment.protozoa_reference]
                     uniques.add(treatment.name)
+                    const ref = virus_ref === undefined ?
+                        bacteria_ref === undefined ? protozoa_ref === undefined ? "#" : protozoa_ref : bacteria_ref : virus_ref
+                    const link = ref.ReferenceLink;
+                    const name = ref.ReferenceName;
                     inner += `<li>
                     <h5>${treatment.name}</h5>
                     <div class="text-muted small mb-4">${treatment.description}</div>
@@ -335,22 +339,22 @@
                         </tr>
                         <tr>
                             <td>Viruses</td>
-                            <td>${treatment.viruses_min}</td>
-                            <td>${treatment.viruses_max}</td>
+                            <td>${treatment.viruses_min === null ? 'NA' : treatment.viruses_min}</td>
+                            <td>${treatment.viruses_max === null ? 'NA' : treatment.viruses_max}</td>
                         </tr>
                         <tr>
                             <td>Bacteria</td>
-                            <td>${treatment.bacteria_min}</td>
-                            <td>${treatment.bacteria_max}</td>
+                            <td>${treatment.bacteria_min === null ? 'NA' : treatment.bacteria_min}</td>
+                            <td>${treatment.bacteria_max === null ? 'NA' : treatment.bacteria_max}</td>
                         </tr>
                         <tr>
                             <td>Protozoa</td>
-                            <td>${treatment.protozoa_min}</td>
-                            <td>${treatment.protozoa_max}</td>
+                            <td>${treatment.protozoa_min === null ? 'NA' : treatment.protozoa_min}</td>
+                            <td>${treatment.protozoa_max === null ? 'NA' : treatment.protozoa_max}</td>
                         </tr>
                         
                     </table>
-                    <div class="small"><sup>[1]</sup>values taken from <a href="${virus_ref.ReferenceLink}">${virus_ref.ReferenceName}</a></p>
+                    <div class="small"><sup>[1]</sup>values taken from <a href="${link}">${name}</a></p>
                     </li>
                     `
                 }

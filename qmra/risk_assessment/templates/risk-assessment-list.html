@@ -124,24 +124,23 @@
     function toggleText()
     {
         const less="Welcome to the QMRA Tool for Water Reuse!</br>";
-        const more = `Welcome to the QMRA Tool for Water Reuse</br>
-                This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
+        const more = `<p class="mt-4">
+                <h5>Welcome to the QMRA Tool for Water Reuse</h5>
+                <p>This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
                 context of water reuse. Whether you're evaluating the safety of treated wastewater or other reclaimed
-                water sources, this tool helps you assess potential health risks associated with microbial contaminants.</br>
-                </br>
-                Free and User-Friendly</br>
-                </br>
-                Our QMRA tool is completely free to use, offering you a powerful resource to assess microbial risks in
-                water reuse schemes. You can use the tool without logging in, making it quick and easy to get started.</br>
-                </br>
-                Enhanced Features for Registered Users</br>
-                </br>
-                Now that you have an account, you can:
+                    water sources, this tool helps you assess potential health risks associated with microbial contaminants.</p>
+                <h5>Free and User-Friendly</h5>
+                <p>Our QMRA tool is completely free to use, offering you a powerful resource to assess microbial risks in
+                    water reuse schemes. You can use the tool without logging in, making it quick and easy to get started.</p>
+                <h5>Enhanced Features for Registered Users</h5>
+                <p>Now that you have an account, you can:
             <ul>
                 <li>Save Your Assessments: Store your risk assessments for future reference.</li>
                 <li>Compare Results: Analyze and compare multiple risk assessments side by side.</li>
                 <li>Export Options: Download and share your results in convenient formats.</li>
-            </ul>`
+            </ul>
+            Let's get started on your risk assessment journey!</p>
+            </p>`
 
         if (status == "less") {
             document.getElementById("textIntroduction").innerHTML = more;
