@@ -42,7 +42,7 @@
             </a>
         </div>
         <div class="col">
-            <button class="btn btn-outline-secondary mt-3 w-100" id="compare-btn">
+            <button class="btn btn-outline-primary mt-3 w-100" id="compare-btn">
                 Compare selected assessments
             </button>
         </div>
@@ -67,7 +67,7 @@
                 <img src="{% static 'img/ra.svg' %}">
             </div>
         </div>
-        <div class="media-body assessment-summary" id="assessment-summary-{{assessment.id}}"
+        <div data-toggle="tooltip" title="click to show results" class="media-body assessment-summary" id="assessment-summary-{{assessment.id}}"
             data-assessment-id="{{assessment.id}}" style="">
             <h4 class="media-heading text-truncate kwb_headline">
                 {{assessment.name|title}}&nbsp
@@ -84,13 +84,13 @@
         </div>
         <div style="height: 21px; display: flex; margin-left: auto; line-height: 0 !important">
             <label class="text-muted small form-inline mb-0 mr-1">compare </label>
-            <input type="checkbox" class="select-assessment-btn mr-2" value="{{assessment.id}}"
+            <input data-toggle="tooltip" title="select for comparison" type="checkbox" class="select-assessment-btn mr-2" value="{{assessment.id}}"
                 style="width: 20px; height: 20px">
-            <a class="mr-1" href="{% url 'assessment-export' assessment.id %}"><img src="{% static 'img/download.svg' %}"></a>
-            <a class="mr-1" href="{% url 'assessment' assessment.id %}">
+            <a data-toggle="tooltip" title="download" class="mr-1" href="{% url 'assessment-export' assessment.id %}"><img src="{% static 'img/download.svg' %}"></a>
+            <a data-toggle="tooltip" title="edit" class="mr-1" href="{% url 'assessment' assessment.id %}">
                 <img src="{% static 'img/pen.svg' %}">
             </a>
-            <label onclick="event.stopPropagation(); deleteAssessment('{{assessment.id}}')" style="cursor: pointer;">
+            <label data-toggle="tooltip" title="delete" onclick="event.stopPropagation(); deleteAssessment('{{assessment.id}}')" style="cursor: pointer;">
                 <input type="submit" hidden="hidden">
 
                 <img src="{% static 'img/close.svg' %}">
