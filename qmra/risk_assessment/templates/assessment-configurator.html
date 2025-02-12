@@ -4,8 +4,8 @@
 {% block body %}
 <div class="d-flex mt-3">
     <form id="configurator" class="col-7"
-        action="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}"
-        method="post">
+          action="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}"
+          method="post">
         <h4 class="ml-3">Risk assessment parameters</h4>
         {% include "risk-assessment-form-fieldset.html" with risk_assessment_form=risk_assessment_form %}
         {% include "inflows-form-fieldset.html" with inflow_form=inflow_form source_name_field=risk_assessment_form.source_name %}
@@ -21,31 +21,58 @@
     <div class="w-100">
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active" id="result-button" data-toggle="tab" data-target="#assessment-result" type="button"
-                    role="tab" aria-controls="home" aria-selected="true">
+                <button class="nav-link active" id="result-button" data-toggle="tab" data-target="#assessment-result"
+                        type="button"
+                        role="tab" aria-controls="home" aria-selected="true">
                     Result
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="references-button" data-toggle="tab" data-target="#info" type="button" role="tab"
-                    aria-controls="home" aria-selected="false">
+                <button class="nav-link" id="references-button" data-toggle="tab" data-target="#info" type="button"
+                        role="tab"
+                        aria-controls="home" aria-selected="false">
                     References
                 </button>
             </li>
             <li class="nav-item">
-                <button id="start-user-guide" class="nav-link" data-toggle="tab" data-target="#guide" type="button" role="tab"
-                    aria-controls="home" aria-selected="false">
+                <button id="start-user-guide" class="nav-link" data-toggle="tab" data-target="#guide" type="button"
+                        role="tab"
+                        aria-controls="home" aria-selected="false">
                     User guide
                 </button>
             </li>
+            {% if user_exposure_form is not None and user_source_form is not None and user_treatment_form is not None %}
+                <li class="nav-item">
+                    <button id="create-exposure-btn" class="nav-link" data-toggle="tab" data-target="#create-exposure" type="button"
+                            role="tab"
+                            aria-controls="home" aria-selected="false">
+                        New Exposure
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button id="create-source-btn" class="nav-link" data-toggle="tab" data-target="#create-source" type="button"
+                            role="tab"
+                            aria-controls="home" aria-selected="false">
+                        New Source
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button id="create-treatment-btn" class="nav-link" data-toggle="tab" data-target="#create-treatment" type="button"
+                            role="tab"
+                            aria-controls="home" aria-selected="false">
+                        New Treatment
+                    </button>
+                </li>
+            {% endif %}
         </ul>
         <div class="w-100 tab-content" style="height: 100%; width: 100%">
             <div id="assessment-result" class="w-100 tab-pane fade show active" role="dialog" style="height: 100%;">
                 <div class="col mr-3" style="height: 100%;">
-                <div id="show-result" class="col" style="position: sticky; top: 50%">
-                    <button id="assess-risk-btn" class="btn btn-outline-secondary w-100 m-2">Show assessment
-                        results</button>
-                </div>
+                    <div id="show-result" class="col" style="position: sticky; top: 50%">
+                        <button id="assess-risk-btn" class="btn btn-outline-secondary w-100 m-2">Show assessment
+                            results
+                        </button>
+                    </div>
                 </div>
             </div>
             <div id="info" class="tab-pane fade mt-4" style="max-height: 100%">
@@ -53,7 +80,8 @@
                     <h4>Exposure: <span id="exposure-info-name"></span></h4>
                     <div class="test-muted small mb-4" id="exposure-info-description"></div>
                     <div class="mb-4" id="exposure-info-values"></div>
-                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="exposure-info-reference" href=""></a></div>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="exposure-info-reference" href=""></a>
+                    </div>
                 </div>
                 <div id="source-info">
                     <h4>Source water: <span id="source-info-name"></span></h4>
@@ -82,14 +110,26 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="source-info-reference" href=""></a></div>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="source-info-reference" href=""></a>
+                    </div>
                 </div>
                 <div id="treatment-info">
                     <h4>Treatments</h4>
                 </div>
-                <div class="test-muted small" id="treatments-info"></div>
+                <div class="text-muted small" id="treatments-info"></div>
             </div>
             <div id="guide" class="tab-pane fade"></div>
+            {% if user_exposure_form is not None and user_source_form is not None and user_treatment_form is not None %}
+                <div id="create-exposure" class="tab-pane fade">
+                    {% crispy user_exposure_form %}
+                </div>
+                <div id="create-source" class="tab-pane fade">
+                    {% crispy user_source_form %}
+                </div>
+                <div id="create-treatment" class="tab-pane fade">
+                    {% crispy user_treatment_form %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -106,28 +146,41 @@
                 }
             }
         })
-        document.addEventListener("DOMContentLoaded", () => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (true) {
-                document.querySelector("#inflow-nav").setAttribute("hidden", "");
-                const inflowContent = document.querySelector("#inflow-content");
-                const clsList = inflowContent.classList;
-                clsList.remove("tab-content");
-                clsList.add("d-flex");
-                const inflowFieldset = document.querySelector("#inflows-formset-fieldset")
-                inflowFieldset.classList.remove("tab-pane")
-                const inflowPlotDiv = document.querySelector("#inflows-plot")
-                inflowPlotDiv.classList.remove("tab-pane")
-                const treatmentContent = document.querySelector("#treatment-content");
-                const clsList2 = treatmentContent.classList;
-                clsList2.remove("tab-content");
-                clsList2.add("d-flex");
-                const treatmentFieldset = document.querySelector("#treatments-formset-fieldset")
-                treatmentFieldset.classList.remove("tab-pane")
-                const treatmentPlotDiv = document.querySelector("#treatments-plot")
-                treatmentPlotDiv.classList.remove("tab-pane")
+        async function addSubmitHandler(form) {
+            function handleSubmit(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+                const frm = new FormData(form);
+                return fetch(form.action, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+                    mode: 'same-origin',
+                    body: frm
+                    }).then(r => {
+                        if (r.redirected) {
+                            window.location.href = r.url;
+                            return false;
+                        }
+                        return r.text();
+                    }).then(r => {
+                        if (r){ form.innerHTML = r; }
+                        return false;
+                    });
             }
+            form.querySelector("input[type=submit]").addEventListener("click", handleSubmit);
+            form.addEventListener("submit", function(){ return false; });
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const userExposureForm = document.querySelector("#user-exposure-form");
+            if (null !== userExposureForm) { addSubmitHandler(userExposureForm) }
+            const userSourceForm = document.querySelector("#user-source-form");
+            if (null !== userSourceForm) { addSubmitHandler(userSourceForm) }
+            const userTreatmentForm = document.querySelector("#user-treatment-form");
+            if (null !== userTreatmentForm) { addSubmitHandler(userTreatmentForm) };
         })
+
     </script>
     <style type="text/css">
         nav .nav-tabs {
@@ -147,6 +200,7 @@
             background: #F6F6FF;
             border: 1px solid #CECFFF;
             border-radius: 2px;
+            display: flex;
         }
 
         textarea#id_ra-description {

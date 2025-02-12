@@ -86,6 +86,7 @@
                 height: this.$div.clientHeight,
                 yaxis: {
                     type: 'log',
+                    exponentformat: "power",
                     autorange: true,
                     title: "Source water concentrations in N/L",
                 },
@@ -106,7 +107,6 @@
             this.config = {displayModeBar: false, responsive: true};
             this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
             window.addEventListener("resize", () => {
-                // console.log(this.$div.getBoundingClientRect().width)
                 Plotly.relayout(divId, {
                     // width: window.innerWidth*.75,
                     // height: window.innerHeight*.3333,
@@ -158,7 +158,9 @@
 
     document.addEventListener('DOMContentLoaded', async function () {
         defaultSources = await fetch("{% static 'data/default-sources.json' %}").then(resp => resp.json());
+        defaultSources = {...defaultSources, ...await fetch("{% url 'sources' %}").then(resp => resp.json())};
         defaultInflows = await fetch("{% static 'data/default-inflows.json' %}").then(resp => resp.json());
+        defaultInflows = {...defaultInflows, ...await fetch("{% url 'inflows' %}").then(resp => resp.json())};
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const sourceInfo = getSourceInfo();
         let colors = ["hsl(229, 100, 44)", "hsl(229, 100, 66)", "hsl(229, 100, 88)"]

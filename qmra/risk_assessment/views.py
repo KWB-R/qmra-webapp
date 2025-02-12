@@ -1,8 +1,10 @@
 import io
 
+from crispy_forms.utils import render_crispy_form
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.template.context_processors import csrf
 from django.urls import reverse
 
 from qmra.risk_assessment import exports
@@ -11,6 +13,10 @@ from qmra.risk_assessment.models import Inflow, RiskAssessment, Treatment
 from qmra.risk_assessment.plots import risk_plots
 from qmra.risk_assessment.risk import assess_risk
 from django.db import transaction
+
+from qmra.risk_assessment.user_models import UserExposureForm, UserTreatmentForm, UserSourceForm, UserExposure, \
+    UserSource, UserTreatment
+
 
 # - treatments categories
 # - calculator layout
@@ -99,19 +105,32 @@ def risk_assessment_view(request, risk_assessment_id=None):
             return render(request, "assessment-configurator.html",
                           context=dict(
                               risk_assessment=RiskAssessment.objects.get(id=risk_assessment_id) if risk_assessment_id is not None else None,
-                              risk_assessment_form=risk_assessment_form,
+                              risk_assessment_form=risk_assessment_form.set_user(request.user),
                               inflow_form=inflow_form,
-                              add_treatment_form=AddTreatmentForm(),
-                              treatment_form=treatment_form
+                              add_treatment_form=AddTreatmentForm().set_user(request.user),
+                              treatment_form=treatment_form.set_user(request.user),
+                              user_exposure_form=UserExposureForm(),
+                              user_source_form=UserSourceForm(),
+                              user_treatment_form=UserTreatmentForm(),
+                              user_exposures=UserExposure.objects.filter(user=request.user).all(),
+                              user_sources=UserSource.objects.filter(user=request.user).all(),
+                              user_treatments=UserTreatment.objects.filter(user=request.user).all(),
                           ))
     if risk_assessment_id is None:
         return render(request, "assessment-configurator.html",
                       context=dict(
                           risk_assessment_form=RiskAssessmentForm(
-                              prefix="ra", initial=dict(name=f"Assessment {len(request.user.risk_assessments.all())+1}")),
+                              prefix="ra", initial=dict(name=f"Assessment {len(request.user.risk_assessments.all())+1}")
+                          ).set_user(request.user),
                           inflow_form=InflowFormSet(queryset=Inflow.objects.none(), prefix="inflow"),
-                          add_treatment_form=AddTreatmentForm(),
-                          treatment_form=TreatmentFormSet(prefix="treatments")
+                          add_treatment_form=AddTreatmentForm().set_user(request.user),
+                          treatment_form=TreatmentFormSet(prefix="treatments").set_user(request.user),
+                          user_exposure_form=UserExposureForm(),
+                          user_source_form=UserSourceForm(),
+                          user_treatment_form=UserTreatmentForm(),
+                          user_exposures=UserExposure.objects.filter(user=request.user).all(),
+                          user_sources=UserSource.objects.filter(user=request.user).all(),
+                          user_treatments=UserTreatment.objects.filter(user=request.user).all(),
                       ))
     risk_assessment = RiskAssessment.objects.get(id=risk_assessment_id)
     if request.method == "DELETE":
@@ -122,10 +141,16 @@ def risk_assessment_view(request, risk_assessment_id=None):
     return render(request, "assessment-configurator.html",
                   context=dict(
                       risk_assessment=risk_assessment,
-                      risk_assessment_form=RiskAssessmentForm(instance=risk_assessment, prefix="ra"),
+                      risk_assessment_form=RiskAssessmentForm(instance=risk_assessment, prefix="ra").set_user(request.user),
                       inflow_form=InflowFormSet(queryset=risk_assessment.inflows.all(), prefix="inflow"),
-                      add_treatment_form=AddTreatmentForm(),
-                      treatment_form=TreatmentFormSet(queryset=risk_assessment.treatments.all(), prefix="treatments")
+                      add_treatment_form=AddTreatmentForm().set_user(request.user),
+                      treatment_form=TreatmentFormSet(queryset=risk_assessment.treatments.all(), prefix="treatments").set_user(request.user),
+                      user_exposure_form=UserExposureForm(),
+                      user_source_form=UserSourceForm(),
+                      user_treatment_form=UserTreatmentForm(),
+                      user_exposures=UserExposure.objects.filter(user=request.user).all(),
+                      user_sources=UserSource.objects.filter(user=request.user).all(),
+                      user_treatments=UserTreatment.objects.filter(user=request.user).all(),
                   ))
 
 
@@ -184,3 +209,91 @@ def export_risk_assessment(request, risk_assessment_id=None):
         exports.risk_assessment_as_zip(response, risk_assessment)
         return response
     return HttpResponse(status=422)
+
+
+@login_required(login_url="/login")
+def create_exposure(request):
+    if request.method == "POST":
+        exposure_form = UserExposureForm(request.POST)
+        if exposure_form.is_valid():
+            # handle duplicate names
+            if any(UserExposure.objects.filter(name=exposure_form.instance.name, user=request.user).all()):
+                exposure_form.add_error("name", "'name' must be unique. You already have an exposure with this name")
+                ctx = {}
+                ctx.update(csrf(request))
+                return HttpResponse(render_crispy_form(exposure_form, context=ctx), status=422)
+            exposure_form.instance.user = request.user
+            exposure_form.save(commit=True)
+            return HttpResponseRedirect(request.META["HTTP_REFERER"])
+        return HttpResponse(status=422)
+    return HttpResponse(status=404)
+
+
+@login_required(login_url="/login")
+def list_exposures(request):
+    return JsonResponse({e["name"]: e for e in UserExposure.objects.filter(user=request.user).values().all()})
+
+
+@login_required(login_url="/login")
+def create_source(request):
+    if request.method == "POST":
+        source_form = UserSourceForm(request.POST)
+        if source_form.is_valid():
+            # handle duplicate names
+            if any(UserExposure.objects.filter(name=source_form.instance.name, user=request.user).all()):
+                source_form.add_error("name", "'name' must be unique. You already have a source with this name")
+                ctx = {}
+                ctx.update(csrf(request))
+                return HttpResponse(render_crispy_form(source_form, context=ctx), status=422)
+            source_form.instance.user = request.user
+            source_form.save(commit=True)
+            return HttpResponseRedirect(request.META["HTTP_REFERER"])
+        return HttpResponse(status=422)
+    return HttpResponse(status=404)
+
+
+@login_required(login_url="/login")
+def list_sources(request):
+    return JsonResponse({s["name"]: s for s in UserSource.objects.filter(user=request.user).values().all()})
+
+
+@login_required(login_url="/login")
+def list_inflows(request):
+    return JsonResponse({s["name"]: [
+        dict(pathogen_name="Rotavirus", source_name=s["name"],
+             min=s["rotavirus_min"], max=s["rotavirus_max"],
+             referenceID=None
+             ),
+        dict(pathogen_name="Campylobacter jejuni", source_name=s["name"],
+             min=s["campylobacter_min"], max=s["campylobacter_max"],
+             referenceID=None
+             ),
+        dict(pathogen_name="Cryptosporidium parvum", source_name=s["name"],
+             min=s["cryptosporidium_min"], max=s["cryptosporidium_max"],
+             referenceID=None
+             ),
+    ] for s in UserSource.objects.filter(user=request.user).values().all()})
+
+
+@login_required(login_url="/login")
+def create_treatment(request):
+    if request.method == "POST":
+        treatment_form = UserTreatmentForm(request.POST)
+        if treatment_form.is_valid():
+            # handle duplicate names
+            if any(UserExposure.objects.filter(name=treatment_form.instance.name, user=request.user).all()):
+                treatment_form.add_error("name", "'name' must be unique. You already have a treatment with this name")
+                ctx = {}
+                ctx.update(csrf(request))
+                return HttpResponse(render_crispy_form(treatment_form, context=ctx), status=422)
+            treatment_form.instance.user = request.user
+            treatment_form.save(commit=True)
+            return HttpResponseRedirect(request.META["HTTP_REFERER"])
+        return HttpResponse(status=422)
+    return HttpResponse(status=404)
+
+
+@login_required(login_url="/login")
+def list_treatments(request):
+    return JsonResponse({t["name"]: {**t, "treatment_name": t["name"]}
+                         for t in UserTreatment.objects.filter(user=request.user).values().all()})

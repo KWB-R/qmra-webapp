@@ -7,6 +7,7 @@ from crispy_forms.layout import Layout, Field, Row, Column, HTML
 
 from qmra.risk_assessment.models import Inflow, DefaultTreatments, Treatment, \
     RiskAssessment
+from qmra.user.models import User
 
 
 def _zero_if_none(x): return x if x is not None else 0
@@ -27,7 +28,7 @@ class RiskAssessmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["source_name"].label = "Select a source water type to add pathogen concentrations"
-        self.fields['exposure_name'].widget.attrs['min'] = 0
+        self.fields['events_per_year'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].label = "Volume per event in liters"
         self.helper = FormHelper(self)
@@ -38,6 +39,17 @@ class RiskAssessmentForm(forms.ModelForm):
             Row(Column("exposure_name"), Column("events_per_year"), Column("volume_per_event"), css_id="exposure-form-fieldset"),
             # Row("source_name", css_id="source-form")
         )
+
+    def set_user(self, user: User):
+        self.fields["exposure_name"].widget.choices = [
+            ["Your Exposures", [(e.name, e.name) for e in user.exposures.all()]],
+            *self.fields["exposure_name"].widget.choices
+        ]
+        self.fields["source_name"].widget.choices = [
+            ["Your Sources", [(s.name, s.name) for s in user.sources.all()]],
+            *self.fields["source_name"].widget.choices
+        ]
+        return self
 
     def clean(self):
         cleaned_data = super().clean()
@@ -139,7 +151,7 @@ class TreatmentForm(forms.ModelForm):
         self.helper.form_tag = False
         self.helper.disable_csrf = True
         self.helper.label_class = "text-muted small"
-        self.fields['name'].choices = DefaultTreatments.choices()
+        # self.fields['name'].choices = DefaultTreatments.choices()
         self.fields['name'].label = ""
         self.fields['bacteria_min'].label = ""
         self.fields['bacteria_max'].label = ""
@@ -201,6 +213,13 @@ class AddTreatmentForm(forms.Form):
             "select_treatment",
         )
 
+    def set_user(self, user: User):
+        self.fields["select_treatment"].choices = [
+            *self.fields["select_treatment"].choices,
+            *[(t.name, t.name) for t in user.treatments.all()]
+        ]
+        return self
+
 
 class TreatmentFormSet(TreatmentFormSetBase):
 
@@ -210,3 +229,10 @@ class TreatmentFormSet(TreatmentFormSetBase):
         self.helper.form_tag = False
         if not kwargs.get("queryset", False):
             self.queryset = Treatment.objects.none()
+
+    def set_user(self, user: User):
+        self.form.base_fields["name"].choices = [
+            *self.form.base_fields['name'].choices,
+            *[(t.name, t.name) for t in user.treatments.all()]
+        ]
+        return self

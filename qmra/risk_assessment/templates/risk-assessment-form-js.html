@@ -78,6 +78,8 @@
 
     document.addEventListener('DOMContentLoaded', async function() {
         defaultExposures = await fetch("{% static 'data/default-exposures.json' %}").then(resp => resp.json());
+        defaultExposures = {...defaultExposures, ...await fetch("{% url 'exposures' %}").then(resp => resp.json())};
+
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         exposureForm = getExposureForm();
         exposureInfo = getExposureInfo();

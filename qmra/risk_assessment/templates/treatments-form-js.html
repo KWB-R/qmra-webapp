@@ -89,13 +89,16 @@
             const btn = this.$div.querySelector(`button[id=focus-${values.id}]`)
             btn.addEventListener("click", ev => {
                 ev.preventDefault();
-                // this.$div.querySelectorAll("button[id*=focus-]").forEach(b => b.classList.remove("active"))
-                // btn.classList.add("active", "focus");
+                this.$div.querySelectorAll("button[id*=focus-]").forEach(b => b.classList.remove("selected-treatment"))
+                btn.classList.add("selected-treatment");
                 onfocus();
             })
-            this.$div.querySelectorAll("button").forEach(b => b.classList.remove("focus"))
+            btn.addEventListener("focusout", ev => {
+                event.target.focus()
+            })
+            this.$div.querySelectorAll("button").forEach(b => b.classList.remove("selected-treatment"))
             btn.focus();
-            // btn.classList.add("focus");
+            btn.classList.add("selected-treatment");
             this.$div.querySelector(`#delete-${values.id}`).addEventListener("click", ev => {
                 ev.preventDefault();
                 this.$div.querySelector(`#summary-${values.id}`).remove();
@@ -195,6 +198,7 @@
                 height: this.$div.clientHeight,
                 yaxis: {
                     type: 'log',
+                    exponentformat: "power",
                     autorange: true,
                     title: "Logremoval of individual treatment steps",
                 },
@@ -370,6 +374,9 @@
 
     document.addEventListener('DOMContentLoaded', async function () {
         defaultTreatments = await fetch("{% static 'data/default-treatments.json' %}").then(resp => resp.json());
+        defaultTreatments = {...defaultTreatments, 
+            ...await fetch("{% url 'treatments' %}").then(resp => resp.json())
+        }
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const formset = new TreatmentFormset();
         const list = new TreatmentsList("selected-treatments");

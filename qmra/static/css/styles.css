@@ -2,6 +2,15 @@
     --kwb-blue: rgb(0, 3, 226);
     --kwb-lightblue: #B1B2FF;
     --primary: var(--kwb-blue);
+    --bla: #cc0025;
+    --bla: hsl(349, 100%, 60%);
+    --bla: hsl(349, 100%, 80%);
+    --bla: hsl(23, 100%, 62%);
+    --bla: #FFA570;
+    --bla: #ED5500;
+    --bla: #1B6638;
+    --bla: hsl(144, 39%, 45%);
+    --bla: hsl(144, 43%, 67%);
 }
 
 .info{
@@ -56,6 +65,11 @@ font-size: small;
 .btn-outline-secondary:focus, .btn-secondary:focus {
     box-shadow: 0 0 0 .2rem var(--kwb-blue) !important;
 }
+
+.selected-treatment {
+  box-shadow: 0 0 0 .2rem var(--kwb-blue) !important;
+}
+
 .custom-select {
     padding: .375rem .75rem;
 }

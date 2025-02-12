@@ -6,21 +6,22 @@ import pandas as pd
 RISK_CATEGORY_BG_COLORS = dict(
     none='#E2FBAC', min='#FFDDB5', max='#FFECF4'
 )
-MAX_COLOR_SEQ = ["#FF0532",
-                 "#FF506F",
-                 "#FF8DA2"
-                 ]
+MAX_COLOR_SEQ = [
+    "hsl(359, 100%, 40%)",
+    "hsl(359, 100%, 60%)",
+    "hsl(359, 100%, 80%)",
+]
 
 MIN_COLOR_SEQ = [
-    "#FF873F",
-    "#FFA570",
-    "#ED5500"
+    "hsl(23, 100%, 50%)",
+    "hsl(23, 100%, 70%)",
+    "hsl(23, 100%, 90%)",
 ]
 
 NONE_COLOR_SEQ = [
-    "#1B6638",
-    "#46A16A",
-    "#88D0A5"
+    "hsl(144, 100%, 40%)",
+    "hsl(144, 100%, 60%)",
+    "hsl(144, 100%, 80%)",
 ]
 
 COLOR_SEQS = dict(min=MIN_COLOR_SEQ, max=MAX_COLOR_SEQ, none=NONE_COLOR_SEQ)
@@ -40,6 +41,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             name=r.pathogen,
             marker=dict(color=COLOR_SEQS[r.infection_risk][i % 3])
         ))
+        # infection_prob_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
         dalys_fig.add_trace(go.Box(
             x=["Minimum LRV", "Maximum LRV"],
             lowerfence=[r.dalys_minimum_lrv_min, r.dalys_maximum_lrv_min],
@@ -50,6 +52,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             name=r.pathogen,
             marker=dict(color=COLOR_SEQS[r.dalys_risk][i % 3])
         ))
+        # dalys_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
 
     infection_prob_fig.update_layout(
         boxmode='group',
@@ -60,7 +63,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
         xaxis=dict(title="", showgrid=False),
         yaxis=dict(title="Probability of infection per year",
                    showgrid=False),
-        margin=dict(l=0, r=0, t=30, b=30),
+        margin=dict(l=(int(output_type == "png") * 30), r=(int(output_type == "png") * 30), t=30, b=30),
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -68,7 +71,10 @@ def risk_plots(risk_assessment_results, output_type="div"):
             x=0.5,
         )
     )
-    infection_prob_fig.update_yaxes(type="log")
+    infection_prob_fig.update_yaxes(type="log",
+                                    showexponent='all',
+                                    exponentformat='power'
+                                    )
     infection_prob_fig.add_hline(y=0.0001, line_dash="dashdot",
                                  label=dict(
                                      text="tolerable level",
@@ -90,7 +96,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
         plot_bgcolor="#F6F6FF",
         xaxis=dict(title="", showgrid=False),
         yaxis=dict(title="DALYs pppy", showgrid=False),
-        margin=dict(l=0, r=0, t=30, b=30),
+        margin=dict(l=(int(output_type == "png") * 30), r=(int(output_type == "png") * 30), t=30, b=30),
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -98,7 +104,10 @@ def risk_plots(risk_assessment_results, output_type="div"):
             x=0.5,
         )
     )
-    dalys_fig.update_yaxes(type="log")
+    dalys_fig.update_yaxes(type="log",
+                           showexponent='all',
+                           exponentformat='power'
+                           )
     dalys_fig.add_hline(y=0.000001, line_dash="dashdot",
                         label=dict(
                             text="tolerable level",

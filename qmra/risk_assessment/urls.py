@@ -33,5 +33,40 @@ urlpatterns = [
         views.risk_assessment_result,
         name="assessment-result",
     ),
+    path(
+        "exposure",
+        views.create_exposure,
+        name="exposure"
+    ),
+    path(
+        "exposures",
+        views.list_exposures,
+        name="exposures"
+    ),
+    path(
+        "source",
+        views.create_source,
+        name="source"
+    ),
+    path(
+        "sources",
+        views.list_sources,
+        name="sources"
+    ),
+    path(
+        "inflows",
+        views.list_inflows,
+        name="inflows"
+    ),
+    path(
+        "treatment",
+        views.create_treatment,
+        name="treatment"
+    ),
+    path(
+        "treatments",
+        views.list_treatments,
+        name="treatments"
+    ),
     path('', include('django_prometheus.urls')),
 ]
