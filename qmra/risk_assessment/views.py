@@ -88,9 +88,9 @@ def risk_assessment_view(request, risk_assessment_id=None):
             instance = None
             inflows = Inflow.objects.none()
             treatments = Treatment.objects.none()
-        risk_assessment_form = RiskAssessmentForm(request.POST, instance=instance, prefix="ra")
+        risk_assessment_form = RiskAssessmentForm(request.POST, instance=instance, prefix="ra").set_user(request.user)
         inflow_form = InflowFormSet(request.POST, queryset=inflows, prefix="inflow")
-        treatment_form = TreatmentFormSet(request.POST, queryset=treatments, prefix="treatments")
+        treatment_form = TreatmentFormSet(request.POST, queryset=treatments, prefix="treatments").set_user(request.user)
         if risk_assessment_form.is_valid() and \
                 inflow_form.is_valid() and \
                 treatment_form.is_valid():
@@ -160,6 +160,9 @@ def risk_assessment_result(request):
         risk_assessment_form = RiskAssessmentForm(request.POST, instance=None, prefix="ra")
         inflow_form = InflowFormSet(request.POST, prefix="inflow")
         treatment_form = TreatmentFormSet(request.POST, prefix="treatments")
+        if request.user.is_authenticated:
+            risk_assessment_form = risk_assessment_form.set_user(request.user)
+            treatment_form = treatment_form.set_user(request.user)
         if risk_assessment_form.is_valid() and \
                 inflow_form.is_valid() and \
                 treatment_form.is_valid():

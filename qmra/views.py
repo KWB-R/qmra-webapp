@@ -18,6 +18,10 @@ def dsgvo(request):
     return render(request, "DSGVO.html")
 
 
+def faqs(request):
+    return render(request, "faqs.html")
+
+
 def health(request):
     django.db.connection.ensure_connection()
     return HttpResponse("Ok")

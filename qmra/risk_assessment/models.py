@@ -249,7 +249,7 @@ class DefaultTreatments(StaticEntity):
 class Treatment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     risk_assessment = models.ForeignKey("RiskAssessment", related_name="treatments", on_delete=models.CASCADE)
-    name = models.CharField(choices=DefaultTreatments.choices(), max_length=64)
+    name = models.CharField(max_length=64)
     bacteria_min = models.FloatField(blank=True, null=True)
     bacteria_max = models.FloatField(blank=True, null=True)
     viruses_min = models.FloatField(blank=True, null=True)
@@ -310,13 +310,11 @@ class RiskAssessment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     name = models.CharField(max_length=64, default="", blank=True)
     description = models.TextField(max_length=500, default="", blank=True)
-    source_name = models.CharField(
-        choices=DefaultSources.choices(), blank=True, max_length=256
+    source_name = models.CharField(blank=True, max_length=256
     )
     inflows: QuerySet[Inflow]
     treatments: QuerySet[Treatment]
-    exposure_name = models.CharField(choices=DefaultExposures.choices(),
-                                     blank=True, max_length=256)
+    exposure_name = models.CharField(blank=True, max_length=256)
     events_per_year = models.IntegerField()
     volume_per_event = models.FloatField()
 

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block body %}
+<div class="container w-75 my-4">
+    <h3>Frequently Asked Questions (FAQs)</h3>
+    <h5>1. What is Quantitative Microbial Risk Assessment (QMRA)?</h5>
+    <p>QMRA is a method used to evaluate the potential human health risks associated with exposure to microbial
+        contaminants, such as bacteria, viruses, and protozoa. It is commonly used in water treatment and reuse schemes
+        to assess the likelihood of illness from pathogens in water.</p>
+    <h5>2. Is this tool free to use?</h5>
+    <p></p>Yes, the QMRA tool is completely free to use. It provides you with powerful resources and guidance to assess
+    microbial risks in your water reuse schemes without any cost. You can access the underlying database here (link to
+    Aquanes database) and associated github repository here (link to github).</p>
+    <h5>3. Who should use this QMRA tool?</h5>
+    <p>This tool is designed for water safety professionals, engineers, and public health officials involved in water
+        reuse schemes. It is also suitable for researchers, students, and anyone interested in understanding the risks
+        for human health associated with microbial contaminants in water.</p>
+    <p>According to the EU Regulation 2020/741, conducting a risk assessment is an essential and mandatory step for all
+        water reuse projects intended for agricultural irrigation within the EU. The QMRA tool can be used as a key
+        component of risk assessment to comply with this EU Regulation.</p>
+    <h5>4. What can the QMRA tool be used for?</h5>
+    <p>The QMRA tool assesses the microbial risk to human health for a water reuse scenario, taking into account the
+        water source, treatment process, and exposure scenario. It can be useful in two phases of a water reuse
+        project:</p>
+    <ul>
+        <li>Planning Phase: It can evaluate whether a proposed water treatment process (a series of treatment steps) can
+            reduce risks to acceptable levels based on the quality of the source water and its intended use. The tool
+            can also help choose an appropriate end-use for reclaimed water or select a suitable source water for a
+            specific end-use. The tool provides default values from literature sources, such as the WHO, to carry out
+            the assessment.
+        </li>
+        <li>Plant Operation: It can estimate whether an existing water treatment process (a series of treatment steps)
+            can reduce microbial risks to human health to acceptable levels for a specific use and source water. The
+            tool allows the use of site-specific data, including pathogen concentrations, treatment step removal rates,
+            and exposure scenarios, for a more tailored assessment.
+        </li>
+    </ul>
+    <p>Please note, <b>this tool is not designed for water treatment process design.</b></p>
+</div>
+{% endblock %}

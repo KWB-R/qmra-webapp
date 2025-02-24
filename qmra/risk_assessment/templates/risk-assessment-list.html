@@ -17,6 +17,7 @@
     }
 </style>
 {% csrf_token %}
+{% include "home-guided-tour.html" %}
 <div class="container w-75">
     <div class="modal" id="comparison-modal" role="dialog">
         <div class="modal-dialog" role="document" style="max-width: 75vw !important;">
@@ -35,22 +36,28 @@
             <a href="#" id="toggleIntroduction" onclick="toggleText()"></a>
         </div>
     </div>
-    <div class="row commands w-100" style="z-index: 1000; height: 80px">
-        <div class="col">
+    <div class="row commands w-100" style="z-index: 99; height: 80px">
+        <div id="new-assessment-btn" class="col">
             <a class="btn btn-outline-primary mt-3 w-100" href="{%url 'assessment'%}">
                 Create new risk assessment
             </a>
         </div>
-        <div class="col">
+        <div id="compare-assessments-btn" class="col">
             <button class="btn btn-outline-primary mt-3 w-100" id="compare-btn">
                 Compare selected assessments
+            </button>
+        </div>
+        <div class="col">
+            <button class="btn btn-outline-primary mt-3 w-100" id="start-user-guide">
+                Start user guide
             </button>
         </div>
     </div>
     <button id="show-comparison-btn" hidden data-toggle="modal" data-target="#comparison-modal"
         data-show="true"></button>
     {% if user.is_authenticated %}
-    <h4 class="my-3 kwb_headline text-center" style="height:60px"> My Risk Assessments</h4>
+    <h4 class="my-3 kwb_headline text-center" style="height:60px">My Risk Assessments</h4>
+    <div id="assessment-list">
     {%for assessment in assessments%}
 
     <button id="show-result-{{assessment.id}}" hidden data-toggle="modal"
@@ -108,7 +115,7 @@
     There are currently no risk assessments. Click on Create new risk assessment to create your
     first risk assessment.
     {%endfor%}
-
+</div>
 </div>
 <style type="text/css">
     .commands {

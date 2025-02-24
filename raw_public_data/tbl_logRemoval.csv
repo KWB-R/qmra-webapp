@@ -73,3 +73,6 @@ treatment_id,"min","max","reference","pathogen_group","mean","alpha","beta","dis
 29,4.6,6,50,"Bacteria",NA,NA,NA,"uniform","based on Streptococcus faecalis: kmin = 0.312, kmax = 0.88, MICmax_min = 4.6, MICmax_max = 6,  dose = 40"
 29,4.1,5.9,50,"Viruses",NA,NA,NA,"uniform","based on Rotavirus (MC vs PC): kmin = 0.102, kmax = 0.1514, MICmax_min = 4.1, MICmax_max = 5.9,  dose = 40"
 29,2.5,3,50,"Protozoa",NA,NA,NA,"uniform","based on Giardia lambia: kmin = 0.122, kmax = 0.243, MICmax_min = 2.5, MICmax_max = 3,  dose = 40"
+30,0.3,0.3,NA,"Bacteria",NA,NA,NA,"uniform",NA
+30,0.3,0.3,NA,"Viruses",NA,NA,NA,"uniform",NA
+30,0.3,0.3,NA,"Protozoa",NA,NA,NA,"uniform",NA

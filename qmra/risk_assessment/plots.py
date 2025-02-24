@@ -26,6 +26,12 @@ NONE_COLOR_SEQ = [
 
 COLOR_SEQS = dict(min=MIN_COLOR_SEQ, max=MAX_COLOR_SEQ, none=NONE_COLOR_SEQ)
 
+BLUES = [
+    "hsl(332, 100, 49%)",
+    "hsl(188, 100, 45%)",
+    "hsl(239, 100, 45%)",
+]
+
 
 def risk_plots(risk_assessment_results, output_type="div"):
     infection_prob_fig = go.Figure()
@@ -39,7 +45,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
             median=[r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=COLOR_SEQS[r.infection_risk][i % 3])
+            marker=dict(color=BLUES[i % 3])
         ))
         # infection_prob_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
         dalys_fig.add_trace(go.Box(
@@ -50,7 +56,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.dalys_minimum_lrv_q3, r.dalys_maximum_lrv_q3],
             median=[r.dalys_minimum_lrv_median, r.dalys_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=COLOR_SEQS[r.dalys_risk][i % 3])
+            marker=dict(color=BLUES[i % 3])
         ))
         # dalys_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
 

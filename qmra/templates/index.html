@@ -9,32 +9,25 @@
 <div class="container" style="padding: 5%">
     <div class="row">
         <div class="col">
-            <div>
+            <div class="m-auto col-8">
                 <img src="{% static 'img/qmra-full-logo.svg' %}">
             </div>
-            <a class="btn btn-primary" href="{% url 'assessment' %}">Try out</a>
             <p class="mt-4">
-                <h5>Welcome to the QMRA Tool for Water Reuse</h5>
-                <p>This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
+            <h5>Welcome to the QMRA Tool for Water Reuse</h5>
+            <p>This tool is designed to support Quantitative Microbial Risk Assessment (QMRA) for human health in the
                 context of water reuse. Whether you're evaluating the safety of treated wastewater or other reclaimed
-                    water sources, this tool helps you assess potential health risks associated with microbial contaminants.</p>
-                <h5>Free and User-Friendly</h5>
-                <p>Our QMRA tool is completely free to use, offering you a powerful resource to assess microbial risks in
-                    water reuse schemes. You can use the tool without logging in, making it quick and easy to get started.</p>
-                <h5>Enhanced Features for Registered Users</h5>
-                <p>If you choose to log in, you'll unlock additional features that enhance your experience:
-            <ul>
-                <li>Save Your Assessments: Store your risk assessments for future reference.</li>
-                <li>Compare Results: Analyze and compare multiple risk assessments side by side.</li>
-                <li>Export Options: Download and share your results in convenient formats.</li>
-            </ul>
-            With or without an account, this tool provides risk estimations. Let's get started on your risk
-            assessment journey!</p>
-            </p>
+                water sources, this tool helps you assess potential health risks associated with microbial contaminants.
+                <b> This tool is completely free to use.</b></p>
             <div class="row">
-                <div class="col-4">
-
-                    <p class="mt-4">If you already have an account, enter your username and password to login</p>
+                <div class="col-4 mb-3 mr-5" style="border: 1px solid #8081FF; border-radius: 8px; padding: 16px">
+                    <h5>Try without an account</h5>
+                    <p>QMRA is a free and powerful tool to assess microbial
+                        risks in water reuse. Use it without logging in for quick, easy access.
+                    </p>
+                    <a class="btn btn-primary" href="{% url 'assessment' %}">Try out</a>
+                </div>
+                <div class="col-6 mb-3" style="border: 1px solid #8081FF; border-radius: 8px; padding: 16px">
+                    <h5>Login</h5>
                     <form action="{% url 'login' %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
@@ -52,6 +45,16 @@
                     </div>
                 </div>
             </div>
+
+            <h5>Enhanced Features for Registered Users</h5>
+            <p>If you choose to log in, you'll unlock <b>additional features</b> that enhance your experience:
+            <ul>
+                <li><b>Save</b> Your Assessments: Store your risk assessments for future reference.</li>
+                <li><b>Compare</b> Results: Analyze and compare multiple risk assessments side by side.</li>
+                <li><b>Export</b> Options: Download and share your results in convenient formats.</li>
+            </ul>
+            <p><b>With or without an account, this tool provides risk estimations.</b> Let's get started on your risk
+            assessment journey!</p>
         </div>
     </div>
 </div>

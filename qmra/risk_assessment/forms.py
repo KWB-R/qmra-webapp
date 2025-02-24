@@ -6,7 +6,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Row, Column, HTML
 
 from qmra.risk_assessment.models import Inflow, DefaultTreatments, Treatment, \
-    RiskAssessment
+    RiskAssessment, DefaultExposures, DefaultSources
 from qmra.user.models import User
 
 
@@ -14,6 +14,9 @@ def _zero_if_none(x): return x if x is not None else 0
 
 
 class RiskAssessmentForm(forms.ModelForm):
+    source_name = forms.ChoiceField()
+    exposure_name = forms.ChoiceField()
+
     class Meta:
         model = RiskAssessment
         fields = [
@@ -28,6 +31,8 @@ class RiskAssessmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["source_name"].label = "Select a source water type to add pathogen concentrations"
+        self.fields["exposure_name"].choices = DefaultExposures.choices()
+        self.fields["source_name"].choices = DefaultSources.choices()
         self.fields['events_per_year'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].widget.attrs['min'] = 0
         self.fields['volume_per_event'].label = "Volume per event in liters"
@@ -41,13 +46,13 @@ class RiskAssessmentForm(forms.ModelForm):
         )
 
     def set_user(self, user: User):
-        self.fields["exposure_name"].widget.choices = [
+        self.fields["exposure_name"].choices = [
             ["Your Exposures", [(e.name, e.name) for e in user.exposures.all()]],
-            *self.fields["exposure_name"].widget.choices
+            *self.fields["exposure_name"].choices
         ]
-        self.fields["source_name"].widget.choices = [
+        self.fields["source_name"].choices = [
             ["Your Sources", [(s.name, s.name) for s in user.sources.all()]],
-            *self.fields["source_name"].widget.choices
+            *self.fields["source_name"].choices
         ]
         return self
 
@@ -133,6 +138,8 @@ class InflowFormSet(InflowFormSetBase):
 
 
 class TreatmentForm(forms.ModelForm):
+    name = forms.ChoiceField()
+
     class Meta:
         model = Treatment
         fields = [
@@ -227,6 +234,7 @@ class TreatmentFormSet(TreatmentFormSetBase):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.form.base_fields["name"].choices = DefaultTreatments.choices()
         if not kwargs.get("queryset", False):
             self.queryset = Treatment.objects.none()
 

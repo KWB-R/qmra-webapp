@@ -1,0 +1,35 @@
+<script type="text/javascript">
+        const steps = [
+        {
+            title: "New Risk Assessment",
+            content: "Click the “Create New Risk Assessment” button to begin configuring a new risk assessment. You will be guided through selecting the exposure scenario, source water, and applicable treatments.",
+            target: "#new-assessment-btn",
+            order: 0
+        },
+        {
+            title: "Compare Risk Assessments",
+            content: "Click the “Compare Selected Assessments” button to directly compare two or more existing risk assessments. To select assessments for comparison, check the “Compare” box next to each assessment. A plot displaying the selected assessment comparison will then appear.",
+            target: "#compare-assessments-btn",
+            order: 1
+        },
+        {% if assessments %}
+        {
+            title: "Saved Assessments",
+            content: "This list displays your risk assessments.<br>•	Click on an assessment to view its results.<br>•	To compare assessments, check the “Compare” box for two or more assessments, then click the “Compare Selected Assessments” button in the top right.<br>•	Click the folder icon to export the assessment results.<br>•	Click the pen icon to return to the configuration page and edit the assessment.<br>•	Click the cross icon to delete the assessment.",
+            target: "#assessment-list",
+            order: 4
+        }
+        {% endif %}
+        ];
+        document.addEventListener("DOMContentLoaded", () => {
+            const tg = new tourguide.TourGuideClient({
+                steps: steps
+            })
+            tg.onAfterExit(() => {
+                document.querySelector("#result-button").click();
+            })
+            document.querySelector("#start-user-guide").addEventListener("click", ev => {
+                tg.start();
+            })
+        })
+</script>

@@ -197,3 +197,13 @@ structlog.configure(
     logger_factory=structlog.stdlib.LoggerFactory(),
     cache_logger_on_first_use=True,
 )
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'myusername@gmail.com'
+EMAIL_HOST_PASSWORD = 'mypassword'
+DEFAULT_FROM_EMAIL = 'myusername@gmail.com'
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+SERVER_EMAIL = 'myusername@gmail.com'
