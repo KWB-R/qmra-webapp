@@ -70,7 +70,7 @@ class TestAssesRisk(TestCase):
         ]
         given_treatments = [
             Treatment.from_default(DefaultTreatments.get("Conventional clarification"), given_ra),
-            Treatment.from_default(DefaultTreatments.get("Dissolved air flotation"), given_ra),
+            Treatment.from_default(DefaultTreatments.get("Slow sand filtration"), given_ra),
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
         given_ra.treatments.set(given_treatments, bulk=False)

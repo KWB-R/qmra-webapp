@@ -72,7 +72,7 @@ class TestDefaultSources(TestCase):
 
 
 class TestDefaultTreatments(TestCase):
-    expected_length = 28
+    expected_length = 22
 
     def test_properties(self):
         under_test = DefaultTreatments
