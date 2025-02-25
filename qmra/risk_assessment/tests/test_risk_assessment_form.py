@@ -2,6 +2,7 @@ from django.test import TestCase
 from assertpy import assert_that
 
 from qmra.risk_assessment.forms import RiskAssessmentForm, InflowForm, InflowFormSet, TreatmentForm, TreatmentFormSet
+from qmra.risk_assessment.models import DefaultTreatments
 
 
 class TestRiskAssessmentForm(TestCase):
@@ -89,6 +90,8 @@ class TestTreatmentForm(TestCase):
             protozoa_max=-1
         )
         given_form = TreatmentForm(data=data)
+        # ugly hack to work around dynamic choices...
+        given_form.fields["name"].choices = DefaultTreatments.choices()
         given_form.full_clean()
         print(given_form.errors)
         assert_that(len(given_form.errors)).is_equal_to(0)
@@ -108,6 +111,8 @@ class TestTreatmentForm(TestCase):
             mx = prfx + "_max"
             data = {**default_data, mn: 2, mx: 1}
             given_form = TreatmentForm(data=data)
+            # ugly hack to work around dynamic choices...
+            given_form.fields["name"].choices = DefaultTreatments.choices()
             given_form.full_clean()
             assert_that(len(given_form.errors)).is_equal_to(1)
             assert_that(given_form.errors).contains_key(mn)

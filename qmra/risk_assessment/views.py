@@ -232,8 +232,9 @@ def create_exposure(request):
     return HttpResponse(status=404)
 
 
-@login_required(login_url="/login")
 def list_exposures(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
     return JsonResponse({e["name"]: e for e in UserExposure.objects.filter(user=request.user).values().all()})
 
 
@@ -255,13 +256,15 @@ def create_source(request):
     return HttpResponse(status=404)
 
 
-@login_required(login_url="/login")
 def list_sources(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
     return JsonResponse({s["name"]: s for s in UserSource.objects.filter(user=request.user).values().all()})
 
 
-@login_required(login_url="/login")
 def list_inflows(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
     return JsonResponse({s["name"]: [
         dict(pathogen_name="Rotavirus", source_name=s["name"],
              min=s["rotavirus_min"], max=s["rotavirus_max"],
@@ -296,7 +299,8 @@ def create_treatment(request):
     return HttpResponse(status=404)
 
 
-@login_required(login_url="/login")
 def list_treatments(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({})
     return JsonResponse({t["name"]: {**t, "treatment_name": t["name"]}
                          for t in UserTreatment.objects.filter(user=request.user).values().all()})
