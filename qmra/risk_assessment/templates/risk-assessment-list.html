@@ -161,13 +161,12 @@
     }
     document.addEventListener("DOMContentLoaded", function(){ toggleText()});
 
-    const colors = [['hsl(239, 100, 44)'], ['hsl(149, 90, 33)'], ['hsl(330, 100, 45)']];
-    var [l1, l2, l3] = [44, 33, 45];
-    for (let i of Array(6).keys()) {
-        [l1, l2, l3] = [(l1 + 15) % 100, (l2 + 15) % 100, (l3 + 15) % 100]
-        colors[0].push(`hsl(239, 100, ${l1})`)
-        colors[1].push(`hsl(129, 50, ${l2})`)
-        colors[2].push(`hsl(329, 100, ${l3})`)
+    const colors = [['hsl(332, 100, 49)'], [], ['hsl(188, 100, 45)']];
+    var [l1, l2, l3] = [49, 0, 45];
+    for (let i of Array(3).keys()) {
+        [l1, l2, l3] = [(l1 + 10) % 100, (l2 + 15) % 100, (l3 + 10) % 100]
+        colors[0].push(`hsl(332, 100, ${l1})`)
+        colors[2].push(`hsl(188, 100, ${l3})`)
     }
     function getResults(id) {
         const content = fetch(`{% url 'assessment-result' %}?id=${id}`, {
@@ -213,15 +212,6 @@
                         dash: 'dashdot'
                     }
                 }],
-                // annotations: [{
-                //     text: "tolerable level",
-                //     x: 0,
-                //     y: Math.log10(.0002),
-                //     xref: "paper", yref: "y", showarrow: false,
-                //     font: {
-                //         color: 'rgb(0, 3, 229)',
-                //     }
-                // }],
                 xaxis: {
                     autorange: true,
                     automargin: true
@@ -237,7 +227,7 @@
                 },
                 bargroupgap: .1, bargap: .1
             };
-            this.config = { displayModeBar: false, responsive: true };
+            this.config = { displaylogo: false, modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'], responsive: true };
             Plotly.newPlot(divId, this.data, this.layout, this.config);
             window.addEventListener("resize", () => {
                 Plotly.relayout(divId, {
@@ -250,13 +240,6 @@
         setTraces(allResults) {
             const data = allResults.map((ra, i) => ra.map((x, j) => asTraces(x, i, j)).flat());
             const layout = { ...this.layout }
-            // for (var i of [...Array(data.length).keys()]) {
-            //     if (i >= 0) {
-            //         layout[`xaxis${i> 0 ? i + 1 : ''}`] = { domain: [i*(1/data.length), (i+1)*(1/data.length)], autorange: true, anchor: 'y' }
-            //     }
-            // }
-            // layout.grid = { rows: 2, columns: allResults.length,
-            //      subplots: [['xy', 'x2y', 'x3y']], pattern: 'independent' }
             layout.width = this.$div.getBoundingClientRect().width * .95;
             layout.height = window.innerHeight * .75;
             Plotly.react(this.divId, data.flat(), layout, this.config)
@@ -266,45 +249,29 @@
     function asTraces(r, i, j) {
         return [{
             x: [r.ra_name],
-            // x0: (i + 1) * j,
-            // y: [r.infection_minimum_lrv_min, r.infection_maximum_lrv_max],
             base: [r.infection_maximum_lrv_min],
             y: [r.infection_minimum_lrv_max],
-            // q3: [r.infection_minimum_lrv_max],
-            // q1: [r.infection_maximum_lrv_min],
-            // median: [(r.infection_minimum_lrv_max +  r.infection_maximum_lrv_min)/2],
             name: r.pathogen,
             type: "bar",
             xaxis: "x",
             yaxis: "y",
-            marker: { color: colors[0][j], opacity: .75, fillmode: "overlay" },
+            marker: { color: colors[0][j], opacity: .75, fillmode: "overlay", pattern: {shape: "/"} },
 
             showlegend: i === 0,
             offsetgroup: r.pathogen,
             legendgroup: "min - max range",
             legendgrouptitle: { text: "min - max range" },
-            // width: .5,
-            // hoverinfo: "x+y",
             hovertemplate: `max=%{y}, min=%{base}`
         },
         {
             x: [r.ra_name],
-            // x0: (i + 1) * j,
             base: [r.infection_maximum_lrv_median],
             y: [r.infection_minimum_lrv_median],
-            // q3: [r.infection_minimum_lrv_median],
-            // q1: [r.infection_maximum_lrv_median],
-            // median: [(r.infection_minimum_lrv_median +  r.infection_maximum_lrv_median)/2],
-            // lowerfence: [r.infection_minimum_lrv_min, r.infection_maximum_lrv_min],
-            // upperfence: [r.infection_minimum_lrv_max, r.infection_maximum_lrv_max],
-            // q1: [r.infection_minimum_lrv_q1, r.infection_maximum_lrv_q1],
-            // q3: [r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
-            // median: [r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
             name: r.pathogen,
             type: "bar",
             xaxis: "x",
             yaxis: "y",
-            marker: { color: colors[2][j], opacity: .5, fillmode: "overlay" },
+            marker: { color: colors[2][j], opacity: .85, fillmode: "replace" },
             offsetgroup: r.pathogen,
             showlegend: i === 0,
             legendgroup: "mean range",

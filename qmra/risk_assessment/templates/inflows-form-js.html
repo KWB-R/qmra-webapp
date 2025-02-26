@@ -104,7 +104,7 @@
                 plot_bgcolor:"#F6F6FF",
                 paper_bgcolor:"#F6F6FF"
             };
-            this.config = {displayModeBar: false, responsive: true};
+            this.config = {displaylogo: false, modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'], responsive: true};
             this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
             window.addEventListener("resize", () => {
                 Plotly.relayout(divId, {

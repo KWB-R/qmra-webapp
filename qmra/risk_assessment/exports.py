@@ -76,6 +76,10 @@ def results_as_df(results: dict[str, RiskAssessmentResult]) -> pd.DataFrame:
     return pd.concat(dfs)
 
 
+def risk_assessment_summary(assessment: RiskAssessment) -> str:
+    return f'"Risk Assessment\'s Name:","{assessment.name}"\n"Description:","{assessment.description}"\n\n"Result\'s Summary:"\n'
+
+
 def risk_assessment_as_zip(buffer, risk_assessment: RiskAssessment):
     inflows = inflows_as_df(risk_assessment.inflows)
     treatments = treatments_as_df(risk_assessment.treatments)
@@ -91,7 +95,8 @@ def risk_assessment_as_zip(buffer, risk_assessment: RiskAssessment):
         archive.mkdir("results-plots")
         archive.writestr("exposure-assessment/inflows.csv", inflows.to_csv(sep=",", decimal=".", index=False))
         archive.writestr("exposure-assessment/treatments.csv", treatments.to_csv(sep=",", decimal=".", index=False))
-        archive.writestr(f"{risk_assessment.name}-result.csv", results.to_csv(sep=",", decimal=".", index=False))
+        archive.writestr(f"{risk_assessment.name}-result.csv",
+                         risk_assessment_summary(risk_assessment) + results.to_csv(sep=",", decimal=".", index=False))
         archive.writestr(f"{risk_assessment.name}-report.html", report)
         archive.writestr("results-plots/infection-probability.png", plots[0])
         archive.writestr("results-plots/dalys-pppy.png", plots[1])

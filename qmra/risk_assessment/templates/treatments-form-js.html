@@ -4,6 +4,7 @@
     let defaultTreatments = null;
     let focusedTreatment = null;
     let treatmentsFormset = null;
+    let treatmentsPlots = null;
     class TreatmentForm {
         fields = {
             id: {
@@ -188,6 +189,7 @@
         constructor(divId) {
             this.divId = divId;
             this.$div = document.querySelector(`#${divId}`)
+            this.withIrrigationThresholds = false;
             this.traces = {}
             this.data = [];
             this.layout = {
@@ -200,7 +202,7 @@
                     type: 'log',
                     exponentformat: "power",
                     autorange: true,
-                    title: "Logremoval of individual treatment steps",
+                    title: "Logremoval of individual<br>treatment steps",
                 },
                 xaxis: {
                     autorange: true, domain: [0., 0.33333]
@@ -263,7 +265,7 @@
                 }
                 ]
             };
-            this.config = { displayModeBar: false, responsive: true };
+            this.config = { displaylogo: false, modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'], responsive: true };
             this.plot = Plotly.newPlot(divId, this.data, this.layout, this.config);
             window.addEventListener("resize", () => {
                 Plotly.relayout(divId, {
@@ -274,7 +276,37 @@
         }
         update() {
             this.layout.datarevision += 1;
-            Plotly.react(this.divId, this.data, this.layout, this.config);
+            const data = [...this.data, ...(this.withIrrigationThresholds ? this.irrigationThresholds : [])];
+            Plotly.react(this.divId, data, this.layout, this.config);
+        }
+        get irrigationThresholds(){
+            const name = "Legally Required LRVs<br>for Class A irrigation<br>according to the EU Water<br>Reuse Reg. 2020/74";
+            return [{
+                x: ["min", "max"], y: [5, 5], type: 'scatter',
+                mode: "lines", fill: "tonexty",
+                marker: {color: "hsl(332, 100, 49)"},
+                xaxis: "x", yaxis: "y", name: name, showlegend: true
+            },
+            {
+                x: ['min', 'max'], y: [4, 4], type: 'scatter',
+                mode: "lines", fill: "tonexty",
+                marker: {color: "hsl(332, 100, 49)"},
+                xaxis: "x2", yaxis: "y", name: name, showlegend: false
+            },
+            {
+                x: ['min', 'max'], y: [6, 6], type: 'scatter',
+                mode: "lines", fill: "tonexty",
+                marker: {color: "hsl(332, 100, 49)"},
+                xaxis: "x3", yaxis: "y", name: name, showlegend: false
+            }]
+        }
+        displayLRVThresholdForIrrigation() {
+            this.withIrrigationThresholds = true;
+            this.update();
+        }
+        removeLRVThresholdForIrrigation() {
+            this.withIrrigationThresholds = false;
+            this.update();
         }
     }
     class TreatmentController {
@@ -380,7 +412,7 @@
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const formset = new TreatmentFormset();
         const list = new TreatmentsList("selected-treatments");
-        const treatmentsPlots = new TreatmentPlot("treatments-plot");
+        treatmentsPlots = new TreatmentPlot("treatments-plot");
         const treatmentController = new TreatmentController(list, formset, treatmentsPlots, document.querySelector("#treatment-info"), defaultReferences);
         var lastForm = null
         for (let form of Object.values(formset.forms)) {
@@ -395,6 +427,18 @@
             form.setValues(values);
             treatmentController.addTreatment(form, values)
         })
+        // callback to display legal LRV threshold for irrigation exposures
+        const selectedExposure = document.querySelector("#id_ra-exposure_name");
+        selectedExposure.addEventListener("change", ev => {
+            if (ev.target.value.includes("irrigation")) {
+                treatmentsPlots.displayLRVThresholdForIrrigation();
+            } else {
+                treatmentsPlots.removeLRVThresholdForIrrigation();
+            }
+        })
+        if (selectedExposure.value.includes("irrigation")) {
+            treatmentsPlots.displayLRVThresholdForIrrigation();
+        }
     })
 
 </script>

@@ -127,6 +127,6 @@ def risk_plots(risk_assessment_results, output_type="div"):
         marker_size=8
     )
     if output_type == "div":
-        return plot(infection_prob_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False), \
-            plot(dalys_fig, output_type="div", config={'displayModeBar': False}, include_plotlyjs=False)
+        return plot(infection_prob_fig, output_type="div", config={"displaylogo": False, "modeBarButtonsToRemove": ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']}, include_plotlyjs=False), \
+            plot(dalys_fig, output_type="div", config={"displaylogo": False, "modeBarButtonsToRemove": ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']}, include_plotlyjs=False)
     return infection_prob_fig.to_image(format=output_type), dalys_fig.to_image(format=output_type)
