@@ -186,7 +186,7 @@ class TestAssesRisk(TestCase):
             dalys_maximum_lrv_median=0.0004801641,
         )
         results = assess_risk(given_ra, given_inflows, given_treatments)
-        # all pathogens exceeds all tolerable levels
+        # all pathogens exceeds all tolerable risk levels
         for r in results.values():
             assert_that(r.infection_risk).is_true()
             assert_that(r.dalys_risk).is_true()

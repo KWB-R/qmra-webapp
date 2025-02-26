@@ -201,6 +201,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
+                    dtick: 1,
                     autorange: true,
                     title: "Logremoval of individual<br>treatment steps",
                 },
@@ -277,28 +278,36 @@
         update() {
             this.layout.datarevision += 1;
             const data = [...this.data, ...(this.withIrrigationThresholds ? this.irrigationThresholds : [])];
-            Plotly.react(this.divId, data, this.layout, this.config);
+            const layout = {...this.layout, ...(this.withIrrigationThresholds ?
+            {shapes: [
+                {
+                    type: "line",
+                    xref: "x", yref: "y", x0: -0.5, x1: 1.5, y0: 6, y1: 6,
+                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"}
+                },
+                {
+                    type: "line",
+                    xref: "x2", yref: "y", x0: -0.5, x1: 1.5, y0: 5, y1: 5,
+                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"}
+                },
+                {
+                    type: "line",
+                    xref: "x3", yref: "y", x0: -0.5, x1: 1.5, y0: 4, y1: 4,
+                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"}
+                }
+                ]} : {})
+                }
+            Plotly.react(this.divId, data, layout, this.config);
         }
         get irrigationThresholds(){
-            const name = "Legally Required LRVs<br>for Class A irrigation<br>according to the EU Water<br>Reuse Reg. 2020/74";
+            const name = "Required LRVs for<br>Class A irrigation<br>according to the EU<br>Water Reuse Reg. 2020/74";
             return [{
-                x: ["min", "max"], y: [5, 5], type: 'scatter',
-                mode: "lines", fill: "tonexty",
-                marker: {color: "hsl(332, 100, 49)"},
+                x: ['min', 'max'], y: [6, 6],
+                mode: "lines",
+                line: {color: "hsl(332, 100, 49)", dash: "dashdot"},
                 xaxis: "x", yaxis: "y", name: name, showlegend: true
-            },
-            {
-                x: ['min', 'max'], y: [4, 4], type: 'scatter',
-                mode: "lines", fill: "tonexty",
-                marker: {color: "hsl(332, 100, 49)"},
-                xaxis: "x2", yaxis: "y", name: name, showlegend: false
-            },
-            {
-                x: ['min', 'max'], y: [6, 6], type: 'scatter',
-                mode: "lines", fill: "tonexty",
-                marker: {color: "hsl(332, 100, 49)"},
-                xaxis: "x3", yaxis: "y", name: name, showlegend: false
-            }]
+            }
+            ]
         }
         displayLRVThresholdForIrrigation() {
             this.withIrrigationThresholds = true;
@@ -322,7 +331,16 @@
             const formValues = form.getValues();
             this.treatments.push(values);
             const idx = parseInt(formValues.id.split("-").pop());
-            const trace = new TreatmentTrace({ ...formValues, color: `hsl(229, 100, ${(44 + idx * 22) % 100})` });
+            const colors = [
+                [239, 100, 40],
+                [188, 100, 40],
+                [332, 100, 40],
+            ];
+            const c = colors[Math.floor((idx % 9) / 3)];
+            console.log(idx);
+            c[2] = (c[2] + (idx % 3) * 19) % 100
+            const trace = new TreatmentTrace(
+            { ...formValues, color: `hsl(${c[0]}, ${c[1]}, ${c[2]})` });
             const summary = this.list.addSummary(formValues, form.isValid(),
                 () => {
                     Object.values(this.formset.forms).map(f => f.hide());

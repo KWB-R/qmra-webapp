@@ -83,7 +83,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
                                     )
     infection_prob_fig.add_hline(y=0.0001, line_dash="dashdot",
                                  label=dict(
-                                     text="tolerable level",
+                                     text="tolerable risk level",
                                      textposition="end",
                                      yanchor="top",
                                      font=dict(color="rgb(0, 3, 226)")
@@ -116,7 +116,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
                            )
     dalys_fig.add_hline(y=0.000001, line_dash="dashdot",
                         label=dict(
-                            text="tolerable level",
+                            text="tolerable risk level",
                             textposition="end",
                             yanchor="top",
                             font=dict(color="rgb(0, 3, 226)")

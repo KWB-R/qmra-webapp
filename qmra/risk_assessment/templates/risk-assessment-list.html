@@ -161,12 +161,12 @@
     }
     document.addEventListener("DOMContentLoaded", function(){ toggleText()});
 
-    const colors = [['hsl(332, 100, 49)'], [], ['hsl(188, 100, 45)']];
+    const colors = [['hsl(188, 100, 49)'], [], ['hsl(239, 100, 45)']];
     var [l1, l2, l3] = [49, 0, 45];
     for (let i of Array(3).keys()) {
-        [l1, l2, l3] = [(l1 + 10) % 100, (l2 + 15) % 100, (l3 + 10) % 100]
-        colors[0].push(`hsl(332, 100, ${l1})`)
-        colors[2].push(`hsl(188, 100, ${l3})`)
+        [l1, l2, l3] = [(l1 + (40/3)) % 100, (l2 + 15) % 100, (l3 + (40/3)) % 100]
+        colors[0].push(`hsl(188, 100, ${l1})`)
+        colors[2].push(`hsl(239, 100, ${l3})`)
     }
     function getResults(id) {
         const content = fetch(`{% url 'assessment-result' %}?id=${id}`, {
@@ -193,6 +193,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
+                    dtick: 1,
                     autorange: true,
                     title: "infection prob",
                     automargin: true,
@@ -200,7 +201,7 @@
                 },
                 shapes: [{
                     type: 'line',
-                    label: {text: "tolerable level", font: {color: 'rgb(0, 3, 229)', size: 12}, textposition: "end"},
+                    label: {text: "tolerable risk level", font: {color: 'rgb(0, 3, 229)', size: 12}, textposition: "end"},
                     x0: 0,
                     y0: .0001,
                     x1: 1,
