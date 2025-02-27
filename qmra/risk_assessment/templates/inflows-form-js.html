@@ -56,9 +56,14 @@
             }))
         }
     }
+    let colors = {
+        "Rotavirus": "hsl(332, 100, 49)",
+        "Campylobacter jejuni": "hsl(188, 100, 45)",
+        "Cryptosporidium parvum": "hsl(239, 100, 45)"
+    }
     class InflowTrace {
-        constructor({pathogen_name='', min=0, max=0, color="#FFFFFF"}){
-            this.data = { name: pathogen_name, x: ['min', 'max'], y: [min, max], type: 'bar', marker: {color: color}}
+        constructor({pathogen_name='', min=0, max=0}){
+            this.data = { name: pathogen_name, x: ['min', 'max'], y: [min, max], type: 'bar', marker: {color: colors[pathogen_name]}}
             this.updates = {
                 pathogen_name: x => {this.data.name = x},
                 min: x => {this.data.y[0] = x},
@@ -164,15 +169,12 @@
         defaultInflows = {...defaultInflows, ...await fetch("{% url 'inflows' %}").then(resp => resp.json())};
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const sourceInfo = getSourceInfo();
-        let colors = ["hsl(332, 100, 49)", "hsl(188, 100, 45)", "hsl(239, 100, 45)"]
         const formset = new InflowsFormset();
         const plot = new InflowPlot("inflows-plot")
         const controller = new InflowController(formset, plot);
         
-        var ci = 0;
         for (let [k, v] of Object.entries(formset.forms)) {
-            plot.traces[k] = new InflowTrace({...v.getValues(), color: colors[ci]})
-            ci += 1;
+            plot.traces[k] = new InflowTrace({...v.getValues()})
             plot.data.push(plot.traces[k].data)
             for (let field of Object.keys(v.fields)){
                 v.bindCallback(field, newValue => {

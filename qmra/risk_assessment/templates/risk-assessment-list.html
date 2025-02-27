@@ -24,7 +24,7 @@
             <div class="modal-content">
                 <h4 class="mt-3 mx-5 text-center">Risk assessment comparison</h4>
                 <div id="comparison-plot" class="">
-                <div class="small text-muted mx-5 my-3">For each pathogen, the outer boundaries of each barplot refer to the range between the maximum of the maximum LRV scenario and the minimum of the minimum risk scenario (maximal range). The inner range refers to the range between the mean of the maximum and the mean of the minimum risk scenario (difference in means). The mean of the distribution is often considered as the preferred point estimator, for deciding whether health targets are achieved.
+                <div class="text-muted mx-5 my-3">For each pathogen, the outer boundaries of the barplot (line-fill) represent the maximum risk range, spanning from the highest value of the maximum risk scenario (using the lowest minimum LRVs) to the lowest value of the minimum risk scenario (using the highest maximum LRVs). The inner range (solid fill) shows the mean risk range, defined as the range between the mean of the individual maximum and the mean of the individual minimum risk scenario (difference in means). The mean of the distribution is commonly used as the preferred point estimate when assessing whether health targets are met.
                 </div>
                 </div>
             </div>
@@ -196,14 +196,14 @@
                 },
                 shapes: [{
                     type: 'line',
-                    label: {text: "tolerable risk level", font: {color: 'rgb(0, 3, 229)', size: 12}, textposition: "end"},
+                    label: {text: "tolerable risk level", font: {color: 'rgb(10, 10, 10)', size: 14}, textposition: "end"},
                     x0: 0,
                     y0: .0001,
                     x1: 1,
                     y1: .0001,
                     xref: "paper",
                     line: {
-                        color: 'rgb(0, 3, 229)',
+                        color: 'rgb(10, 10, 10)',
                         width: 2,
                         dash: 'dashdot'
                     }

@@ -22,6 +22,10 @@ def faqs(request):
     return render(request, "faqs.html")
 
 
+def impressum(request):
+    return render(request, "impressum.html")
+
+
 def health(request):
     django.db.connection.ensure_connection()
     return HttpResponse("Ok")

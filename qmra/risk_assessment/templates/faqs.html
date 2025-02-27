@@ -8,9 +8,10 @@
         contaminants, such as bacteria, viruses, and protozoa. It is commonly used in water treatment and reuse schemes
         to assess the likelihood of illness from pathogens in water.</p>
     <h5>2. Is this tool free to use?</h5>
-    <p></p>Yes, the QMRA tool is completely free to use. It provides you with powerful resources and guidance to assess
-    microbial risks in your water reuse schemes without any cost. You can access the underlying database here (link to
-    Aquanes database) and associated github repository here (link to github).</p>
+    <p>Yes, the QMRA tool is completely free to use. It provides you with powerful resources and guidance to assess
+        microbial risks in your water reuse schemes without any cost. You can access the underlying database here (link
+        to
+        Aquanes database) and associated <a href="https://github.com/KWB-R/qmra-webapp">github repository</a>.</p>
     <h5>3. Who should use this QMRA tool?</h5>
     <p>This tool is designed for water safety professionals, engineers, and public health officials involved in water
         reuse schemes. It is also suitable for researchers, students, and anyone interested in understanding the risks
@@ -36,5 +37,113 @@
         </li>
     </ul>
     <p>Please note, <b>this tool is not designed for water treatment process design.</b></p>
+
+    <h5>5. What is the basic functionality of the QMRA tool?</h5>
+    <p>The QMRA Tool offers a user-friendly graphical interface that allows you to configure key input variables for
+        conducting a Quantitative Microbial Risk Assessment (QMRA) in the context of water supply and water reuse
+        systems.
+        Based on your configuration, the tool performs a Monte Carlo Simulation (MCS) to generate a range of potential
+        risk outcomes.</p>
+    <p>The tool is designed to accommodate both beginners and experts:</p>
+    <ul>
+        <li>User guide: or beginners and non-experts, the tool offers a step-by-step guide in the “User Guide” tab
+            located on the right side of the configuration. This guide explains each step of the risk assessment
+            process.
+        </li>
+    </ul>
+    <p>The tool provides two basic modes of use:</p>
+    <ul>
+        <li>Use of default data based on literature (e.g. WHO) by choosing from a drop-down menu.</li>
+        <li>Use of site-specific data by modifying the inputs manually.</li>
+    </ul>
+    <p>Model Inputs:</p>
+    <ul>
+        <li>Exposure Scenario: Events per year, volume per event in liters for the intended end-use</li>
+        <li>Source Water Quality: Minimum and maximum concentration for rotavirus, Campylobacter jejuni and Cryptosporidium
+            parvum</li>
+        <li>(Waste)water Treatment: Log removal values (LRV) for viruses, bacteria and protozoa for each water treatment
+        process</li>
+    </ul>
+    <p>Safe custom input data by saving the risk assessment.</p>
+    <p>Simulation Outputs:</p>
+    <p>The simulated risk is expressed and visualized in terms of:</p>
+    <ul>
+        <li>Annual Risk of Infection</li>
+        <li>Disability-Adjusted Life Years (DALYs): A measure representing the loss of the equivalent of one year of full
+            health, commonly used to assess human health risks.</li>
+    </ul>
+    <p>The tool evaluates the water supply or water reuse scenario by comparing the simulation results with the tolerable
+        risk levels set by the WHO:</p>
+    <ul>
+        <li>1/10,000 infections per person per year</li>
+        <li>1 µDALY per person per year (WHO 2022)</li>
+    </ul>
+    <p>Additionally, the QMRA Tool allows you to export your saved risk assessments for further analysis or reporting by
+    using the download button on the "My Risk Assessments" overview page.</p>
+    <h5>6. What types of water reuse schemes can this tool assess?</h5>
+    <p>The tool can be used to assess a variety of water reuse schemes, including potable and non-potable reuse, incl.
+    agricultural irrigation and domestic uses (e.g. car wash, toilet flushing). It provides flexibility to customize the
+    assessment based on the specific use case.</p>
+    <h5>7. What data are used in the tool and where can I access them?</h5>
+    <p>The tool uses data (e.g. pathogen concentrations in different source waters, LRV for specific water treatments)
+    derived from scientific literature and international guidance documents. All references are transparently listed in
+    the “Reference” tab of the risk assessment configuration page, and in the QMRA tool database (Link to the database).</p>
+    <h5>8. Can I customize the parameters in the tool?</h5>
+    <p>Absolutely! While the tool provides default values and guidance, you can fully customize the parameters, such as
+    pathogen concentrations, treatment effectiveness (Log Removal Values - LRV), and exposure scenarios, to match your
+    specific situation.</p>
+    <h5>9. How accurate are the results provided by the tool?</h5>
+    <p>The tool uses internationally recognized data and guidelines to provide reliable risk estimates. However, for the
+    most accurate results, it’s recommended to use locally obtained data for pathogen concentrations and treatment
+    effectiveness whenever possible.
+    <p>Please note that the tool is not a water treatment process design tool, and is based on assumptions that lead to
+    limitations (see 14. What are the limitations of this tool?)</p>
+    <p>Typical treatments are given in the user manual.</p>
+    <h5>10. Can I save and share my risk assessment reports?</h5>
+    <p>Yes, after completing your assessment, you can save your results and generate an output (.zip including excel with
+    underlying data and assessment results as well as assessment result plots). These reports can be shared with
+    colleagues, stakeholders, or regulatory bodies.</p>
+    <h5>11. What support is available if I have questions?</h5>
+    <p>The tool includes built-in tooltips for each step. If you have further questions, you can access the online
+    documentation or contact our support team for assistance.</p>
+    <h5>12. Is the tool compliant with international guidelines?</h5>
+    <p>Yes, the tool is developed based on international guidelines for water safety and QMRA, ensuring that your
+    assessments are aligned with best practices and standards. The specific guidelines used are accessible via the QMRA
+    database (Link to database).</p>
+    <h5>13. What are the limitations of this tool?</h5>
+    <p>While the QMRA Tool is a powerful resource for assessing microbial risks in water reuse schemes, it does have some
+    limitations:</p>
+    <ul>
+        <li>Reliance on Input Data: The accuracy of the risk assessment depends heavily on the quality and relevance of the
+    input data, such as pathogen concentrations, treatment effectiveness, and exposure scenarios. If local data is not
+    available, default values based on international guidelines are used, which may not fully capture local conditions.</li>
+        <li>Simplified Assumptions: The tool uses certain assumptions and simplifications to model complex real-world
+    scenarios.
+            <ul>
+                <li>The tool assumes uniform water quality throughout the entire treatment process: The tool estimates the same LRV
+    for two filtration steps in a row, even though after one filtration, the reduction is likely to be much lower as the
+    target contaminants already have been eliminated.</li>
+                <li>The tool assumes constant treatment efficacy: LRV of a treatment is constant regardless of the treatment process
+    order, which does not reflect the variability present in actual systems.</li>
+                <li>The tool does not consider operation conditions: Constant treatment LRV are assumed, which does not reflect the
+    variability present in actual systems, for e.g. empty bed contact time during activated carbon fixed-bed filtration,
+    filtration rate of a sand filter.</li>
+            </ul></li>
+        <li>Uncertainty Handling: While the tool allows for sensitivity analysis and input ranges, it may not fully capture
+    all uncertainties associated with pathogen behavior, human exposure, and health outcomes. Some complex interactions
+    and rare events might not be fully modeled.</li>
+        <li>Limited Scope: The tool is designed specifically for microbial risk assessment. It does not account for chemical
+    or physical hazards that may also be present in water reuse schemes, nor does it assess long-term health impacts
+    beyond the scope of microbial risks.</li>
+        <li>Regulatory Differences: The tool is based on international guidelines, which may not align perfectly with specific
+    local regulations or standards. Users should verify that the tool’s assumptions and outputs are consistent with
+    their local regulatory framework.</li>
+        <li>Interpretation of Results: The tool provides risk estimates based on the data and assumptions entered, but these
+    results should be interpreted with caution. The tool is intended to inform decision-making rather than to serve as
+    the sole basis for regulatory compliance or public health decisions.</li>
+    </ul>
+    <p>By being aware of these limitations, users can better understand the context in which the QMRA Tool is most
+    effective and can supplement it with additional data or analysis as needed.
+    </p>
 </div>
 {% endblock %}

@@ -12,25 +12,11 @@ MAX_COLOR_SEQ = [
     "hsl(359, 100%, 80%)",
 ]
 
-MIN_COLOR_SEQ = [
-    "hsl(23, 100%, 50%)",
-    "hsl(23, 100%, 70%)",
-    "hsl(23, 100%, 90%)",
-]
-
-NONE_COLOR_SEQ = [
-    "hsl(144, 100%, 40%)",
-    "hsl(144, 100%, 60%)",
-    "hsl(144, 100%, 80%)",
-]
-
-COLOR_SEQS = dict(min=MIN_COLOR_SEQ, max=MAX_COLOR_SEQ, none=NONE_COLOR_SEQ)
-
-BLUES = [
-    "hsl(332, 100, 49%)",
-    "hsl(188, 100, 45%)",
-    "hsl(239, 100, 45%)",
-]
+COLORS = {
+    "Rotavirus": "hsl(332, 100, 49%)",
+    "Campylobacter jejuni": "hsl(188, 100, 45%)",
+    "Cryptosporidium parvum": "hsl(239, 100, 45%)",
+}
 
 
 def risk_plots(risk_assessment_results, output_type="div"):
@@ -45,7 +31,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
             median=[r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=BLUES[i % 3])
+            marker=dict(color=COLORS[r.pathogen])
         ))
         # infection_prob_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
         dalys_fig.add_trace(go.Box(
@@ -56,7 +42,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.dalys_minimum_lrv_q3, r.dalys_maximum_lrv_q3],
             median=[r.dalys_minimum_lrv_median, r.dalys_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=BLUES[i % 3])
+            marker=dict(color=COLORS[r.pathogen])
         ))
         # dalys_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
 
