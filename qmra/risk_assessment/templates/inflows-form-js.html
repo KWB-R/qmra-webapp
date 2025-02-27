@@ -87,7 +87,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
-                    dtick: 1,
+                    dtick: "D2",
                     autorange: true,
                     title: "Source water concentrations in N/L",
                 },
@@ -164,7 +164,7 @@
         defaultInflows = {...defaultInflows, ...await fetch("{% url 'inflows' %}").then(resp => resp.json())};
         defaultReferences = await fetch("{% static 'data/default-references.json' %}").then(resp => resp.json());
         const sourceInfo = getSourceInfo();
-        let colors = ["hsl(229, 100, 44)", "hsl(229, 100, 66)", "hsl(229, 100, 88)"]
+        let colors = ["hsl(332, 100, 49)", "hsl(188, 100, 45)", "hsl(239, 100, 45)"]
         const formset = new InflowsFormset();
         const plot = new InflowPlot("inflows-plot")
         const controller = new InflowController(formset, plot);

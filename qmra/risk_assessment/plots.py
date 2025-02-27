@@ -79,6 +79,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
     )
     infection_prob_fig.update_yaxes(type="log",
                                     showexponent='all',
+                                    dtick="D2",
                                     exponentformat='power'
                                     )
     infection_prob_fig.add_hline(y=0.0001, line_dash="dashdot",
@@ -112,6 +113,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
     )
     dalys_fig.update_yaxes(type="log",
                            showexponent='all',
+                           dtick="D2",
                            exponentformat='power'
                            )
     dalys_fig.add_hline(y=0.000001, line_dash="dashdot",

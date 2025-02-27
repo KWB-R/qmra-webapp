@@ -201,7 +201,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
-                    dtick: 1,
+                    dtick: "D2",
                     autorange: true,
                     title: "Logremoval of individual<br>treatment steps",
                 },
@@ -300,7 +300,7 @@
             Plotly.react(this.divId, data, layout, this.config);
         }
         get irrigationThresholds(){
-            const name = "Required LRVs for<br>Class A irrigation<br>according to the EU<br>Water Reuse Reg. 2020/74";
+            const name = "Required LRVs for<br>Class A validation<br>according to the EU<br>Water Reuse Reg. 202/741";
             return [{
                 x: ['min', 'max'], y: [6, 6],
                 mode: "lines",

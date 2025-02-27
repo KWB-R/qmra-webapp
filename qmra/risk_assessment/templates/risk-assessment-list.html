@@ -161,13 +161,8 @@
     }
     document.addEventListener("DOMContentLoaded", function(){ toggleText()});
 
-    const colors = [['hsl(188, 100, 49)'], [], ['hsl(239, 100, 45)']];
-    var [l1, l2, l3] = [49, 0, 45];
-    for (let i of Array(3).keys()) {
-        [l1, l2, l3] = [(l1 + (40/3)) % 100, (l2 + 15) % 100, (l3 + (40/3)) % 100]
-        colors[0].push(`hsl(188, 100, ${l1})`)
-        colors[2].push(`hsl(239, 100, ${l3})`)
-    }
+    const colors = ['hsl(332, 100, 49)', 'hsl(239, 100, 45)', 'hsl(188, 100, 45)'];
+
     function getResults(id) {
         const content = fetch(`{% url 'assessment-result' %}?id=${id}`, {
             method: "GET",
@@ -193,7 +188,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
-                    dtick: 1,
+                    dtick: "D2",
                     autorange: true,
                     title: "infection prob",
                     automargin: true,
@@ -248,6 +243,7 @@
 
     }
     function asTraces(r, i, j) {
+        const color = colors[["Rotavirus", "Cryptosporidium parvum", "Campylobacter jejuni"].indexOf(r.pathogen)]
         return [{
             x: [r.ra_name],
             base: [r.infection_maximum_lrv_min],
@@ -256,7 +252,7 @@
             type: "bar",
             xaxis: "x",
             yaxis: "y",
-            marker: { color: colors[0][j], opacity: .75, fillmode: "overlay", pattern: {shape: "/"} },
+            marker: { color: color, opacity: .75, fillmode: "overlay", pattern: {shape: "/"} },
 
             showlegend: i === 0,
             offsetgroup: r.pathogen,
@@ -272,7 +268,7 @@
             type: "bar",
             xaxis: "x",
             yaxis: "y",
-            marker: { color: colors[2][j], opacity: .85, fillmode: "replace" },
+            marker: { color: color, opacity: .85, fillmode: "replace" },
             offsetgroup: r.pathogen,
             showlegend: i === 0,
             legendgroup: "mean range",
