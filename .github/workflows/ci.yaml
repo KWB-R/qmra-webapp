@@ -13,19 +13,19 @@ jobs:
   build-dev:
     needs: test
     name: build-dev
-    uses: ./.github/workflow/build.yaml
+    uses: ./.github/workflows/build.yaml
     with:
       environment: dev
   deploy-dev:
     needs: build-dev
     name: deploy-dev
-    uses: ./.github/workflow/deploy.yaml
+    uses: ./.github/workflows/deploy.yaml
     with:
       environment: dev
   build-prod:
     needs: test
     name: build-prod
-    uses: ./.github/workflow/build.yaml
+    uses: ./.github/workflows/build.yaml
     with:
       environment: prod
   deploy-prod:
@@ -33,6 +33,6 @@ jobs:
       - build-prod
       - deploy-dev
     name: deploy-prod
-    uses: ./.github/workflow/deploy.yaml
+    uses: ./.github/workflows/deploy.yaml
     with:
       environment: prod
