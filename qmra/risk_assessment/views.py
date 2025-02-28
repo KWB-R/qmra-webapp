@@ -18,16 +18,6 @@ from qmra.risk_assessment.user_models import UserExposureForm, UserTreatmentForm
     UserSource, UserTreatment
 
 
-# - treatments categories
-# - calculator layout
-# - finish comparison doc
-# - inflows and treatments in results
-# - refresh / loading
-# - consistent icons
-# - styling login / registration
-# - more tests
-# - no crispy...
-
 @transaction.atomic
 def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_form):
     risk_assessment = risk_assessment_form.save(commit=False)
@@ -47,6 +37,11 @@ def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_fo
         deleted.instance.delete()
     for treatment in treatments:
         treatment.risk_assessment = risk_assessment
+        treatment.train_index = -1
+        treatment.save()
+    # save the order of the treatments (:crossed_finger:...)
+    for i, treatment in enumerate(risk_assessment.treatments.all()):
+        treatment.train_index = i
         treatment.save()
     return risk_assessment
 
@@ -83,7 +78,7 @@ def risk_assessment_view(request, risk_assessment_id=None):
         if risk_assessment_id is not None:
             instance = RiskAssessment.objects.get(id=risk_assessment_id)
             inflows = instance.inflows.all()
-            treatments = instance.treatments.all()
+            treatments = instance.treatments.order_by("train_index").all()
         else:
             instance = None
             inflows = Inflow.objects.none()
@@ -98,7 +93,9 @@ def risk_assessment_view(request, risk_assessment_id=None):
             for r in ra.results.all():
                 r.delete()
             ra = assess_and_save_results(ra)
-            return HttpResponseRedirect(reverse("assessments"))
+            if request.GET.get("redirect", False):
+                return HttpResponseRedirect(reverse("assessments"))
+            return HttpResponseRedirect(reverse("assessment", kwargs=dict(risk_assessment_id=ra.id)))
         else:
             print(inflow_form.errors)
             print(treatment_form.errors)
@@ -144,7 +141,7 @@ def risk_assessment_view(request, risk_assessment_id=None):
                       risk_assessment_form=RiskAssessmentForm(instance=risk_assessment, prefix="ra").set_user(request.user),
                       inflow_form=InflowFormSet(queryset=risk_assessment.inflows.all(), prefix="inflow"),
                       add_treatment_form=AddTreatmentForm().set_user(request.user),
-                      treatment_form=TreatmentFormSet(queryset=risk_assessment.treatments.all(), prefix="treatments").set_user(request.user),
+                      treatment_form=TreatmentFormSet(queryset=risk_assessment.treatments.order_by("train_index").all(), prefix="treatments").set_user(request.user),
                       user_exposure_form=UserExposureForm(),
                       user_source_form=UserSourceForm(),
                       user_treatment_form=UserTreatmentForm(),

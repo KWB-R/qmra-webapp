@@ -337,7 +337,6 @@
                 [332, 100, 40],
             ];
             const c = colors[Math.floor((idx % 9) / 3)];
-            console.log(idx);
             c[2] = (c[2] + (idx % 3) * 19) % 100
             const trace = new TreatmentTrace(
             { ...formValues, color: `hsl(${c[0]}, ${c[1]}, ${c[2]})` });
@@ -348,9 +347,12 @@
                 },
                 () => {
                     form.delete()
-                    const startIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.viruses)
-                    const stopIndex = this.plot.data.indexOf(this.plot.traces[formValues.id].data.protozoa)
-                    this.plot.data.splice(startIndex, stopIndex + 1);
+                    const startIndex = Math.min(...[
+                        this.plot.data.indexOf(this.plot.traces[formValues.id].data.viruses),
+                        this.plot.data.indexOf(this.plot.traces[formValues.id].data.bacteria),
+                        this.plot.data.indexOf(this.plot.traces[formValues.id].data.protozoa)
+                    ])
+                    this.plot.data.splice(startIndex, 3);
                     const start = this.treatments.indexOf(values)
                     this.treatments.splice(start, 1);
                     delete this.plot.traces[formValues.id];

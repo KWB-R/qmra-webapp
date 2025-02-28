@@ -65,7 +65,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
     )
     infection_prob_fig.update_yaxes(type="log",
                                     showexponent='all',
-                                    dtick="D2",
+                                    dtick=1,
                                     exponentformat='power'
                                     )
     infection_prob_fig.add_hline(y=0.0001, line_dash="dashdot",
@@ -73,9 +73,9 @@ def risk_plots(risk_assessment_results, output_type="div"):
                                      text="tolerable risk level",
                                      textposition="end",
                                      yanchor="top",
-                                     font=dict(color="rgb(0, 3, 226)")
+                                     font=dict(color="#FFAA27")
                                  ),
-                                 line=dict(color="rgb(0, 3, 226)", width=3)
+                                 line=dict(color="#FFAA27", width=3)
                                  )
     infection_prob_fig.update_traces(
         marker_size=8
@@ -99,7 +99,7 @@ def risk_plots(risk_assessment_results, output_type="div"):
     )
     dalys_fig.update_yaxes(type="log",
                            showexponent='all',
-                           dtick="D2",
+                           dtick=1,
                            exponentformat='power'
                            )
     dalys_fig.add_hline(y=0.000001, line_dash="dashdot",
@@ -107,9 +107,9 @@ def risk_plots(risk_assessment_results, output_type="div"):
                             text="tolerable risk level",
                             textposition="end",
                             yanchor="top",
-                            font=dict(color="rgb(0, 3, 226)")
+                            font=dict(color="#FFAA27")
                         ),
-                        line=dict(color="rgb(0, 3, 226)", width=3)
+                        line=dict(color="#FFAA27", width=3)
                         )
     dalys_fig.update_traces(
         marker_size=8

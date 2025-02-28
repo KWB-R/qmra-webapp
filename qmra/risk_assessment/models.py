@@ -250,6 +250,7 @@ class Treatment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     risk_assessment = models.ForeignKey("RiskAssessment", related_name="treatments", on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
+    train_index = models.IntegerField(blank=False, null=False, default=0)
     bacteria_min = models.FloatField(blank=True, null=True)
     bacteria_max = models.FloatField(blank=True, null=True)
     viruses_min = models.FloatField(blank=True, null=True)

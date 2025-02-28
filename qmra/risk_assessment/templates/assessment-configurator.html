@@ -12,8 +12,13 @@
         {% include "treatments-form-fieldset.html" with treatment_form=treatment_form add_treatment_form=add_treatment_form %}
         {% if request.user.is_authenticated %}
         <div class="my-2  configurator-section" id="configurator-commands" style="z-index: 98">
-            <div class="col ">
-                <input id="save-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2" value="Save">
+            <div class="col-6">
+                <input id="save-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2" value="Save & Continue">
+            </div>
+            <div class="col-6">
+                <input id="save-and-exit-risk-assessment-btn" type="submit" class="btn btn-primary w-100 my-2"
+                       formaction="{%if risk_assessment is None %}{% url 'assessment' %}{% else %}{% url 'assessment' risk_assessment.id %}{% endif %}?redirect=True"
+                       value="Save & Exit">
             </div>
         </div>
         {% endif %}
@@ -69,7 +74,7 @@
             <div id="assessment-result" class="w-100 tab-pane fade show active" role="dialog" style="height: 100%;">
                 <div class="col mr-3" style="height: 100%;">
                     <div id="show-result" class="col" style="position: sticky; top: 50%">
-                        <button id="assess-risk-btn" class="btn btn-outline-secondary w-100 m-2">Show assessment
+                        <button id="assess-risk-btn" class="btn btn-outline-primary w-100 m-2">Show assessment
                             results
                         </button>
                     </div>

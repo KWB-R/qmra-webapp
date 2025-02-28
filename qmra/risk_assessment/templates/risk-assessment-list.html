@@ -22,7 +22,7 @@
     <div class="modal" id="comparison-modal" role="dialog">
         <div class="modal-dialog" role="document" style="max-width: 75vw !important;">
             <div class="modal-content">
-                <h4 class="mt-3 mx-5 text-center">Risk assessment comparison</h4>
+                <h4 class="mt-3 mx-5 text-center">Comparison of infection risk</h4>
                 <div id="comparison-plot" class="">
                 <div class="text-muted mx-5 my-3">For each pathogen, the outer boundaries of the barplot (line-fill) represent the maximum risk range, spanning from the highest value of the maximum risk scenario (using the lowest minimum LRVs) to the lowest value of the minimum risk scenario (using the highest maximum LRVs). The inner range (solid fill) shows the mean risk range, defined as the range between the mean of the individual maximum and the mean of the individual minimum risk scenario (difference in means). The mean of the distribution is commonly used as the preferred point estimate when assessing whether health targets are met.
                 </div>
@@ -77,7 +77,7 @@
         <div data-toggle="tooltip" title="click to show results" class="media-body assessment-summary" id="assessment-summary-{{assessment.id}}"
             data-assessment-id="{{assessment.id}}" style="">
             <h4 class="media-heading text-truncate kwb_headline">
-                {{assessment.name|title}}&nbsp
+                {{assessment.name}}&nbsp
             </h4>
             <div class="d-flex w-100 h-75">
                 <div class="w-75 text-truncate">
@@ -188,7 +188,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
-                    dtick: "D2",
+                    dtick: 1,
                     autorange: true,
                     title: "infection prob",
                     automargin: true,
@@ -196,14 +196,14 @@
                 },
                 shapes: [{
                     type: 'line',
-                    label: {text: "tolerable risk level", font: {color: 'rgb(10, 10, 10)', size: 14}, textposition: "end"},
+                    label: {text: "tolerable risk level", font: {color: '#FFAA27', size: 14}, textposition: "end"},
                     x0: 0,
                     y0: .0001,
                     x1: 1,
                     y1: .0001,
                     xref: "paper",
                     line: {
-                        color: 'rgb(10, 10, 10)',
+                        color: '#FFAA27',
                         width: 2,
                         dash: 'dashdot'
                     }
