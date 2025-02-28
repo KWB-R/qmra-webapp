@@ -1,0 +1,38 @@
+---
+name: CICD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: test app
+    uses: ./.github/workflows/test.yaml
+  build-dev:
+    needs: test
+    name: build-dev
+    uses: ./.github/workflow/build.yaml
+    with:
+      environment: dev
+  deploy-dev:
+    needs: build-dev
+    name: deploy-dev
+    uses: ./.github/workflow/deploy.yaml
+    with:
+      environment: dev
+  build-prod:
+    needs: test
+    name: build-prod
+    uses: ./.github/workflow/build.yaml
+    with:
+      environment: prod
+  deploy-prod:
+    needs:
+      - build-prod
+      - deploy-dev
+    name: deploy-prod
+    uses: ./.github/workflow/deploy.yaml
+    with:
+      environment: prod

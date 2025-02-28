@@ -6,7 +6,7 @@ adduser k8admin
 usermod -aG sudo k8admin
 su - k8admin
 
-sudo apt update && apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 
 # install microk8s
 sudo snap install microk8s --classic --channel=1.31
@@ -40,3 +40,13 @@ source .bash_aliases
 mk8 enable ingress cert-manager hostpath-storage metrics-server
 mk8 disable ha-cluster
 #observability dashboard hostpath-storage
+
+# firewall settings:
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow https
+#ufw allow http #necessary for certbot to obtain certificate
+sudo ufw enable
+# needed by mk8s hostpath-provisionner:
+sudo ufw default allow routed
