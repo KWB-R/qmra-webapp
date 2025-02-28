@@ -16,18 +16,21 @@ jobs:
     uses: ./.github/workflows/build.yaml
     with:
       environment: dev
+    secrets: inherit
   deploy-dev:
     needs: build-dev
     name: deploy-dev
     uses: ./.github/workflows/deploy.yaml
     with:
       environment: dev
+    secrets: inherit
   build-prod:
     needs: test
     name: build-prod
     uses: ./.github/workflows/build.yaml
     with:
       environment: prod
+    secrets: inherit
   deploy-prod:
     needs:
       - build-prod
@@ -36,3 +39,4 @@ jobs:
     uses: ./.github/workflows/deploy.yaml
     with:
       environment: prod
+    secrets: inherit
