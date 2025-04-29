@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block body %}
+<div class="container w-75 my-4">
+    <h3>Imprint</h3>
+    <img height="100px" class="my-5" src="{% static 'img/qmra-full-logo.svg' %}">
+    <h2>Funding</h2><br><br>
+    <div class="row">
+        <div class="col">
+            <div style="display: flex; align-items: center; justify-content: center; height: 300px"><img style="display: block; margin: auto" width="90%" src="{% static 'img/interreg.png' %}"></div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 300px"><img style="display: block; margin: auto" width="90%" src="{% static 'img/nextGen.png' %}"></div>
+        </div>
+        <div class="col">
+            <div style="display: flex; align-items: center; justify-content: center; height: 300px"><img style="display: block; margin: auto" width="90%" src="{% static 'img/ultimate.png' %}"></div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 300px"><img style="display: block; margin: auto" width="90%" src="{% static 'img/AquaNES.png' %}"></div>
+        </div>
+    </div>
+    <h2>Contact</h2>
+    <b>Wolfgang Seis</b><br>
+    Kompetenzzentrum Wasser Berlin<br>
+    Wissenschaftlicher Mitarbeiter<br>
+    <br>
+    wolfgang.seis@kompetenz-wasser.de<br>
+    +49 (0) 30 53 653 807
+    <br>
+    <br>
+    <b>Pia Schumann</b><br>
+    Kompetenzzentrum Wasser Berlin<br>
+    Wissenschaftliche Mitarbeiterin<br>
+    <br>
+    pia.schumann@kompetenz-wasser.de<br>
+    +49 (0) 30 53 653 835
+</div>
+{% endblock %}

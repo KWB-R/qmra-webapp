@@ -22,8 +22,8 @@ def faqs(request):
     return render(request, "faqs.html")
 
 
-def impressum(request):
-    return render(request, "impressum.html")
+def imprint(request):
+    return render(request, "imprint.html")
 
 
 def health(request):

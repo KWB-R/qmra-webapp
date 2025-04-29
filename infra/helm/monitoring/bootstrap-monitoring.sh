@@ -10,3 +10,6 @@ helm install grafana grafana/grafana -n monitoring \
     --set persistence.storageClassName=microk8s-hostpath
 helm upgrade --install loki grafana/loki-stack -n monitoring \
     --set fluent-bit.enabled=false,promtail.enabled=true,grafana.enabled=false,loki.image.tag=2.9.3
+
+# get the grafana password:
+# microk8s kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
