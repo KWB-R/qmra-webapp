@@ -85,7 +85,7 @@
                     <h4>Exposure: <span id="exposure-info-name"></span></h4>
                     <div class="test-muted small mb-4" id="exposure-info-description"></div>
                     <div class="mb-4" id="exposure-info-values"></div>
-                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="exposure-info-reference" href=""></a>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="exposure-info-reference" href="" target="_blank" rel="noopener noreferrer"></a>
                     </div>
                 </div>
                 <div id="source-info">
@@ -115,7 +115,7 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="source-info-reference" href=""></a>
+                    <div class="small mb-4"><sup>[1]</sup>values taken from <a id="source-info-reference" href="" target="_blank" rel="noopener noreferrer"></a>
                     </div>
                 </div>
                 <div id="treatment-info">
@@ -156,6 +156,8 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (!form.checkValidity()) { form.reportValidity(); return; }
+                const accepted_redirect = confirm("Any unsaved changes to your risk assessment will be lost.\nAre you sure you want to continue?")
+                if (!accepted_redirect) return;
                 const frm = new FormData(form);
                 return fetch(form.action, {
                     method: "POST",

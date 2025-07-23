@@ -70,7 +70,7 @@
             const values = treatmentValues;
             const template = document.createElement("template");
             var innerHTML = `
-            <div class='pr-2 mt-2' ${isValid ? "id='summary-" + values.id + "'" : ""} style='position: relative; display: flex; height: 42px; min-width: 100%; ${isValid ? "" : "border: solid 2px var(--danger);"}'>
+            <div class='pr-2 mt-2' ${isValid ? "id='summary-" + values.id + "'" : ""} style='position: relative; display: flex; height: 42px; ${isValid ? "" : "border: solid 2px var(--danger);"}'>
                 <button id='focus-${values.id}' class='btn btn-secondary text-truncate w-100'>${values.name}</button>
                 <button id='delete-${values.id}' class='btn' style='position: absolute; top: -22px; right: -15px; opacity: 1; z-index: 90;'><img src='/static/img/close.svg'></button>
             </div>
@@ -152,19 +152,19 @@
         }
     }
     class TreatmentTrace {
-        constructor({ name = '', bacteria_min = 0, viruses_min = 0, protozoa_min = 0, bacteria_max = 0, viruses_max = 0, protozoa_max = 0, color = "#FFFFFF" }) {
+        constructor({ id = '', name = '', bacteria_min = 0, viruses_min = 0, protozoa_min = 0, bacteria_max = 0, viruses_max = 0, protozoa_max = 0, color = "#FFFFFF" }) {
             this.data = {
                 viruses: {
                     name: name, x: ['min', 'max'], y: [viruses_min, viruses_max], type: 'bar',
-                    xaxis: "x", yaxis: "y", marker: { color: color }, showlegend: true
+                    xaxis: "x", yaxis: "y", marker: { color: color }, showlegend: true, legendgroup: id
                 },
                 bacteria: {
                     name: name, x: ['min', 'max'], y: [bacteria_min, bacteria_max], type: 'bar',
-                    xaxis: "x2", yaxis: "y", marker: { color: color }, showlegend: false
+                    xaxis: "x2", yaxis: "y", marker: { color: color }, showlegend: false, legendgroup: id
                 },
                 protozoa: {
                     name: name, x: ['min', 'max'], y: [protozoa_min, protozoa_max], type: 'bar',
-                    xaxis: "x3", yaxis: "y", marker: { color: color }, showlegend: false
+                    xaxis: "x3", yaxis: "y", marker: { color: color }, showlegend: false, legendgroup: id
                 }
             }
             this.updates = {
@@ -202,7 +202,7 @@
                     type: 'log',
                     exponentformat: "power",
                     dtick: "D2",
-                    autorange: true,
+                    range: [0.0000001, .9],
                     title: "Logremoval of individual<br>treatment steps",
                 },
                 xaxis: {
@@ -277,18 +277,20 @@
         }
         update() {
             this.layout.datarevision += 1;
-            const data = [...this.data, ...(this.withIrrigationThresholds ? this.irrigationThresholds : [])];
+            const name = "Required LRVs for<br>Class A validation<br>according to the EU<br>Water Reuse Reg. 2020/741";
+            const data = [...this.data];
             const layout = {...this.layout, ...(this.withIrrigationThresholds ?
             {shapes: [
                 {
                     type: "line",
                     xref: "x", yref: "y", x0: -0.5, x1: 1.5, y0: 6, y1: 6,
-                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"}
+                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"},
+                    name: name, showlegend: true
                 },
                 {
                     type: "line",
                     xref: "x2", yref: "y", x0: -0.5, x1: 1.5, y0: 5, y1: 5,
-                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"}
+                    line: {color: "hsl(332, 100, 49)", dash: "dashdot"},
                 },
                 {
                     type: "line",
@@ -297,12 +299,17 @@
                 }
                 ]} : {})
                 }
+            if (data.length){
+                let lrv_sum = 0;
+                data.map(d => { return Math.max(...d.y); }).forEach(x => { lrv_sum += x });
+                layout.yaxis.range[1] = Math.max(layout.yaxis.range[1], 1.05 * Math.log10(lrv_sum));
+            }
             Plotly.react(this.divId, data, layout, this.config);
         }
         get irrigationThresholds(){
             const name = "Required LRVs for<br>Class A validation<br>according to the EU<br>Water Reuse Reg. 2020/741";
             return [{
-                x: ['min', 'max'], y: [6, 6],
+                x: ['min', 'max'], y: [0, 0],
                 mode: "lines",
                 line: {color: "hsl(332, 100, 49)", dash: "dashdot"},
                 xaxis: "x", yaxis: "y", name: name, showlegend: true

@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   name: {{ .Values.configmap_name }}
 data:
-  DEBUG: "true"
+  DEBUG: {{ .values.debug }}
   DOMAIN_NAME: {{ .Values.domain }}
   SQLITE_PATH: {{ .Values.sqlite.mount_path }}
   STATIC_ROOT: {{ .Values.static.mount_path }}

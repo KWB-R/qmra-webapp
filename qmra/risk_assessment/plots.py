@@ -31,7 +31,8 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.infection_minimum_lrv_q3, r.infection_maximum_lrv_q3],
             median=[r.infection_minimum_lrv_median, r.infection_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=COLORS[r.pathogen])
+            marker=dict(color=COLORS[r.pathogen]),
+            hoverinfo="y"
         ))
         # infection_prob_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
         dalys_fig.add_trace(go.Box(
@@ -42,7 +43,8 @@ def risk_plots(risk_assessment_results, output_type="div"):
             q3=[r.dalys_minimum_lrv_q3, r.dalys_maximum_lrv_q3],
             median=[r.dalys_minimum_lrv_median, r.dalys_maximum_lrv_median],
             name=r.pathogen,
-            marker=dict(color=COLORS[r.pathogen])
+            marker=dict(color=COLORS[r.pathogen]),
+            hoverinfo="y"
         ))
         # dalys_fig.add_annotation(text=r.pathogen, showarrow=False, xref="paper", yref="paper", x=(i+1)/7, y=0)
 
@@ -73,9 +75,9 @@ def risk_plots(risk_assessment_results, output_type="div"):
                                      text="tolerable risk level",
                                      textposition="end",
                                      yanchor="top",
-                                     font=dict(color="#FFAA27")
+                                     font=dict(color="#FF0000")
                                  ),
-                                 line=dict(color="#FFAA27", width=3)
+                                 line=dict(color="#FF0000", width=1)
                                  )
     infection_prob_fig.update_traces(
         marker_size=8
@@ -107,14 +109,24 @@ def risk_plots(risk_assessment_results, output_type="div"):
                             text="tolerable risk level",
                             textposition="end",
                             yanchor="top",
-                            font=dict(color="#FFAA27")
+                            font=dict(color="#FF0000")
                         ),
-                        line=dict(color="#FFAA27", width=3)
+                        line=dict(color="#FF0000", width=1)
                         )
     dalys_fig.update_traces(
         marker_size=8
     )
     if output_type == "div":
-        return plot(infection_prob_fig, output_type="div", config={"displaylogo": False, "modeBarButtonsToRemove": ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']}, include_plotlyjs=False), \
-            plot(dalys_fig, output_type="div", config={"displaylogo": False, "modeBarButtonsToRemove": ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']}, include_plotlyjs=False)
+        return plot(infection_prob_fig, output_type="div", config={"displaylogo": False,
+                                                                   "modeBarButtonsToRemove": ['zoom2d', 'pan2d',
+                                                                                              'select2d', 'lasso2d',
+                                                                                              'zoomIn2d', 'zoomOut2d',
+                                                                                              'autoScale2d',
+                                                                                              'resetScale2d']},
+                    include_plotlyjs=False), \
+            plot(dalys_fig, output_type="div", config={"displaylogo": False,
+                                                       "modeBarButtonsToRemove": ['zoom2d', 'pan2d', 'select2d',
+                                                                                  'lasso2d', 'zoomIn2d', 'zoomOut2d',
+                                                                                  'autoScale2d', 'resetScale2d']},
+                 include_plotlyjs=False)
     return infection_prob_fig.to_image(format=output_type), dalys_fig.to_image(format=output_type)

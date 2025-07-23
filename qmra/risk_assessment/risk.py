@@ -14,7 +14,8 @@ def get_annual_risk(
         n_events: int = 10_000,
         n_years: int = 1000,
 ):
-    inflow = np.random.normal(
+    generator = np.random.default_rng(seed=42)
+    inflow = generator.normal(
         loc=(np.log10(inflow_min + 10 ** (-8)) + np.log10(inflow_max)) / 2,
         scale=(np.log10(inflow_max) - np.log10(inflow_min + 10 ** (-8))) / 4,
         size=n_events
@@ -23,7 +24,7 @@ def get_annual_risk(
     outflow = inflow - lrv
     dose = (10 ** outflow) * volume_per_event
     event_probs = distribution.pdf(dose)
-    event_samples = np.random.choice(event_probs, size=(n_years, events_per_year), replace=True)
+    event_samples = generator.choice(event_probs, size=(n_years, events_per_year), replace=True)
     return 1 - np.prod(1 - event_samples, axis=1)
 
 
