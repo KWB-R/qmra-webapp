@@ -15,7 +15,7 @@ jobs:
     - name: Declare image's tag
       shell: bash
       run: |
-        echo "sha_short=$(echo $GITHUB_SHA | cut -c 1-8)" >> "$GITHUB_ENV"
+        echo "sha_short=$(echo $GITHUB_SHA | cut -c 1-8)" >> $GITHUB_ENV
     - name: Deploy
       uses: appleboy/ssh-action@v1.1.0
       env:
