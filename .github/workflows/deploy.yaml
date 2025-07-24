@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
     - name: Declare image's tag
       shell: bash
       run: |
