@@ -6,7 +6,7 @@ namespace: qmra
 domain: dev.qmra.org
 monitoring_domain: dev2.qmra.org
 replicaCount: 1
-debug: "true"
+debug: true
 
 app_secret_key:
   secret_name: qmra-secret-key-secret

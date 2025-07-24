@@ -15,7 +15,7 @@ jobs:
     - name: Deploy
       uses: appleboy/ssh-action@v1.1.0
       env:
-        sha_short: $(git rev-parse --short "$GITHUB_SHA")
+        sha_short: "$(git rev-parse --short '$GITHUB_SHA')"
       with:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
@@ -25,4 +25,4 @@ jobs:
           cd ${{ secrets.DEPLOY_PATH }} && git pull
           microk8s ctr image import img.tar && rm img.tar
           cd infra/helm
-          microk8s helm upgrade -f ./qmra/${{ inputs.environment }}.values.yaml qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }},image.tag=$sha_short
+          microk8s helm upgrade -f ./qmra/${{ inputs.environment }}.values.yaml qmra ./qmra -n qmra --set app_secret_key.value=${{ secrets.APP_SECRET_KEY }},image.tag="$sha_short"
