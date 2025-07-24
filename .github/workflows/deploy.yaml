@@ -12,16 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
     - name: Declare image's tag
       shell: bash
       run: |
-        echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+        echo "sha_short=$(echo $GITHUB_SHA | cut -c 1-8)" >> $GITHUB_ENV
     - name: Deploy
       uses: appleboy/ssh-action@v1.1.0
-      env:
-        sha_short: ${{ env.sha_short }}
       with:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
