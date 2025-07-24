@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+    - name: Declare image's tag
+      shell: bash
+      run: |
+        echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
     - name: Deploy
       uses: appleboy/ssh-action@v1.1.0
       with:
