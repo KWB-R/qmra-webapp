@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "app.fullname" . }}-qmra_default-file-pv
+  name: {{ include "app.fullname" . }}-qmra-default-file-pv
 spec:
   capacity:
     storage: 10Gi
@@ -43,7 +43,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: microk8s-hostpath
   hostPath:
-    path: {{ .Values.qmra_default.hostpath }}
+    path: {{ .Values.qmra-default.hostpath }}
     type: FileOrCreate
 ---
 apiVersion: v1
@@ -77,12 +77,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "app.fullname" . }}-qmra_default-file-pvc
+  name: {{ include "app.fullname" . }}-qmra-default-file-pvc
 spec:
   accessModes:
     - ReadWriteMany
   volumeMode: Filesystem
-  volumeName: {{ include "app.fullname" . }}-qmra_default-file-pv
+  volumeName: {{ include "app.fullname" . }}-qmra-default-file-pv
   resources:
     requests:
       storage: 1Gi
