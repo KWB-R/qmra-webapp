@@ -36,7 +36,7 @@ metadata:
   name: {{ include "app.fullname" . }}-qmra-default-file-pv
 spec:
   capacity:
-    storage: 10Gi
+    storage: 2Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany

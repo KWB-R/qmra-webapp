@@ -37,13 +37,13 @@ spec:
             - name: sqlite
               mountPath: {{ .Values.sqlite.mount_path }}
           command: [ python, manage.py, migrate ]
-        - name: migrate_qmra_default
+        - name: migrate-qmra-default
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           envFrom:
             - configMapRef:
                 name: {{ .Values.configmap_name }}
           volumeMounts:
-            - name: qmra_default
+            - name: qmra-default
               mountPath: {{ .Values.qmra_default.mount_path }}
           command: [ python, manage.py, migrate, --database, qmra ]
       containers:
@@ -77,7 +77,7 @@ spec:
           volumeMounts:
               - name: sqlite
                 mountPath: {{ .Values.sqlite.mount_path }}
-              - name: qmra_default
+              - name: qmra-default
                 mountPath: {{ .Values.qmra_default.mount_path }}
               - name: static
                 mountPath: {{ .Values.static.mount_path }}
@@ -85,7 +85,7 @@ spec:
         - name: sqlite
           persistentVolumeClaim:
             claimName: {{ include "app.fullname" . }}-sqlite-file-pvc
-        - name: qmra_default
+        - name: qmra-default
           persistentVolumeClaim:
             claimName: {{ include "app.fullname" . }}-qmra-default-file-pvc
         - name: static
