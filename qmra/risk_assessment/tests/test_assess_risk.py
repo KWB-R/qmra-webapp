@@ -1,6 +1,7 @@
 """test computation of risk assessment"""
 import warnings
 
+from django.core.management import call_command
 from django.test import TestCase
 from assertpy import assert_that
 
@@ -11,6 +12,13 @@ from qmra.user.models import User
 
 
 class TestAssesRisk(TestCase):
+    databases = ["default", "qmra"]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        call_command("seed_default_db")
+
     def test_with_standard_pathogens_and_all_treatments(self):
         given_user = User.objects.create_user("test-user", "test-user@test.com", "password")
         given_user.save()
@@ -106,7 +114,7 @@ class TestAssesRisk(TestCase):
         given_inflows = [
             Inflow.objects.create(
                 risk_assessment=given_ra,
-                pathogen=inflow.pathogen_name,
+                pathogen=inflow.pathogen.name,
                 min=inflow.min, max=inflow.max
             ) for inflow in QMRAInflows.get("groundwater")
         ]
