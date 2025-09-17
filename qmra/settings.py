@@ -100,7 +100,7 @@ DATABASES = {
     },
     'qmra': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv("SQLITE_PATH", BASE_DIR / 'default_qmra_data.db'),
+        'NAME': os.getenv("DEFAULT_QMRA_PATH", BASE_DIR / 'default_qmra_data.db'),
     }
 }
 DATABASE_ROUTERS = ('qmra.risk_assessment.dbrouter.DBRouter',)

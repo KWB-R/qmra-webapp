@@ -7,6 +7,7 @@ data:
   DEBUG: "{{ .Values.debug }}"
   DOMAIN_NAME: {{ .Values.domain }}
   SQLITE_PATH: {{ .Values.sqlite.mount_path }}
+  DEFAULT_QMRA_PATH: {{ .Values.qmra_default.mount_path }}
   STATIC_ROOT: {{ .Values.static.mount_path }}
 ---
 apiVersion: v1
