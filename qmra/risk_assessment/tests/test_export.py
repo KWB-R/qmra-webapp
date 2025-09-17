@@ -5,7 +5,8 @@ from django.test import TestCase
 import pandas as pd
 
 from qmra.risk_assessment import exports
-from qmra.risk_assessment.models import RiskAssessment, Inflow, Treatment, DefaultTreatments
+from qmra.risk_assessment.models import RiskAssessment, Inflow, Treatment
+from qmra.risk_assessment.qmra_models import QMRATreatments
 from qmra.risk_assessment.risk import assess_risk
 from qmra.user.models import User
 
@@ -40,7 +41,7 @@ class TestResultExport(TestCase):
         ]
         given_treatments = [
             Treatment.from_default(t, given_ra)
-            for t in list(DefaultTreatments.data.values())[:3]
+            for t in list(QMRATreatments.data.values())[:3]
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
         given_ra.treatments.set(given_treatments, bulk=False)

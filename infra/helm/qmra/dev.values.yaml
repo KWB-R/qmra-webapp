@@ -17,6 +17,10 @@ sqlite:
   mount_path: /var/lib/qmra/qmra.db
   hostpath: /var/lib/qmra/qmra.db
 
+qmra_default:
+  mount_path: /var/lib/qmra/default_qmra_data.db
+  hostpath: /var/lib/qmra/default_qmra_data.db
+
 static:
   mount_path: /var/cache/qmra/static
   hostpath: /var/cache/qmra/static

@@ -45,6 +45,11 @@
             <li class="nav-item active">
                 <a class=" nav-link text_link_kwb " target="_blank" rel="noopener noreferrer" href="https://qmra.readthedocs.io/en/latest/">About</a>
             </li>
+            {% if user.is_staff %}
+            <li class="nav-item active">
+                <a class=" nav-link text_link_kwb " target="_blank" rel="noopener noreferrer" href="/admin">Admin</a>
+            </li>
+            {% endif %}
         </ul>
     </div>
 </nav>

@@ -4,8 +4,8 @@ import warnings
 from django.test import TestCase
 from assertpy import assert_that
 
-from qmra.risk_assessment.models import RiskAssessment, Inflow, Treatment, DefaultTreatments, RiskAssessmentResult, \
-    DefaultPathogens, DefaultInflows
+from qmra.risk_assessment.models import RiskAssessment, Inflow, Treatment, RiskAssessmentResult
+from qmra.risk_assessment.qmra_models import QMRAPathogens, QMRAInflows, QMRATreatments
 from qmra.risk_assessment.risk import assess_risk
 from qmra.user.models import User
 
@@ -39,7 +39,7 @@ class TestAssesRisk(TestCase):
         ]
         given_treatments = [
             Treatment.from_default(t, given_ra)
-            for _, t in DefaultTreatments.data.items()
+            for _, t in QMRATreatments.data.items()
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
         given_ra.treatments.set(given_treatments, bulk=False)
@@ -66,11 +66,11 @@ class TestAssesRisk(TestCase):
                 risk_assessment=given_ra,
                 pathogen=p,
                 min=0.1, max=0.2
-            ) for p, _ in DefaultPathogens.data.items()
+            ) for p, _ in QMRAPathogens.data.items()
         ]
         given_treatments = [
-            Treatment.from_default(DefaultTreatments.get("Conventional clarification"), given_ra),
-            Treatment.from_default(DefaultTreatments.get("Slow sand filtration"), given_ra),
+            Treatment.from_default(QMRATreatments.get("Conventional clarification"), given_ra),
+            Treatment.from_default(QMRATreatments.get("Slow sand filtration"), given_ra),
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
         given_ra.treatments.set(given_treatments, bulk=False)
@@ -108,10 +108,10 @@ class TestAssesRisk(TestCase):
                 risk_assessment=given_ra,
                 pathogen=inflow.pathogen_name,
                 min=inflow.min, max=inflow.max
-            ) for inflow in DefaultInflows.get("groundwater")
+            ) for inflow in QMRAInflows.get("groundwater")
         ]
         given_treatments = [
-            Treatment.from_default(DefaultTreatments.get("Primary treatment"), given_ra)
+            Treatment.from_default(QMRATreatments.get("Primary treatment"), given_ra)
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
         given_ra.treatments.set(given_treatments, bulk=False)
