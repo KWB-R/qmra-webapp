@@ -43,7 +43,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: microk8s-hostpath
   hostPath:
-    path: {{ .Values.qmra-default.hostpath }}
+    path: {{ .Values.qmra_default.hostpath }}
     type: FileOrCreate
 ---
 apiVersion: v1
