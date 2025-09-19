@@ -11,6 +11,29 @@ from django.forms import model_to_dict
 from django.utils.functional import classproperty
 
 
+"""
+IMPORTANT NOTE:
+
+qmra has 2 databases:
+1. 'default' contains the users' defaults and risk_assessment data
+2. 'qmra' contains the KWB's defaults and is managed only by KWB
+
+to bootstrap the 'qmra' db:
+```
+python manage.py collect_default_static_entities  # create data/default-*.json from the original QMRA data (.csv in raw_public_data/)
+python manage.py seed_default_db  # ingest the json into the 'qmra' db
+```
+additionally, 
+```
+python manage.py export_default
+```
+re-create the json **from** the 'qmra' db and is called every time an admin saves something in the admin page
+
+In order to provide the correct choices in server-side rendered forms, this module exposes `StaticEntities` models.
+These classes read the .json files (not the 'qmra' db!) and scrape the keys for valid choices.
+
+"""
+
 class ExponentialDistribution:
     def __init__(self, k):
         self.k = k
@@ -48,9 +71,10 @@ class StaticEntity(metaclass=abc.ABCMeta):
 
     @classproperty
     def raw_data(cls) -> dict[str, dict[str, Any]]:
-        if cls._raw_data is None:
-            with open(cls.source, "r") as f:
-                cls._raw_data = json.load(f)
+        # because an admin can change this data while the app runs,
+        # we need _raw_data to be loaded dynamically...
+        with open(cls.source, "r") as f:
+            cls._raw_data = json.load(f)
         return cls._raw_data
 
     @classproperty
@@ -197,8 +221,6 @@ class QMRAPathogens(StaticEntity):
 
 
 class QMRAInflow(models.Model):
-    # pathogen_name: str
-    # source_name: str
     source = models.ForeignKey(QMRASource, on_delete=models.CASCADE)
     pathogen = models.ForeignKey(QMRAPathogen, on_delete=models.CASCADE)
     min: float = models.FloatField()
@@ -208,11 +230,10 @@ class QMRAInflow(models.Model):
     @classmethod
     def from_dict(cls, data: dict):
         return QMRAInflow(
-            # pathogen_name=data["pathogen_name"],
-            # source_name=data["source_name"],
             pk=data["id"],
             source=QMRASource.objects.get(name=data["source_name"]),
             pathogen=QMRAPathogen.objects.get(name=data["pathogen_name"]),
+            reference_id=data.get("ReferenceID", None),
             min=data["min"],
             max=data["max"]
         )
@@ -221,6 +242,7 @@ class QMRAInflow(models.Model):
         data = model_to_dict(self, exclude={"source", "pathogen"})
         data["source_name"] = self.source.name
         data["pathogen_name"] = self.pathogen.name
+        data["ReferenceID"] = str(self.reference.pk) if self.reference is not None else None
         data["id"] = self.pk
         return data
 
@@ -319,7 +341,7 @@ class QMRAExposure(models.Model):
     def to_dict(self):
         data = model_to_dict(self)
         data["id"] = self.pk
-        data["ReferenceId"] = str(self.reference.pk)
+        data["ReferenceID"] = str(self.reference.pk) if self.reference is not None else None
         return data
 
 

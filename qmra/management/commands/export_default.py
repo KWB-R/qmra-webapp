@@ -13,8 +13,8 @@ def save_as_json(data, destination: str):
 class Command(BaseCommand):
     help = "export the default data of qmra to json files for serving them as statics"
 
-    def add_arguments(self, parser):
-        parser.add_argument('--format', type=str, help="'json' (default) or 'csv' ", default="json")
+    # def add_arguments(self, parser):
+    #     parser.add_argument('--format', type=str, help="'json' (default) or 'csv' ", default="json")
 
     def handle(self, *args, **options):
         save_as_json(
@@ -22,7 +22,7 @@ class Command(BaseCommand):
             QMRASources.source
         )
         save_as_json(
-            {pathogen.name: model_to_dict(pathogen) for pathogen in QMRAPathogen.objects.all()},
+            {pathogen.name: pathogen.to_dict() for pathogen in QMRAPathogen.objects.all()},
             QMRAPathogens.source
         )
         save_as_json(

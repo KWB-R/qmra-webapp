@@ -208,10 +208,11 @@ TreatmentFormSetBase = modelformset_factory(
 
 
 class AddTreatmentForm(forms.Form):
-    select_treatment = forms.ChoiceField(choices=QMRATreatments.choices(), widget=forms.Select())
+    select_treatment = forms.ChoiceField(choices=[], widget=forms.Select())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["select_treatment"].choices = QMRATreatments.choices()
         self.fields["select_treatment"].required = False
         self.fields["select_treatment"].label = "Select treatment to add"
         self.helper = FormHelper()
@@ -235,9 +236,13 @@ class TreatmentFormSet(TreatmentFormSetBase):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        self.form.base_fields["name"].choices = QMRATreatments.choices()
+        choices = QMRATreatments.choices()
+        self.form.base_fields["name"].choices = choices
         if not kwargs.get("queryset", False):
             self.queryset = Treatment.objects.none()
+        else:
+            # make sure the treatment name is still valid even it has been changed in the default
+            self.form.base_fields["name"].choices += [(t.name, t.name) for t in kwargs["queryset"] if t.name not in choices]
 
     def set_user(self, user: User):
         self.form.base_fields["name"].choices = [
