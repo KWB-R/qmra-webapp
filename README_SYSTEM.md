@@ -30,6 +30,13 @@ The QMRA models rely on curated microbiological and treatment performance data s
 - **Raw public datasets (`raw_public_data/`)** – CSV files sourced from published literature and guidelines providing pathogen characteristics, dose-response parameters, water sources, inflow concentrations, treatment log removals, and exposure assumptions.【F:raw_public_data/tbl_pathogen.csv†L1-L2】【F:raw_public_data/tbl_treatment.csv†L1-L2】 These serve as the authoritative reference tables.
 - **Static JSON datasets (`qmra/static/data/`)** – The application loads default pathogens, inflows, treatments, exposures, sources, and citations from JSON files embedded in the static directory.【F:qmra/static/data/default-pathogens.json†L1-L20】 They are derived from the raw CSV inputs via the `collect_static_default_entities` management command, which merges, filters, and normalizes the raw tables into the JSON structures consumed by the UI forms.【F:qmra/management/commands/collect_static_default_entities.py†L1-L69】【F:qmra/management/commands/collect_static_default_entities.py†L94-L121】
 
+### Runtime data loading
+
+- **Default reference values** – When users open the configurator, the front-end JavaScript fetches the static JSON bundles (for example `default-treatments.json`, `default-exposures.json`, `default-sources.json`) through Django's static file handler to populate the dropdowns and helper panels.【F:qmra/risk_assessment/templates/treatments-form-js.html†L2-L452】【F:qmra/risk_assessment/templates/risk-assessment-form-js.html†L44-L97】【F:qmra/risk_assessment/templates/inflows-form-js.html†L2-L203】 No database lookups are required for these defaults at runtime—the values are read directly from the generated static assets.
+- **User-defined entries and saved assessments** – Any data a signed-in user creates (custom sources, exposures, treatments, and complete risk assessments) is persisted in the PostgreSQL database via the Django ORM and is exposed back to the UI through JSON endpoints such as `/sources`, `/inflows`, and `/exposures` that combine database rows with the static defaults.【F:qmra/risk_assessment/views.py†L43-L140】【F:qmra/risk_assessment/templates/inflows-form-js.html†L166-L198】【F:qmra/risk_assessment/templates/risk-assessment-form-js.html†L80-L93】
+
+In short, the shipped literature-based reference data is served from static JSON generated from the CSVs, while user-generated content and saved configurations flow through the database connection.
+
 To refresh the static defaults when raw data changes, run:
 
 ```bash
