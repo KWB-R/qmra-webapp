@@ -31,6 +31,22 @@ spec:
     type: FileOrCreate
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "app.fullname" . }}-qmra-default-file-pv
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: microk8s-hostpath
+  hostPath:
+    path: {{ .Values.qmra_default.hostpath }}
+    type: FileOrCreate
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "app.fullname" . }}-static-files-pvc
@@ -53,6 +69,20 @@ spec:
     - ReadWriteMany
   volumeMode: Filesystem
   volumeName: {{ include "app.fullname" . }}-sqlite-file-pv
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: microk8s-hostpath
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "app.fullname" . }}-qmra-default-file-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  volumeName: {{ include "app.fullname" . }}-qmra-default-file-pv
   resources:
     requests:
       storage: 1Gi

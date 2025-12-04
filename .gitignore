@@ -4,7 +4,9 @@ venv/
 .idea
 .static
 qmra.db
+default_qmra_data.db
 qmra-prod.db
 dump*
 prod-migrations/
 *.tar
+.vscode
