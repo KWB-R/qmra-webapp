@@ -51,7 +51,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(f"{reverse('index')}?isLogin=1")
         else:
             return render(
                 request,

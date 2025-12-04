@@ -9,3 +9,4 @@ qmra-prod.db
 dump*
 prod-migrations/
 *.tar
+.vscode
