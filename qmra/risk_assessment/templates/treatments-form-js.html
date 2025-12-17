@@ -103,7 +103,11 @@
             btn.classList.add("selected-treatment");
             this.$div.querySelector(`#delete-${values.id}`).addEventListener("click", ev => {
                 ev.preventDefault();
-                this.$div.querySelector(`#summary-${values.id}`).remove();
+                var summary = this.$div.querySelector(`#summary-${values.id}`);
+                if (summary === null){
+                    summary = ev.target.parentElement.parentElement.parentElement;
+                }
+                summary.remove()
                 if (this.$div.children.length === 0) {
                     this.$div.innerHTML = "None"
                 }
