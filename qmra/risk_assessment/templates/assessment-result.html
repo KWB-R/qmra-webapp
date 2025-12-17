@@ -1,5 +1,24 @@
 <div class="p-4">
     <h4 class="mt-3 mx-5 text-center">Result</h4>
+    {% if max_lrv_warning_for|length %}
+    <div class="p-2 min-risk mb-3" style="font-size: 90%;">
+        <p><strong>Warning!</strong></p>
+        <p>Some treatment(s) in this risk assessment has one or more maximum LRV above 6.
+           <br>The WHO standards do not allow LRVs above 6 in order to promote redundancy and robustness in treatment trains.
+        </p>
+        <p>The following fields triggered this warning</p>
+        <ol>
+        {% for t_name, values in max_lrv_warning_for.items %}
+            <li>{{t_name}}</li>
+            <ol>
+            {% for value_name in values %}
+            <li>{{value_name}}</li>
+            {% endfor %}
+            </ol>
+        {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
     <div class="p-2 {{infection_risk}}-risk mb-3" style="font-size: 90%;">
         <div>The risk of this water reuse scenario can be compared to
             two commonly applied health-based targets (WHO 2022):

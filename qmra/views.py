@@ -15,7 +15,7 @@ def index(request):
 
 
 def dsgvo(request):
-    return render(request, "DSGVO.html")
+    return render(request, "DSGVO.html", dict(locale=request.GET.get("locale", "de")))
 
 
 def faqs(request):

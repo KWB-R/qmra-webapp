@@ -95,7 +95,8 @@
                 onfocus();
             })
             btn.addEventListener("focusout", ev => {
-                event.target.focus()
+                //this blocks all other input elements from being editable... why was it there??...
+                //event.target.focus()
             })
             this.$div.querySelectorAll("button").forEach(b => b.classList.remove("selected-treatment"))
             btn.focus();
@@ -201,7 +202,7 @@
                 yaxis: {
                     type: 'log',
                     exponentformat: "power",
-                    dtick: "D2",
+                    dtick: "D3",
                     range: [0.0000001, .9],
                     title: "Logremoval of individual<br>treatment steps",
                 },

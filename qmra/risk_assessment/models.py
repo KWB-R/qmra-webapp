@@ -49,6 +49,13 @@ class Treatment(models.Model):
             protozoa_max=default.protozoa_max,
         )
 
+    def above_max_lrv(self):
+        return [field for field in [
+            "Viruses LRV Maximum" if self.viruses_max is not None and self.viruses_max > 6 else None,
+            "Bacteria LRV Maximum" if self.bacteria_max is not None and self.bacteria_max > 6 else None,
+            "Protozoa LRV Maximum" if self.protozoa_max is not None and self.protozoa_max > 6 else None,
+        ] if field is not None]
+
 
 class RiskAssessment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
