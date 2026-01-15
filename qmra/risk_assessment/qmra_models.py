@@ -270,14 +270,19 @@ class QMRATreatment(models.Model):
     bacteria_max: Optional[float] = models.FloatField(blank=True, null=True)
     bacteria_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
                                            related_name="bacteria_lrv")
+    bacteria_references = models.ManyToManyField(QMRAReference, related_name="bacteria_lrvs")
+
     viruses_min: Optional[float] = models.FloatField(blank=True, null=True)
     viruses_max: Optional[float] = models.FloatField(blank=True, null=True)
     viruses_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
                                           related_name="viruses_lrv")
+    viruses_references = models.ManyToManyField(QMRAReference, related_name="viruses_lrvs")
+
     protozoa_min: Optional[float] = models.FloatField(blank=True, null=True)
     protozoa_max: Optional[float] = models.FloatField(blank=True, null=True)
     protozoa_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
                                            related_name="protozoa_lrv")
+    protozoa_references = models.ManyToManyField(QMRAReference, related_name="protozoa_lrvs")
 
     @classmethod
     def from_dict(cls, data):
