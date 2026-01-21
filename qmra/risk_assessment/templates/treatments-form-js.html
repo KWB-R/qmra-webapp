@@ -388,22 +388,24 @@
             var inner = "";
             for (const treatment of this.treatments){
                 if (!uniques.has(treatment.name)){
-                    const virus_ref = this.references[treatment.viruses_reference]
-                    const bacteria_ref = this.references[treatment.bacteria_reference]
-                    const protozoa_ref = this.references[treatment.protozoa_reference]
+                    const all_refs_id = new Set();
+                    for (const r of [...treatment.viruses_references, ...treatment.bacteria_references, ...treatment.protozoa_references]){
+                        all_refs_id.add(r);
+                    }
+                    const superscripts = [...all_refs_id].map((r, i) => { return `<sup>[${i+1}]</sup>` }).join('');
+                    const ref_footnotes = [...all_refs_id].map((r, i) => {
+                        const ref = this.references[r];
+                        return `<div class="small"><sup>[${i+1}]</sup>values taken from <a href="${ref.ReferenceLink}">${ref.ReferenceName}</a></div>`;
+                    }).join('');
                     uniques.add(treatment.name)
-                    const ref = virus_ref === undefined ?
-                        bacteria_ref === undefined ? protozoa_ref === undefined ? "#" : protozoa_ref : bacteria_ref : virus_ref
-                    const link = ref.ReferenceLink;
-                    const name = ref.ReferenceName;
                     inner += `<li>
-                    <h5>${treatment.name}</h5>
+                    <h5>${treatment.name}${superscripts}</h5>
                     <div class="text-muted small mb-4">${treatment.description}</div>
                     <table class="table small">
                         <tr>
                             <th>Pathogen group</th>
-                            <th>Minimum LRV<sup>[1]</sup></th>
-                            <th>Maximum LRV<sup>[1]</sup></th>
+                            <th>Minimum LRV</th>
+                            <th>Maximum LRV</th>
                         </tr>
                         <tr>
                             <td>Viruses</td>
@@ -422,7 +424,7 @@
                         </tr>
                         
                     </table>
-                    <div class="small"><sup>[1]</sup>values taken from <a href="${link}">${name}</a></p>
+                    ${ref_footnotes}
                     </li>
                     `
                 }

@@ -293,6 +293,7 @@ class QMRATreatment(models.Model):
             description=data['description'],
             bacteria_min=data['bacteria_min'],
             bacteria_max=data['bacteria_max'],
+            # TODO: *_referenceS (m2m fields...)
             bacteria_reference_id=int(data["bacteria_reference"]) \
                 if data["bacteria_reference"] is not None else None,
             viruses_min=data['viruses_min'],
@@ -308,11 +309,11 @@ class QMRATreatment(models.Model):
     def to_dict(self):
         data = model_to_dict(self)
         data["bacteria_reference"] = str(self.bacteria_reference.pk) if self.bacteria_reference is not None else None
-        data["bacteria_references"] = [ref.pk for ref in self.bacteria_references.all()]
+        data["bacteria_references"] = [str(ref.pk) for ref in self.bacteria_references.all()]
         data["viruses_reference"] = str(self.viruses_reference.pk) if self.viruses_reference is not None else None
-        data["viruses_references"] = [ref.pk for ref in self.viruses_references.all()]
+        data["viruses_references"] = [str(ref.pk) for ref in self.viruses_references.all()]
         data["protozoa_reference"] = str(self.protozoa_reference.pk) if self.protozoa_reference is not None else None
-        data["protozoa_references"] = [ref.pk for ref in self.protozoa_references.all()]
+        data["protozoa_references"] = [str(ref.pk) for ref in self.protozoa_references.all()]
         return data
 
 
