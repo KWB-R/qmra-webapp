@@ -4,7 +4,8 @@ from django.db import migrations
 
 
 def migrate_references(apps, schema_editor):
-
+    if schema_editor.connection.alias != "qmra":
+        return
     QMRATreatment = apps.get_model("risk_assessment", "QMRATreatment")
     for treatment in QMRATreatment.objects.all():
 
