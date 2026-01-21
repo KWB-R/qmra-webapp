@@ -77,7 +77,7 @@ class TestAssesRisk(TestCase):
             ) for p, _ in QMRAPathogens.data.items()
         ]
         given_treatments = [
-            Treatment.from_default(QMRATreatments.get("Conventional clarification"), given_ra),
+            Treatment.from_default(QMRATreatments.get("Coagulation, flocculation and media filtration"), given_ra),
             Treatment.from_default(QMRATreatments.get("Slow sand filtration"), given_ra),
         ]
         given_ra.inflows.set(given_inflows, bulk=False)
