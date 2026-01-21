@@ -17,6 +17,7 @@ def migrate_references(apps, schema_editor):
         treatment.viruses_references.add(treatment.viruses_reference)
         treatment.protozoa_references.add(treatment.protozoa_reference)
         treatment.save()
+    call_command("export_default")
 
 
 class Migration(migrations.Migration):
