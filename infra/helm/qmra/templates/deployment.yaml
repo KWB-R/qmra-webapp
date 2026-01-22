@@ -19,15 +19,6 @@ spec:
         {{- include "app.labels" . | nindent 8 }}
     spec:
       initContainers:
-        - name: move-static
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          envFrom:
-          - configMapRef:
-              name: {{ .Values.configmap_name }}
-          volumeMounts:
-            - name: static
-              mountPath: {{ .Values.static.mount_path }}
-          command: [ python, manage.py, collectstatic, --noinput ]
         - name: migrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           envFrom:
@@ -46,6 +37,15 @@ spec:
             - name: qmra-default
               mountPath: {{ .Values.qmra_default.mount_path }}
           command: [ python, manage.py, migrate, --database, qmra ]
+        - name: move-static
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configmap_name }}
+          volumeMounts:
+            - name: static
+              mountPath: {{ .Values.static.mount_path }}
+          command: [ python, manage.py, collectstatic, --noinput ]
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

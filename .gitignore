@@ -10,3 +10,4 @@ dump*
 prod-migrations/
 *.tar
 .vscode
+test.zip

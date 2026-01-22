@@ -17,4 +17,5 @@ class DBRouter(object):
         """
         if model_name is not None and "qmra" in model_name:
             return db == "qmra"
-        return db == "default"
+        # model_name is None when the migration is a RunPython or a RunSQL
+        return db == "default" or model_name is None

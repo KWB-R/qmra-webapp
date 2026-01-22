@@ -64,10 +64,14 @@ class QMRATreatmentAdmin(admin.ModelAdmin):
         ("name", "group"),
         ("bacteria_min", "bacteria_max"),
         "bacteria_reference",
+        "bacteria_references",
         ("viruses_min", "viruses_max"),
         "viruses_reference",
+        "viruses_references",
         ("protozoa_min", "protozoa_max"),
-        "protozoa_reference"
+        "protozoa_reference",
+        "protozoa_references"
     ]
+    filter_horizontal = ["bacteria_references", "viruses_references", "protozoa_references"]
 
     save_model = save_model
