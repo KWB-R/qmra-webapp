@@ -268,53 +268,53 @@ class QMRATreatment(models.Model):
     description: str = models.CharField(max_length=512)
     bacteria_min: Optional[float] = models.FloatField(blank=True, null=True)
     bacteria_max: Optional[float] = models.FloatField(blank=True, null=True)
-    bacteria_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
-                                           related_name="bacteria_lrv")
     bacteria_references = models.ManyToManyField(QMRAReference, related_name="bacteria_lrvs")
+    _bacteria_references_tmp: list[str]
 
     viruses_min: Optional[float] = models.FloatField(blank=True, null=True)
     viruses_max: Optional[float] = models.FloatField(blank=True, null=True)
-    viruses_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
-                                          related_name="viruses_lrv")
     viruses_references = models.ManyToManyField(QMRAReference, related_name="viruses_lrvs")
+    _viruses_references_tmp: list[str]
 
     protozoa_min: Optional[float] = models.FloatField(blank=True, null=True)
     protozoa_max: Optional[float] = models.FloatField(blank=True, null=True)
-    protozoa_reference = models.ForeignKey(QMRAReference, blank=True, null=True, on_delete=models.CASCADE,
-                                           related_name="protozoa_lrv")
     protozoa_references = models.ManyToManyField(QMRAReference, related_name="protozoa_lrvs")
+    _protozoa_references_tmp: list[str]
 
     @classmethod
     def from_dict(cls, data):
-        return QMRATreatment(
+        t = QMRATreatment(
             pk=data["id"],
             name=data['name'],
             group=data['group'],
             description=data['description'],
             bacteria_min=data['bacteria_min'],
             bacteria_max=data['bacteria_max'],
-            # TODO: *_referenceS (m2m fields...)
-            bacteria_reference_id=int(data["bacteria_reference"]) \
-                if data["bacteria_reference"] is not None else None,
             viruses_min=data['viruses_min'],
             viruses_max=data['viruses_max'],
-            viruses_reference_id=int(data["viruses_reference"]) \
-                if data["viruses_reference"] is not None else None,
             protozoa_min=data['protozoa_min'],
             protozoa_max=data['protozoa_max'],
-            protozoa_reference_id=int(data["protozoa_reference"]) \
-                if data["protozoa_reference"] is not None else None,
         )
+        t._bacteria_references_tmp = data.get("bacteria_references", [])
+        t._viruses_references_tmp = data.get("viruses_references", [])
+        t._protozoa_references_tmp = data.get("protozoa_references", [])
+        return t
 
     def to_dict(self):
         data = model_to_dict(self)
-        data["bacteria_reference"] = str(self.bacteria_reference.pk) if self.bacteria_reference is not None else None
         data["bacteria_references"] = [str(ref.pk) for ref in self.bacteria_references.all()]
-        data["viruses_reference"] = str(self.viruses_reference.pk) if self.viruses_reference is not None else None
         data["viruses_references"] = [str(ref.pk) for ref in self.viruses_references.all()]
-        data["protozoa_reference"] = str(self.protozoa_reference.pk) if self.protozoa_reference is not None else None
         data["protozoa_references"] = [str(ref.pk) for ref in self.protozoa_references.all()]
         return data
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        super().save(force_insert, force_update, using, update_fields)
+        self.bacteria_references.set(self._bacteria_references_tmp)
+        self.viruses_references.set(self._viruses_references_tmp)
+        self.protozoa_references.set(self._protozoa_references_tmp)
+        return self
 
 
 class QMRATreatments(StaticEntity):

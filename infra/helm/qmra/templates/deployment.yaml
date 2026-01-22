@@ -37,6 +37,15 @@ spec:
             - name: qmra-default
               mountPath: {{ .Values.qmra_default.mount_path }}
           command: [ python, manage.py, migrate, --database, qmra ]
+        - name: export-default
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configmap_name }}
+          volumeMounts:
+            - name: qmra-default
+              mountPath: {{ .Values.qmra_default.mount_path }}
+          command: [ python, manage.py, export_default ]
         - name: move-static
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           envFrom:

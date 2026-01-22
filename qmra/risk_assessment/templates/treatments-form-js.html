@@ -389,7 +389,7 @@
             for (const treatment of this.treatments){
                 if (!uniques.has(treatment.name)){
                     const all_refs_id = new Set();
-                    for (const r of [...treatment.viruses_references, ...treatment.bacteria_references, ...treatment.protozoa_references]){
+                    for (const r of [...treatment?.viruses_references, ...treatment?.bacteria_references, ...treatment?.protozoa_references]){
                         all_refs_id.add(r);
                     }
                     const superscripts = [...all_refs_id].map((r, i) => { return `<sup>[${i+1}]</sup>` }).join('');
