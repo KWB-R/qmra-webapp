@@ -41,10 +41,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           envFrom:
             - configMapRef:
-                name: { { .Values.configmap_name } }
+                name: {{ .Values.configmap_name }}
           volumeMounts:
             - name: static
-              mountPath: { { .Values.static.mount_path } }
+              mountPath: {{ .Values.static.mount_path }}
           command: [ python, manage.py, collectstatic, --noinput ]
       containers:
         - name: {{ .Chart.Name }}
