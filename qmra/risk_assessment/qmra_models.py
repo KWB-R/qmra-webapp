@@ -311,9 +311,12 @@ class QMRATreatment(models.Model):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         super().save(force_insert, force_update, using, update_fields)
-        self.bacteria_references.set(self._bacteria_references_tmp)
-        self.viruses_references.set(self._viruses_references_tmp)
-        self.protozoa_references.set(self._protozoa_references_tmp)
+        if hasattr(self, "_viruses_references_tmp"):
+            self.viruses_references.set(self._viruses_references_tmp)
+        if hasattr(self, "_protozoa_references_tmp"):
+            self.protozoa_references.set(self._protozoa_references_tmp)
+        if hasattr(self, "_bacteria_references_tmp"):
+            self.bacteria_references.set(self._bacteria_references_tmp)
         return self
 
 
