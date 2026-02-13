@@ -1,0 +1,51 @@
+<div>
+    <button id="change-notice-btn" hidden data-toggle="modal" data-target="#change-notice"
+            data-show="true">
+    </button>
+    <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function(){
+                if (window.location.toString().includes("isLogin=1")) document.querySelector("#change-notice-btn").click();
+            });
+    </script>
+    <div class="modal" id="change-notice" role="dialog">
+        <div class="modal-dialog" role="document" style="max-width: 75vw !important;">
+            <div class="modal-content w-50 m-auto">
+                <h4 class="m-5 text-center ">Notice</h4>
+                <div class="m-5">
+                    <p>Dear QMRA Tool User,</p>
+                    <p>We are pleased to inform you that the default treatment options in the QMRA Tool have been
+                        updated.
+                        These
+                        changes will take effect on <strong>17 December 2025</strong>.</p>
+                    <p>Please note that this update affects:
+                    <ul>
+                        <li>Treatment names</li>
+                        <li>Log Removal Values</li>
+                        <li>References</li>
+                    </ul>
+                    </p>
+                    <p>
+                        Your previously saved risk assessments will not be affected and will remain as you saved them.
+                        <br>
+                        This notification will be shown until <strong>28 February</strong>.
+                    </p>
+                    <p>
+                        Thanks for your understanding. We hope that the improved treatment options will support you in
+                        your
+                        future
+                        assessments.
+                        Kind regards,<br>
+                    </p>
+                    <p>
+                        The QMRA Tool Team
+                    </p>
+                    <button id="change-acknowledged" class="btn btn-outline-primary w-100"
+                            data-dismiss="modal"
+                    >
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

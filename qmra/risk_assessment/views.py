@@ -176,10 +176,13 @@ def risk_assessment_result(request):
             return render(request, "assessment-result.html",
                           context=dict(results=results.values(),
                                        infection_risk=risk_category,
-                                       risk_plot=plots[0], daly_plot=plots[1]))
+                                       risk_plot=plots[0], daly_plot=plots[1],
+                                       max_lrv_warning_for={t.name: t.above_max_lrv()
+                                                            for t in treatments
+                                                            if len(t.above_max_lrv())}))
         else:
-            print(inflow_form.errors)
-            print(treatment_form.errors)
+            # print(inflow_form.errors)
+            # print(treatment_form.errors)
             return HttpResponse(status=422)
 
     elif request.method == "GET":
@@ -193,7 +196,10 @@ def risk_assessment_result(request):
             return render(request, "assessment-result.html",
                           context=dict(results=results,
                                        infection_risk=risk_assessment.infection_risk,
-                                       risk_plot=plots[0], daly_plot=plots[1]))
+                                       risk_plot=plots[0], daly_plot=plots[1],
+                                       max_lrv_warning_for={t.name: t.above_max_lrv()
+                                                            for t in risk_assessment.treatments.all()
+                                                            if len(t.above_max_lrv())}))
 
 
 @login_required(login_url="/login")

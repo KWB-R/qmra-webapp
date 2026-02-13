@@ -9,13 +9,13 @@ from django.db import models
 
 def index(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("assessments"))
+        return HttpResponseRedirect(f"{reverse('assessments')}?isLogin={request.GET.get('isLogin', 0)}")
     else:
         return render(request, "index.html")
 
 
 def dsgvo(request):
-    return render(request, "DSGVO.html")
+    return render(request, "DSGVO.html", dict(locale=request.GET.get("locale", "de")))
 
 
 def faqs(request):

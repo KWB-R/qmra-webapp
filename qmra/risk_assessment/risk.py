@@ -2,7 +2,8 @@ from typing import Iterable
 
 import numpy as np
 
-from qmra.risk_assessment.models import RiskAssessment, RiskAssessmentResult, Treatment, PathogenGroup, DefaultPathogens
+from qmra.risk_assessment.models import RiskAssessment, RiskAssessmentResult, Treatment
+from qmra.risk_assessment.qmra_models import PathogenGroup, QMRAPathogens
 
 
 def get_annual_risk(
@@ -54,7 +55,7 @@ def assess_risk(risk_assessment: RiskAssessment, inflows, treatments, save=True)
 
     for inflow in inflows:
         # unpack params
-        pathogen = DefaultPathogens.get(inflow.pathogen)
+        pathogen = QMRAPathogens.get(inflow.pathogen)
         group = pathogen.group
         dist = pathogen.get_distribution()
 

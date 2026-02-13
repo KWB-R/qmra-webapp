@@ -9,7 +9,7 @@ urlpatterns = [
     path("dsgvo", views.dsgvo, name="dsgvo"),
     path("faqs", views.faqs, name="faqs"),
     path("imprint", views.imprint, name="imprint"),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name="admin-site"),
     path("accounts/", include("django.contrib.auth.urls")),
     path('', include('qmra.risk_assessment.urls')),
     path('', include('qmra.user.urls')),

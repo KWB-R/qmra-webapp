@@ -30,7 +30,8 @@ def get_default_inflows():
     inflows = pd.merge(inflows, sources, left_on="source_id", right_on="id", how="left").rename(columns={"name": "source_name"})
     inflows = pd.merge(inflows, pathogens, left_on="pathogen_id", right_on="id", how="left").rename(columns={"name": "pathogen_name"})
     inflows = inflows[inflows.pathogen_id.isin((3, 32, 34))]
-    return inflows.loc[:, ["source_name", "pathogen_name", "min", "max", "ReferenceID"]]
+    inflows["id"] = list(range(len(inflows.index)))
+    return inflows.loc[:, ["id", "source_name", "pathogen_name", "min", "max", "ReferenceID"]]
 
 
 def get_default_treatments():

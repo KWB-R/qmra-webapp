@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -25,6 +28,7 @@ jobs:
       environment: dev
     secrets: inherit
   build-prod:
+    if: github.ref_name == 'main'
     needs: test
     name: build-prod
     uses: ./.github/workflows/build.yaml
@@ -32,6 +36,7 @@ jobs:
       environment: prod
     secrets: inherit
   deploy-prod:
+    if: github.ref_name == 'main'
     needs:
       - build-prod
       - deploy-dev
