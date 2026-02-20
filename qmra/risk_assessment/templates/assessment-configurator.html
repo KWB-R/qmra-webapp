@@ -130,6 +130,37 @@
                 </div>
                 <div id="create-source" class="tab-pane fade">
                     {% crispy user_source_form %}
+                    <div class="mt-3 p-3 border rounded" id="source-upload-tools">
+                        <h6>Upload pathogen measurements (CSV)</h6>
+                        <div class="small text-muted mb-2">Each file must contain one column with the exact pathogen name.</div>
+                        <div class="mb-3" data-pathogen-row="Rotavirus">
+                            <label class="text-muted small">Rotavirus CSV (column: Rotavirus)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Rotavirus"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Rotavirus">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Rotavirus"></div>
+                            <div class="mt-2" id="source-fit-histogram-Rotavirus" style="height: 180px;"></div>
+                        </div>
+                        <div class="mb-3" data-pathogen-row="Campylobacter jejuni">
+                            <label class="text-muted small">Campylobacter jejuni CSV (column: Campylobacter jejuni)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Campylobacter jejuni"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Campylobacter jejuni">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Campylobacter jejuni"></div>
+                            <div class="mt-2" id="source-fit-histogram-Campylobacter-jejuni" style="height: 180px;"></div>
+                        </div>
+                        <div class="mb-3" data-pathogen-row="Cryptosporidium parvum">
+                            <label class="text-muted small">Cryptosporidium parvum CSV (column: Cryptosporidium parvum)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Cryptosporidium parvum"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Cryptosporidium parvum">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Cryptosporidium parvum"></div>
+                            <div class="mt-2" id="source-fit-histogram-Cryptosporidium-parvum" style="height: 180px;"></div>
+                        </div>
+                    </div>
                 </div>
                 <div id="create-treatment" class="tab-pane fade">
                     {% crispy user_treatment_form %}
@@ -179,6 +210,94 @@
             form.querySelector("input[type=submit]").addEventListener("click", handleSubmit);
             form.addEventListener("submit", function(){ return false; });
         }
+
+        function pathogenToFieldPrefix(pathogen) {
+            if (pathogen === "Rotavirus") return "rotavirus";
+            if (pathogen === "Campylobacter jejuni") return "campylobacter";
+            return "cryptosporidium";
+        }
+
+        function pathogenToHistogramId(pathogen) {
+            return `source-fit-histogram-${pathogen.replaceAll(" ", "-")}`;
+        }
+
+        function setPathogenMessage(pathogen, message, isError=false) {
+            const msgNode = document.querySelector(`[data-pathogen-message="${pathogen}"]`);
+            if (!msgNode) { return; }
+            msgNode.classList.toggle("text-danger", isError);
+            msgNode.classList.toggle("text-success", !isError);
+            msgNode.textContent = message;
+        }
+
+        function renderSourceHistogram(pathogen, histogram) {
+            const targetId = pathogenToHistogramId(pathogen);
+            const target = document.getElementById(targetId);
+            if (!target) { return; }
+            Plotly.react(targetId, [{
+                x: histogram.x,
+                y: histogram.y,
+                type: "bar",
+                marker: { color: "#4f5dff" },
+                name: "Simulated count"
+            }], {
+                margin: {l: 35, r: 10, t: 20, b: 35},
+                height: 180,
+                paper_bgcolor: "#ffffff",
+                plot_bgcolor: "#ffffff",
+                xaxis: {title: "Concentration"},
+                yaxis: {title: "Frequency"}
+            }, {displaylogo: false, responsive: true});
+        }
+
+        async function bindSourceFitHandlers() {
+            const sourceForm = document.querySelector("#user-source-form");
+            if (!sourceForm) { return; }
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            document.querySelectorAll("#create-source [data-pathogen-calc]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    const pathogen = button.getAttribute("data-pathogen-calc");
+                    const fileInput = document.querySelector(`#create-source [data-pathogen-file="${pathogen}"]`);
+                    const file = fileInput?.files?.[0];
+                    if (!file) {
+                        setPathogenMessage(pathogen, "Please select a CSV file first.", true);
+                        return;
+                    }
+
+                    const payload = new FormData();
+                    payload.append("pathogen", pathogen);
+                    payload.append("file", file);
+                    setPathogenMessage(pathogen, "Calculating distribution...");
+
+                    try {
+                        const response = await fetch("{% url 'source-inflow-fit' %}", {
+                            method: "POST",
+                            headers: {'X-CSRFToken': csrfToken},
+                            body: payload
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            setPathogenMessage(pathogen, result.error || "Calculation failed.", true);
+                            return;
+                        }
+
+                        const prefix = pathogenToFieldPrefix(pathogen);
+                        const minInput = sourceForm.querySelector(`#id_${prefix}_min`);
+                        const maxInput = sourceForm.querySelector(`#id_${prefix}_max`);
+                        if (minInput && maxInput) {
+                            minInput.value = result.q025;
+                            maxInput.value = result.q975;
+                            minInput.dispatchEvent(new Event("change"));
+                            maxInput.dispatchEvent(new Event("change"));
+                        }
+                        renderSourceHistogram(pathogen, result.histogram);
+                        setPathogenMessage(pathogen, `Calculated from ${result.n_samples} values. Min=${result.q025}, Max=${result.q975}`);
+                    } catch (err) {
+                        setPathogenMessage(pathogen, "Could not calculate distribution. Please try again.", true);
+                    }
+                });
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const userExposureForm = document.querySelector("#user-exposure-form");
             if (null !== userExposureForm) { addSubmitHandler(userExposureForm) }
@@ -186,6 +305,7 @@
             if (null !== userSourceForm) { addSubmitHandler(userSourceForm) }
             const userTreatmentForm = document.querySelector("#user-treatment-form");
             if (null !== userTreatmentForm) { addSubmitHandler(userTreatmentForm) };
+            bindSourceFitHandlers();
         })
 
     </script>
