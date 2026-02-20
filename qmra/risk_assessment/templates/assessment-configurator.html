@@ -130,6 +130,37 @@
                 </div>
                 <div id="create-source" class="tab-pane fade">
                     {% crispy user_source_form %}
+                    <div class="mt-3 p-3 border rounded" id="source-upload-tools">
+                        <h6>Upload pathogen measurements (CSV)</h6>
+                        <div class="small text-muted mb-2">Each file must contain one column with the exact pathogen name.</div>
+                        <div class="mb-3" data-pathogen-row="Rotavirus">
+                            <label class="text-muted small">Rotavirus CSV (column: Rotavirus)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Rotavirus"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Rotavirus">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Rotavirus"></div>
+                            <div class="mt-2" id="source-fit-histogram-Rotavirus" style="height: 180px;"></div>
+                        </div>
+                        <div class="mb-3" data-pathogen-row="Campylobacter jejuni">
+                            <label class="text-muted small">Campylobacter jejuni CSV (column: Campylobacter jejuni)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Campylobacter jejuni"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Campylobacter jejuni">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Campylobacter jejuni"></div>
+                            <div class="mt-2" id="source-fit-histogram-Campylobacter-jejuni" style="height: 180px;"></div>
+                        </div>
+                        <div class="mb-3" data-pathogen-row="Cryptosporidium parvum">
+                            <label class="text-muted small">Cryptosporidium parvum CSV (column: Cryptosporidium parvum)</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="file" accept=".csv" data-pathogen-file="Cryptosporidium parvum"/>
+                                <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Cryptosporidium parvum">Calculate</button>
+                            </div>
+                            <div class="small mt-2" data-pathogen-message="Cryptosporidium parvum"></div>
+                            <div class="mt-2" id="source-fit-histogram-Cryptosporidium-parvum" style="height: 180px;"></div>
+                        </div>
+                    </div>
                 </div>
                 <div id="create-treatment" class="tab-pane fade">
                     {% crispy user_treatment_form %}
@@ -222,10 +253,10 @@
             const sourceForm = document.querySelector("#user-source-form");
             if (!sourceForm) { return; }
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-            sourceForm.querySelectorAll("[data-pathogen-calc]").forEach(button => {
+            document.querySelectorAll("#create-source [data-pathogen-calc]").forEach(button => {
                 button.addEventListener("click", async () => {
                     const pathogen = button.getAttribute("data-pathogen-calc");
-                    const fileInput = sourceForm.querySelector(`[data-pathogen-file="${pathogen}"]`);
+                    const fileInput = document.querySelector(`#create-source [data-pathogen-file="${pathogen}"]`);
                     const file = fileInput?.files?.[0];
                     if (!file) {
                         setPathogenMessage(pathogen, "Please select a CSV file first.", true);
