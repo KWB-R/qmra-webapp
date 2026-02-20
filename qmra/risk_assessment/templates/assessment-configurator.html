@@ -179,6 +179,94 @@
             form.querySelector("input[type=submit]").addEventListener("click", handleSubmit);
             form.addEventListener("submit", function(){ return false; });
         }
+
+        function pathogenToFieldPrefix(pathogen) {
+            if (pathogen === "Rotavirus") return "rotavirus";
+            if (pathogen === "Campylobacter jejuni") return "campylobacter";
+            return "cryptosporidium";
+        }
+
+        function pathogenToHistogramId(pathogen) {
+            return `source-fit-histogram-${pathogen.replaceAll(" ", "-")}`;
+        }
+
+        function setPathogenMessage(pathogen, message, isError=false) {
+            const msgNode = document.querySelector(`[data-pathogen-message="${pathogen}"]`);
+            if (!msgNode) { return; }
+            msgNode.classList.toggle("text-danger", isError);
+            msgNode.classList.toggle("text-success", !isError);
+            msgNode.textContent = message;
+        }
+
+        function renderSourceHistogram(pathogen, histogram) {
+            const targetId = pathogenToHistogramId(pathogen);
+            const target = document.getElementById(targetId);
+            if (!target) { return; }
+            Plotly.react(targetId, [{
+                x: histogram.x,
+                y: histogram.y,
+                type: "bar",
+                marker: { color: "#4f5dff" },
+                name: "Simulated count"
+            }], {
+                margin: {l: 35, r: 10, t: 20, b: 35},
+                height: 180,
+                paper_bgcolor: "#ffffff",
+                plot_bgcolor: "#ffffff",
+                xaxis: {title: "Concentration"},
+                yaxis: {title: "Frequency"}
+            }, {displaylogo: false, responsive: true});
+        }
+
+        async function bindSourceFitHandlers() {
+            const sourceForm = document.querySelector("#user-source-form");
+            if (!sourceForm) { return; }
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            sourceForm.querySelectorAll("[data-pathogen-calc]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    const pathogen = button.getAttribute("data-pathogen-calc");
+                    const fileInput = sourceForm.querySelector(`[data-pathogen-file="${pathogen}"]`);
+                    const file = fileInput?.files?.[0];
+                    if (!file) {
+                        setPathogenMessage(pathogen, "Please select a CSV file first.", true);
+                        return;
+                    }
+
+                    const payload = new FormData();
+                    payload.append("pathogen", pathogen);
+                    payload.append("file", file);
+                    setPathogenMessage(pathogen, "Calculating distribution...");
+
+                    try {
+                        const response = await fetch("{% url 'source-inflow-fit' %}", {
+                            method: "POST",
+                            headers: {'X-CSRFToken': csrfToken},
+                            body: payload
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            setPathogenMessage(pathogen, result.error || "Calculation failed.", true);
+                            return;
+                        }
+
+                        const prefix = pathogenToFieldPrefix(pathogen);
+                        const minInput = sourceForm.querySelector(`#id_${prefix}_min`);
+                        const maxInput = sourceForm.querySelector(`#id_${prefix}_max`);
+                        if (minInput && maxInput) {
+                            minInput.value = result.q025;
+                            maxInput.value = result.q975;
+                            minInput.dispatchEvent(new Event("change"));
+                            maxInput.dispatchEvent(new Event("change"));
+                        }
+                        renderSourceHistogram(pathogen, result.histogram);
+                        setPathogenMessage(pathogen, `Calculated from ${result.n_samples} values. Min=${result.q025}, Max=${result.q975}`);
+                    } catch (err) {
+                        setPathogenMessage(pathogen, "Could not calculate distribution. Please try again.", true);
+                    }
+                });
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const userExposureForm = document.querySelector("#user-exposure-form");
             if (null !== userExposureForm) { addSubmitHandler(userExposureForm) }
@@ -186,6 +274,7 @@
             if (null !== userSourceForm) { addSubmitHandler(userSourceForm) }
             const userTreatmentForm = document.querySelector("#user-treatment-form");
             if (null !== userTreatmentForm) { addSubmitHandler(userTreatmentForm) };
+            bindSourceFitHandlers();
         })
 
     </script>

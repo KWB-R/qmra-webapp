@@ -1,4 +1,5 @@
 import io
+import math
 
 from crispy_forms.utils import render_crispy_form
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,69 @@ from django.db import transaction
 
 from qmra.risk_assessment.user_models import UserExposureForm, UserTreatmentForm, UserSourceForm, UserExposure, \
     UserSource, UserTreatment
+import numpy as np
+import pandas as pd
+
+
+ALLOWED_SOURCE_PATHOGENS = {
+    "Rotavirus",
+    "Campylobacter jejuni",
+    "Cryptosporidium parvum",
+}
+
+
+def _bad_fit_response(message: str, status=422):
+    return JsonResponse({"error": message}, status=status)
+
+
+def _fit_negative_binomial_from_series(series: pd.Series):
+    if series.empty:
+        raise ValueError("The pathogen column has no values.")
+
+    numeric = pd.to_numeric(series, errors="coerce")
+    if numeric.isna().any():
+        raise ValueError("All measurements must be integers.")
+    if (numeric < 0).any():
+        raise ValueError("All measurements must be non-negative integers.")
+    if not ((numeric % 1) == 0).all():
+        raise ValueError("All measurements must be integers.")
+
+    values = numeric.astype(np.int64).to_numpy()
+    if values.size < 5:
+        raise ValueError("At least 5 measurements are required to fit a negative binomial distribution.")
+
+    mu = float(values.mean())
+    variance = float(values.var(ddof=1))
+    if variance <= mu:
+        raise ValueError("Negative binomial fit failed because variance must be greater than the mean.")
+
+    r = (mu ** 2) / (variance - mu)
+    p = r / (r + mu)
+
+    if r <= 0 or p <= 0 or p >= 1:
+        raise ValueError("Negative binomial fit failed due to invalid fitted parameters.")
+
+    simulated = np.random.default_rng(7).negative_binomial(r, p, size=5000)
+    q025 = float(np.quantile(simulated, 0.025))
+    q975 = float(np.quantile(simulated, 0.975))
+
+    bins = np.arange(simulated.min(), simulated.max() + 2) - 0.5
+    hist_counts, hist_edges = np.histogram(simulated, bins=bins)
+    centers = ((hist_edges[:-1] + hist_edges[1:]) / 2).astype(int)
+
+    return {
+        "n_samples": int(values.size),
+        "mu": mu,
+        "variance": variance,
+        "r": float(r),
+        "p": float(p),
+        "q025": float(math.floor(q025)),
+        "q975": float(math.ceil(q975)),
+        "histogram": {
+            "x": centers.tolist(),
+            "y": hist_counts.tolist(),
+        }
+    }
 
 
 @transaction.atomic
@@ -263,6 +327,41 @@ def list_sources(request):
     if not request.user.is_authenticated:
         return JsonResponse({})
     return JsonResponse({s["name"]: s for s in UserSource.objects.filter(user=request.user).values().all()})
+
+
+@login_required(login_url="/login")
+def fit_source_pathogen_distribution(request):
+    if request.method != "POST":
+        return HttpResponse(status=404)
+
+    pathogen = request.POST.get("pathogen")
+    if pathogen not in ALLOWED_SOURCE_PATHOGENS:
+        return _bad_fit_response("Unsupported pathogen selected.")
+
+    csv_file = request.FILES.get("file")
+    if csv_file is None:
+        return _bad_fit_response("Please upload a CSV file.")
+    if csv_file.size > 5 * 1024 * 1024:
+        return _bad_fit_response("Uploaded file is too large. Maximum allowed size is 5 MB.")
+
+    try:
+        content = csv_file.read().decode("utf-8")
+        df = pd.read_csv(io.StringIO(content))
+    except Exception:
+        return _bad_fit_response("Could not read the CSV file. Please upload a valid UTF-8 CSV.")
+
+    if pathogen not in df.columns:
+        return _bad_fit_response(f"CSV must include a column named '{pathogen}'.")
+
+    try:
+        fit = _fit_negative_binomial_from_series(df[pathogen].dropna())
+    except ValueError as err:
+        return _bad_fit_response(str(err))
+
+    return JsonResponse({
+        "pathogen": pathogen,
+        **fit,
+    })
 
 
 def list_inflows(request):

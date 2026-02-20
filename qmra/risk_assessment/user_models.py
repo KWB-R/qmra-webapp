@@ -112,16 +112,49 @@ class UserSourceForm(forms.ModelForm):
                 Column(AppendedText('rotavirus_min', 'N/L')),
                 Column(AppendedText('rotavirus_max', 'N/L'))
             ),
+            HTML("""
+                <div class="mb-3" data-pathogen-row="Rotavirus">
+                    <label class="text-muted small">Upload raw measurements CSV (column: Rotavirus)</label>
+                    <div class="d-flex gap-2">
+                        <input class="form-control" type="file" accept=".csv" data-pathogen-file="Rotavirus"/>
+                        <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Rotavirus">Calculate</button>
+                    </div>
+                    <div class="small mt-2" data-pathogen-message="Rotavirus"></div>
+                    <div class="mt-2" id="source-fit-histogram-Rotavirus" style="height: 180px;"></div>
+                </div>
+            """),
             Row(
                 Column("pathogen2"),
                 Column(AppendedText('campylobacter_min', 'N/L')),
                 Column(AppendedText('campylobacter_max', 'N/L'))
             ),
+            HTML("""
+                <div class="mb-3" data-pathogen-row="Campylobacter jejuni">
+                    <label class="text-muted small">Upload raw measurements CSV (column: Campylobacter jejuni)</label>
+                    <div class="d-flex gap-2">
+                        <input class="form-control" type="file" accept=".csv" data-pathogen-file="Campylobacter jejuni"/>
+                        <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Campylobacter jejuni">Calculate</button>
+                    </div>
+                    <div class="small mt-2" data-pathogen-message="Campylobacter jejuni"></div>
+                    <div class="mt-2" id="source-fit-histogram-Campylobacter-jejuni" style="height: 180px;"></div>
+                </div>
+            """),
             Row(
                 Column("pathogen3"),
                 Column(AppendedText('cryptosporidium_min', 'N/L')),
                 Column(AppendedText('cryptosporidium_max', 'N/L'))
             ),
+            HTML("""
+                <div class="mb-3" data-pathogen-row="Cryptosporidium parvum">
+                    <label class="text-muted small">Upload raw measurements CSV (column: Cryptosporidium parvum)</label>
+                    <div class="d-flex gap-2">
+                        <input class="form-control" type="file" accept=".csv" data-pathogen-file="Cryptosporidium parvum"/>
+                        <button class="btn btn-outline-primary" type="button" data-pathogen-calc="Cryptosporidium parvum">Calculate</button>
+                    </div>
+                    <div class="small mt-2" data-pathogen-message="Cryptosporidium parvum"></div>
+                    <div class="mt-2" id="source-fit-histogram-Cryptosporidium-parvum" style="height: 180px;"></div>
+                </div>
+            """),
             Submit("Submit", "Submit")
 
             # "DELETE"

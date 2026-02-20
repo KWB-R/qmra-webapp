@@ -49,6 +49,11 @@ urlpatterns = [
         name="source"
     ),
     path(
+        "source/inflow-fit",
+        views.fit_source_pathogen_distribution,
+        name="source-inflow-fit"
+    ),
+    path(
         "sources",
         views.list_sources,
         name="sources"
