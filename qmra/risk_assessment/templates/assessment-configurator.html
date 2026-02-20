@@ -179,6 +179,84 @@
             form.querySelector("input[type=submit]").addEventListener("click", handleSubmit);
             form.addEventListener("submit", function(){ return false; });
         }
+
+        function renderSourceHistogram(container, histogram) {
+            if (!container || !window.Plotly) { return; }
+            if (!histogram || !histogram.bins || !histogram.counts) { return; }
+            const trace = {
+                x: histogram.bins,
+                y: histogram.counts,
+                type: "bar",
+                marker: {color: "#4a6fe3"}
+            };
+            const layout = {
+                height: 220,
+                margin: {t: 20, l: 40, r: 10, b: 40},
+                xaxis: {title: "Simulated concentration"},
+                yaxis: {title: "Count"}
+            };
+            Plotly.newPlot(container, [trace], layout, {displayModeBar: false, responsive: true});
+            container.style.display = "block";
+        }
+
+        function setupSourceCsvUploads() {
+            const section = document.querySelector("#user-source-form");
+            if (!section) { return; }
+            const csrfInput = section.querySelector("input[name=csrfmiddlewaretoken]");
+            const csrfToken = csrfInput ? csrfInput.value : "";
+            const rows = section.querySelectorAll(".source-upload-row");
+            rows.forEach(row => {
+                const button = row.querySelector(".source-calc-btn");
+                const fileInput = row.querySelector(".source-csv-input");
+                const status = row.querySelector(".source-upload-status");
+                const histogram = row.querySelector(".source-histogram");
+                if (!button || !fileInput) { return; }
+                button.addEventListener("click", async () => {
+                    const file = fileInput.files[0];
+                    const pathogen = row.dataset.pathogen;
+                    if (!file) {
+                        status.textContent = "Select a CSV file first.";
+                        return;
+                    }
+                    status.textContent = "Uploading and fitting...";
+                    if (histogram) { histogram.style.display = "none"; }
+                    button.disabled = true;
+                    const formData = new FormData();
+                    formData.append("pathogen", pathogen);
+                    formData.append("file", file);
+                    try {
+                        const response = await fetch("{% url 'source-inflow-fit' %}", {
+                            method: "POST",
+                            headers: csrfToken ? {"X-CSRFToken": csrfToken} : {},
+                            body: formData
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.ok) {
+                            status.textContent = (data.errors || ["Upload failed."]).join(" ");
+                            return;
+                        }
+                        const minInput = document.getElementById(row.dataset.minInput);
+                        const maxInput = document.getElementById(row.dataset.maxInput);
+                        if (minInput) {
+                            minInput.value = data.q025;
+                            minInput.dispatchEvent(new Event("input", {bubbles: true}));
+                            minInput.dispatchEvent(new Event("change", {bubbles: true}));
+                        }
+                        if (maxInput) {
+                            maxInput.value = data.q975;
+                            maxInput.dispatchEvent(new Event("input", {bubbles: true}));
+                            maxInput.dispatchEvent(new Event("change", {bubbles: true}));
+                        }
+                        status.textContent = `Parsed ${data.n_samples} samples. Min/Max updated.`;
+                        renderSourceHistogram(histogram, data.histogram);
+                    } catch (error) {
+                        status.textContent = "Upload failed. Please try again.";
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
+            });
+        }
         document.addEventListener("DOMContentLoaded", function() {
             const userExposureForm = document.querySelector("#user-exposure-form");
             if (null !== userExposureForm) { addSubmitHandler(userExposureForm) }
@@ -186,6 +264,7 @@
             if (null !== userSourceForm) { addSubmitHandler(userSourceForm) }
             const userTreatmentForm = document.querySelector("#user-treatment-form");
             if (null !== userTreatmentForm) { addSubmitHandler(userTreatmentForm) };
+            setupSourceCsvUploads();
         })
 
     </script>
@@ -271,6 +350,39 @@
             position: sticky;
             bottom: 10px;
             background: #F6F6FF;
+        }
+
+        .source-upload-row {
+            border: 1px dashed #CECFFF;
+            border-radius: 6px;
+            padding: 8px 0;
+            background: #F9F9FF;
+            margin: 6px 0 0;
+        }
+
+        .source-upload-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
+        }
+
+        .source-upload-status {
+            min-height: 18px;
+        }
+
+        .source-pathogen-cell {
+            border: 1px solid #CECFFF;
+            border-radius: 6px;
+            background: #F5F6FF;
+        }
+
+        .source-pathogen-block {
+            border: 1px dashed #CECFFF;
+            border-radius: 8px;
+            padding: 10px 10px 12px;
+            margin: 8px 0 16px;
+            background: #F9F9FF;
         }
     </style>
     {% include "risk-assessment-form-js.html" %}

@@ -54,6 +54,11 @@ urlpatterns = [
         name="sources"
     ),
     path(
+        "source/inflow-fit",
+        views.fit_source_inflow,
+        name="source-inflow-fit"
+    ),
+    path(
         "inflows",
         views.list_inflows,
         name="inflows"

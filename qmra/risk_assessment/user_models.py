@@ -85,12 +85,21 @@ class UserSourceForm(forms.ModelForm):
         self.helper.form_id = "user-source-form"
         self.helper.label_class = "text-muted small"
         self.fields["pathogen1"].disabled = True
+        self.fields["pathogen1"].widget.attrs["class"] = (
+            self.fields["pathogen1"].widget.attrs.get("class", "") + " source-pathogen-cell"
+        )
         self.fields["pathogen1"].required = False
-        self.fields["pathogen1"].label = "Reference Pathogen"
+        self.fields["pathogen1"].label = ""
         self.fields["pathogen2"].disabled = True
+        self.fields["pathogen2"].widget.attrs["class"] = (
+            self.fields["pathogen2"].widget.attrs.get("class", "") + " source-pathogen-cell"
+        )
         self.fields["pathogen2"].required = False
         self.fields["pathogen2"].label = ""
         self.fields["pathogen3"].disabled = True
+        self.fields["pathogen3"].widget.attrs["class"] = (
+            self.fields["pathogen3"].widget.attrs.get("class", "") + " source-pathogen-cell"
+        )
         self.fields["pathogen3"].required = False
         self.fields["pathogen3"].label = ""
         self.fields['rotavirus_min'].widget.attrs['min'] = 0
@@ -103,28 +112,82 @@ class UserSourceForm(forms.ModelForm):
         self.fields['cryptosporidium_min'].label = ""
         self.fields['cryptosporidium_max'].widget.attrs['min'] = 0
         self.fields['cryptosporidium_max'].label = ""
-        self.fields['rotavirus_min'].label = "Minimum concentration"
-        self.fields['rotavirus_max'].label = "Maximum concentration"
+        self.fields['rotavirus_min'].label = ""
+        self.fields['rotavirus_max'].label = ""
         self.helper.layout = Layout(
             'name',
+            Row(
+                Column(HTML("<label class='text-muted small'>Reference Pathogen</label>")),
+                Column(HTML("<label class='text-muted small'>Minimum concentration</label>")),
+                Column(HTML("<label class='text-muted small'>Maximum concentration</label>"))
+            ),
+            HTML("<div class='source-pathogen-block'>"),
             Row(
                 Column("pathogen1"),
                 Column(AppendedText('rotavirus_min', 'N/L')),
                 Column(AppendedText('rotavirus_max', 'N/L'))
             ),
             Row(
+                Column(HTML(
+                    "<div class='source-upload-row' data-pathogen='Rotavirus' "
+                    "data-min-input='id_rotavirus_min' data-max-input='id_rotavirus_max'>"
+                    "<div class='source-upload-stack'>"
+                    "<input type='file' class='form-control-file source-csv-input' "
+                    "id='source-upload-rotavirus' accept='.csv,text/csv'>"
+                    "<button type='button' class='btn btn-outline-primary btn-sm source-calc-btn'>"
+                    "Calculate</button>"
+                    "<div class='small text-muted source-upload-status'></div>"
+                    "<div class='source-histogram' style='display: none; height: 220px;'></div>"
+                    "</div>"
+                    "</div>"
+                ), css_class="col-12")
+            ),
+            HTML("</div>"),
+            HTML("<div class='source-pathogen-block'>"),
+            Row(
                 Column("pathogen2"),
                 Column(AppendedText('campylobacter_min', 'N/L')),
                 Column(AppendedText('campylobacter_max', 'N/L'))
             ),
             Row(
+                Column(HTML(
+                    "<div class='source-upload-row' data-pathogen='Campylobacter jejuni' "
+                    "data-min-input='id_campylobacter_min' data-max-input='id_campylobacter_max'>"
+                    "<div class='source-upload-stack'>"
+                    "<input type='file' class='form-control-file source-csv-input' "
+                    "id='source-upload-campylobacter' accept='.csv,text/csv'>"
+                    "<button type='button' class='btn btn-outline-primary btn-sm source-calc-btn'>"
+                    "Calculate</button>"
+                    "<div class='small text-muted source-upload-status'></div>"
+                    "<div class='source-histogram' style='display: none; height: 220px;'></div>"
+                    "</div>"
+                    "</div>"
+                ), css_class="col-12")
+            ),
+            HTML("</div>"),
+            HTML("<div class='source-pathogen-block'>"),
+            Row(
                 Column("pathogen3"),
                 Column(AppendedText('cryptosporidium_min', 'N/L')),
                 Column(AppendedText('cryptosporidium_max', 'N/L'))
             ),
+            Row(
+                Column(HTML(
+                    "<div class='source-upload-row' data-pathogen='Cryptosporidium parvum' "
+                    "data-min-input='id_cryptosporidium_min' data-max-input='id_cryptosporidium_max'>"
+                    "<div class='source-upload-stack'>"
+                    "<input type='file' class='form-control-file source-csv-input' "
+                    "id='source-upload-cryptosporidium' accept='.csv,text/csv'>"
+                    "<button type='button' class='btn btn-outline-primary btn-sm source-calc-btn'>"
+                    "Calculate</button>"
+                    "<div class='small text-muted source-upload-status'></div>"
+                    "<div class='source-histogram' style='display: none; height: 220px;'></div>"
+                    "</div>"
+                    "</div>"
+                ), css_class="col-12")
+            ),
+            HTML("</div>"),
             Submit("Submit", "Submit")
-
-            # "DELETE"
         )
 
 

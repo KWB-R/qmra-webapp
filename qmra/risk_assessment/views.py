@@ -1,4 +1,5 @@
 import io
+import math
 
 from crispy_forms.utils import render_crispy_form
 from django.contrib.auth.decorators import login_required
@@ -13,6 +14,9 @@ from qmra.risk_assessment.models import Inflow, RiskAssessment, Treatment
 from qmra.risk_assessment.plots import risk_plots
 from qmra.risk_assessment.risk import assess_risk
 from django.db import transaction
+
+import numpy as np
+import pandas as pd
 
 from qmra.risk_assessment.user_models import UserExposureForm, UserTreatmentForm, UserSourceForm, UserExposure, \
     UserSource, UserTreatment
@@ -44,6 +48,44 @@ def create_risk_assessment(user, risk_assessment_form, inflow_form, treatment_fo
         treatment.train_index = i
         treatment.save()
     return risk_assessment
+
+
+def _nb_quantile(target, r, p, max_k=100000):
+    if not (0 < p < 1):
+        return None
+    pmf = p ** r
+    cdf = pmf
+    if cdf >= target:
+        return 0
+    for k in range(1, max_k + 1):
+        pmf *= (k - 1 + r) / k * (1 - p)
+        if pmf == 0:
+            break
+        cdf += pmf
+        if cdf >= target:
+            return k
+    return None
+
+
+def _fit_negative_binomial(values):
+    series = np.asarray(values, dtype=float)
+    mean = float(np.mean(series))
+    variance = float(np.var(series, ddof=1 if len(series) > 1 else 0))
+    if variance <= mean:
+        return None, None, "Data are under-dispersed; negative binomial fit is not suitable."
+    r = (mean ** 2) / (variance - mean)
+    p = r / (r + mean)
+    q025 = _nb_quantile(0.025, r, p)
+    q975 = _nb_quantile(0.975, r, p)
+    if q025 is None or q975 is None:
+        return None, None, "Unable to compute distribution quantiles for the fitted model."
+    return (r, p, mean, variance), (q025, q975), None
+
+
+def _simulate_negative_binomial(r, p, n_samples=5000):
+    scale = (1 - p) / p
+    lam = np.random.gamma(shape=r, scale=scale, size=n_samples)
+    return np.random.poisson(lam=lam)
 
 
 @transaction.atomic
@@ -263,6 +305,58 @@ def list_sources(request):
     if not request.user.is_authenticated:
         return JsonResponse({})
     return JsonResponse({s["name"]: s for s in UserSource.objects.filter(user=request.user).values().all()})
+
+
+@login_required(login_url="/login")
+def fit_source_inflow(request):
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "errors": ["Invalid request method."]}, status=405)
+    pathogen = request.POST.get("pathogen")
+    upload = request.FILES.get("file")
+    if not pathogen or upload is None:
+        return JsonResponse({"ok": False, "errors": ["Missing pathogen or CSV file."]}, status=400)
+    try:
+        dataframe = pd.read_csv(upload, header=None)
+    except Exception:
+        return JsonResponse({"ok": False, "errors": ["Unable to parse CSV file."]}, status=400)
+    if dataframe.shape[1] < 1:
+        return JsonResponse({"ok": False, "errors": ["CSV file must contain at least one column."]}, status=400)
+    series = dataframe.iloc[:, 0].dropna()
+    if series.empty:
+        return JsonResponse({"ok": False, "errors": ["No data values found for this pathogen."]}, status=400)
+    values = series.to_list()
+    for value in values:
+        if isinstance(value, str):
+            return JsonResponse({"ok": False, "errors": ["Non-integer values detected in the CSV column."]}, status=400)
+        if float(value) % 1 != 0:
+            return JsonResponse({"ok": False, "errors": ["Non-integer values detected in the CSV column."]}, status=400)
+        if int(value) < 0:
+            return JsonResponse({"ok": False, "errors": ["Negative values are not allowed."]}, status=400)
+    params, quantiles, error = _fit_negative_binomial(values)
+    if error:
+        return JsonResponse({"ok": False, "errors": [error]}, status=400)
+    r, p, mean, variance = params
+    q025, q975 = quantiles
+    q025_floor = math.floor(q025)
+    q975_ceil = math.ceil(q975)
+    samples = _simulate_negative_binomial(r, p, n_samples=5000)
+    counts, bin_edges = np.histogram(samples, bins=30)
+    bin_centers = ((bin_edges[:-1] + bin_edges[1:]) / 2.0).tolist()
+    return JsonResponse({
+        "ok": True,
+        "pathogen": pathogen,
+        "n_samples": len(values),
+        "r": r,
+        "p": p,
+        "mean": mean,
+        "variance": variance,
+        "q025": q025_floor,
+        "q975": q975_ceil,
+        "histogram": {
+            "bins": bin_centers,
+            "counts": counts.tolist()
+        }
+    })
 
 
 def list_inflows(request):
