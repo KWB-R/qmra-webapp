@@ -305,5 +305,7 @@ def create_treatment(request):
 def list_treatments(request):
     if not request.user.is_authenticated:
         return JsonResponse({})
-    return JsonResponse({t["name"]: {**t, "treatment_name": t["name"]}
+    return JsonResponse({t["name"]: {**t, "treatment_name": t["name"], "viruses_references": [],
+                                     "bacteria_references": [], "protozoa_references": [],
+                                     }
                          for t in UserTreatment.objects.filter(user=request.user).values().all()})
