@@ -4,6 +4,7 @@
     </button>
     <script type="text/javascript">
             document.addEventListener("DOMContentLoaded", function(){
+                // Popup hook: the login view appends ?isLogin=1 to open this modal.
                 if (window.location.toString().includes("isLogin=1")) document.querySelector("#change-notice-btn").click();
             });
     </script>

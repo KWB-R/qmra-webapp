@@ -51,6 +51,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            # Popup hook: this query flag triggers the post-login notice modal.
             return HttpResponseRedirect(f"{reverse('index')}?isLogin=1")
         else:
             return render(
