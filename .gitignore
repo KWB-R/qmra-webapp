@@ -11,3 +11,4 @@ prod-migrations/
 *.tar
 .vscode
 test.zip
+.vs
