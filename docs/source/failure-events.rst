@@ -91,22 +91,23 @@ Normal-day risk:
 
 .. math::
 
-   p_{inf,day,normal} = 1 - e^{-\frac{c_{in} \cdot V}{10^{LRV_{normal}}}}
+   p_{inf,day,normal} = 1 - e^{-\frac{r \cdot c_{in} \cdot V}{10^{LRV_{normal}}}}
 
 Failure-day risk:
 
 .. math::
 
-   p_{inf,day,failure} = 1 - e^{-\frac{c_{in} \cdot V}{10^{LRV_{failure}}}}
+   p_{inf,day,failure} = 1 - e^{-\frac{r \cdot Vc_{in} \cdot V}{10^{LRV_{failure}}}}
 
-Suggested mixed daily risk:
+Suggested mixed daily LRV (only needed for best-case calculation):
 
 .. math::
 
-   p_{inf,day,mix} = (1 - x_{fail}) \cdot p_{inf,day,normal} + x_{fail} \cdot p_{inf,day,failure}
+   LRV_{failure,mix} = -log(\frac{x_{fail}}{10^{LRV_{failure,max}}}+\frac{1-x_{fail}} {10^{LRV_{max}}})
 
 where:
 
+############# Equations need to be checked:
 .. math::
 
    x_{fail} = \frac{failure\_duration\_minutes}{1440}
@@ -126,6 +127,7 @@ where:
 
 This is the smallest change to the current model if the code keeps the same
 annual-risk structure and only swaps in a failure-adjusted daily probability.
+####################
 
 Treatment LRV adjustment
 ------------------------
