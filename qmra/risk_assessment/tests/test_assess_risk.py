@@ -19,6 +19,45 @@ class TestAssesRisk(TestCase):
         super().setUpClass()
         call_command("seed_default_db")
 
+    def test_treatment_from_default_includes_failure_defaults(self):
+        given_user = User.objects.create_user("test-user", "test-user@test.com", "password")
+        given_ra = RiskAssessment.objects.create(
+            user=given_user,
+            events_per_year=1,
+            volume_per_event=2,
+        )
+
+        treatment = Treatment.from_default(QMRATreatments.get("Primary treatment"), given_ra)
+
+        assert_that(treatment.failure_duration_minutes).is_equal_to(30)
+        assert_that(treatment.failure_frequency_days_per_year).is_equal_to(0)
+
+    def test_nonzero_failure_frequency_changes_results(self):
+        given_user = User.objects.create_user("test-user", "test-user@test.com", "password")
+        given_ra = RiskAssessment.objects.create(
+            user=given_user,
+            events_per_year=365,
+            volume_per_event=1,
+        )
+        given_inflows = [
+            Inflow.objects.create(
+                risk_assessment=given_ra,
+                pathogen="Rotavirus",
+                min=0.1, max=0.2
+            )
+        ]
+        baseline_treatment = Treatment.from_default(QMRATreatments.get("Primary treatment"), given_ra)
+        failure_treatment = Treatment.from_default(QMRATreatments.get("Primary treatment"), given_ra)
+        failure_treatment.failure_duration_minutes = 1440
+        failure_treatment.failure_frequency_days_per_year = 365
+
+        baseline_results = assess_risk(given_ra, given_inflows, [baseline_treatment])
+        failure_results = assess_risk(given_ra, given_inflows, [failure_treatment])
+
+        assert_that(failure_results["Rotavirus"].infection_maximum_lrv_median).is_not_equal_to(
+            baseline_results["Rotavirus"].infection_maximum_lrv_median
+        )
+
     def test_with_standard_pathogens_and_all_treatments(self):
         given_user = User.objects.create_user("test-user", "test-user@test.com", "password")
         given_user.save()

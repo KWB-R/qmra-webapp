@@ -27,7 +27,9 @@ def treatments_as_df(treatments: QuerySet[Treatment]) -> pd.DataFrame:
             "Treatment": [t.name] * 3,
             "Pathogen group": ["Viruses", "Bacteria", "Protozoa"],
             "Maximum LRV": [t.viruses_max, t.bacteria_max, t.protozoa_max],
-            "Minimum LRV": [t.viruses_min, t.bacteria_min, t.protozoa_min]
+            "Minimum LRV": [t.viruses_min, t.bacteria_min, t.protozoa_min],
+            "Failure duration (minutes)": [t.failure_duration_minutes] * 3,
+            "Failure frequency (days/year)": [t.failure_frequency_days_per_year] * 3,
         })]
     return pd.concat(dfs)
 
@@ -84,7 +86,10 @@ def risk_assessment_as_zip(buffer, risk_assessment: RiskAssessment):
     inflows = inflows_as_df(risk_assessment.inflows)
     treatments = treatments_as_df(risk_assessment.treatments)
     results = results_as_df({r.pathogen: r for r in risk_assessment.results.all()})
-    plots = risk_plots(risk_assessment.results.all(), "png")
+    try:
+        plots = risk_plots(risk_assessment.results.all(), "png")
+    except Exception:
+        plots = (b"", b"")
     report = render_to_string("assessment-result-export.html",
                               context=dict(results=risk_assessment.results.all(),
                                            infection_risk=risk_assessment.infection_risk,

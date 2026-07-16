@@ -6,6 +6,10 @@ from qmra.risk_assessment.models import RiskAssessment, RiskAssessmentResult, Tr
 from qmra.risk_assessment.qmra_models import PathogenGroup, QMRAPathogens
 
 
+def _zero_if_none(x):
+    return x if x is not None else 0
+
+
 def get_annual_risk(
         inflow_min: float, inflow_max: float,
         log_removal: float,
@@ -36,21 +40,29 @@ def lrv_by_pathogen_group(treatments: Iterable[Treatment]) -> dict:
         PathogenGroup.Protozoa: dict(min=0, max=0)
     }
 
-    def zero_if_none(x): return x if x is not None else 0
-
     for t in treatments:
-        lrvs[PathogenGroup.Bacteria]["min"] += zero_if_none(t.bacteria_min)
-        lrvs[PathogenGroup.Bacteria]["max"] += zero_if_none(t.bacteria_max)
-        lrvs[PathogenGroup.Viruses]["min"] += zero_if_none(t.viruses_min)
-        lrvs[PathogenGroup.Viruses]["max"] += zero_if_none(t.viruses_max)
-        lrvs[PathogenGroup.Protozoa]["min"] += zero_if_none(t.protozoa_min)
-        lrvs[PathogenGroup.Protozoa]["max"] += zero_if_none(t.protozoa_max)
+        lrvs[PathogenGroup.Bacteria]["min"] += _zero_if_none(t.bacteria_min)
+        lrvs[PathogenGroup.Bacteria]["max"] += _zero_if_none(t.bacteria_max)
+        lrvs[PathogenGroup.Viruses]["min"] += _zero_if_none(t.viruses_min)
+        lrvs[PathogenGroup.Viruses]["max"] += _zero_if_none(t.viruses_max)
+        lrvs[PathogenGroup.Protozoa]["min"] += _zero_if_none(t.protozoa_min)
+        lrvs[PathogenGroup.Protozoa]["max"] += _zero_if_none(t.protozoa_max)
     return lrvs
+
+
+def failure_fraction(treatments: Iterable[Treatment]) -> float:
+    fraction = 0.0
+    for treatment in treatments:
+        duration_fraction = _zero_if_none(treatment.failure_duration_minutes) / 1440
+        frequency_fraction = _zero_if_none(treatment.failure_frequency_days_per_year) / 365
+        fraction += duration_fraction * frequency_fraction
+    return min(1.0, fraction)
 
 
 def assess_risk(risk_assessment: RiskAssessment, inflows, treatments, save=True) -> dict[str, RiskAssessmentResult]:
     # assuming the model has been already validated
     lrvs = lrv_by_pathogen_group(treatments)
+    failure_lrv_fraction = failure_fraction(treatments)
     results = {}
 
     for inflow in inflows:
@@ -63,15 +75,17 @@ def assess_risk(risk_assessment: RiskAssessment, inflows, treatments, save=True)
             return pr * pat.infection_to_illness * pat.dalys_per_case
 
         # min / max probs
+        min_lrv = lrvs[group]["max"] * (1 - failure_lrv_fraction)
+        max_lrv = lrvs[group]["min"] * (1 - failure_lrv_fraction)
         min_prob = get_annual_risk(
             inflow.min, inflow.max,
-            lrvs[group]["max"],
+            min_lrv,
             risk_assessment.volume_per_event, risk_assessment.events_per_year,
             dist
         )
         max_prob = get_annual_risk(
             inflow.min, inflow.max,
-            lrvs[group]["min"],
+            max_lrv,
             risk_assessment.volume_per_event, risk_assessment.events_per_year,
             dist
         )

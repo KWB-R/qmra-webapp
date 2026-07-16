@@ -46,6 +46,10 @@ def get_default_treatments():
                          min=f"{grp_name.lower()}_min",
                          max=f"{grp_name.lower()}_max"))
         treatments = pd.merge(treatments, grp, on="id", how="outer")
+    if "failure_duration_minutes" not in treatments.columns:
+        treatments["failure_duration_minutes"] = 30
+    if "failure_frequency_days_per_year" not in treatments.columns:
+        treatments["failure_frequency_days_per_year"] = 0
     return treatments
 
 

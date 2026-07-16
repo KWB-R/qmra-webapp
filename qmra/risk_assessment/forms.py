@@ -145,6 +145,8 @@ class TreatmentForm(forms.ModelForm):
         model = Treatment
         fields = [
             "name",
+            "failure_duration_minutes",
+            "failure_frequency_days_per_year",
             "bacteria_min",
             "bacteria_max",
             'viruses_min',
@@ -161,6 +163,14 @@ class TreatmentForm(forms.ModelForm):
         self.helper.label_class = "text-muted small"
         # self.fields['name'].choices = DefaultTreatments.choices()
         self.fields['name'].label = ""
+        self.fields['failure_duration_minutes'].label = "Failure duration (minutes)"
+        self.fields['failure_frequency_days_per_year'].label = "Failure frequency (days/year)"
+        self.fields['failure_duration_minutes'].initial = 30
+        self.fields['failure_frequency_days_per_year'].initial = 0
+        self.fields['failure_duration_minutes'].widget.attrs['min'] = 1
+        self.fields['failure_duration_minutes'].widget.attrs['max'] = 1440
+        self.fields['failure_frequency_days_per_year'].widget.attrs['min'] = 0
+        self.fields['failure_frequency_days_per_year'].widget.attrs['max'] = 365
         self.fields['bacteria_min'].label = ""
         self.fields['bacteria_max'].label = ""
         self.fields['viruses_min'].label = ""
@@ -173,6 +183,12 @@ class TreatmentForm(forms.ModelForm):
             Row(Column(HTML(f"<div></div>")),
                 Column(HTML(f"<label class='text-muted text-center w-100'>Minimum</label>")),
                 Column(HTML(f"<label class='text-muted text-center w-100'>Maximum</label>"))),
+            Row(Column(HTML(f"<label {label_style}>Failure duration (min):</label>")),
+                Column("failure_duration_minutes"),
+                Column(HTML(f"<div></div>"))),
+            Row(Column(HTML(f"<label {label_style}>Failure frequency (days/year):</label>")),
+                Column("failure_frequency_days_per_year"),
+                Column(HTML(f"<div></div>"))),
             Row(Column(HTML(f"<label {label_style}>Bacteria LRV:</label>")),
                 Column("bacteria_min"), Column("bacteria_max")),
             Row(Column(HTML(f"<label {label_style}>Viruses LRV:</label>")),
@@ -184,6 +200,12 @@ class TreatmentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        failure_duration_minutes = cleaned_data.get("failure_duration_minutes")
+        failure_frequency_days_per_year = cleaned_data.get("failure_frequency_days_per_year")
+        if failure_duration_minutes is not None and not 1 <= failure_duration_minutes <= 1440:
+            self.add_error("failure_duration_minutes", "this field must be between 1 and 1440")
+        if failure_frequency_days_per_year is not None and not 0 <= failure_frequency_days_per_year <= 365:
+            self.add_error("failure_frequency_days_per_year", "this field must be between 0 and 365")
         b_min = _zero_if_none(cleaned_data.get("bacteria_min", 0))
         b_max = _zero_if_none(cleaned_data.get("bacteria_max", 0))
         v_min = _zero_if_none(cleaned_data.get("viruses_min", 0))

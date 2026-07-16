@@ -9,8 +9,7 @@ def migrate_references(apps, schema_editor):
     QMRATreatment = apps.get_model("risk_assessment", "QMRATreatment")
     all_treatments = QMRATreatment.objects.all()
     if len(all_treatments) == 0:
-        call_command("seed_default_db")
-        all_treatments = QMRATreatment.objects.all()
+        return
     for treatment in all_treatments:
 
         treatment.bacteria_references.add(treatment.bacteria_reference)

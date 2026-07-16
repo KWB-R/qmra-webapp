@@ -12,3 +12,9 @@ prod-migrations/
 .vscode
 test.zip
 .vs
+*.log
+node_modules/
+test-results/
+playwright-report/
+app-dev*.log
+app-dev*.err.log

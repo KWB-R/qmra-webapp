@@ -57,6 +57,8 @@ class QMRAPathogenAdmin(admin.ModelAdmin):
 class QMRATreatmentAdmin(admin.ModelAdmin):
     list_display = [
         "name", "group",
+        "failure_duration_minutes",
+        "failure_frequency_days_per_year",
         "bacteria_min",
         "bacteria_max",
         "viruses_min",
@@ -66,6 +68,7 @@ class QMRATreatmentAdmin(admin.ModelAdmin):
     ]
     fields = [
         ("name", "group"),
+        ("failure_duration_minutes", "failure_frequency_days_per_year"),
         ("bacteria_min", "bacteria_max"),
         "bacteria_references",
         ("viruses_min", "viruses_max"),

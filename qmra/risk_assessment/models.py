@@ -29,6 +29,8 @@ class Treatment(models.Model):
     risk_assessment = models.ForeignKey("RiskAssessment", related_name="treatments", on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
     train_index = models.IntegerField(blank=False, null=False, default=0)
+    failure_duration_minutes = models.IntegerField(default=30)
+    failure_frequency_days_per_year = models.FloatField(default=0)
     bacteria_min = models.FloatField(blank=True, null=True)
     bacteria_max = models.FloatField(blank=True, null=True)
     viruses_min = models.FloatField(blank=True, null=True)
@@ -41,6 +43,8 @@ class Treatment(models.Model):
         return Treatment.objects.create(
             risk_assessment=risk_assessment,
             name=default.name,
+            failure_duration_minutes=default.failure_duration_minutes,
+            failure_frequency_days_per_year=default.failure_frequency_days_per_year,
             bacteria_min=default.bacteria_min,
             bacteria_max=default.bacteria_max,
             viruses_min=default.viruses_min,

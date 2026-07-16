@@ -13,6 +13,8 @@
                 setter: (elem, x) => null
             },
             name: { selector: "select", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            failure_duration_minutes: { selector: "input[id*='failure_duration_minutes']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            failure_frequency_days_per_year: { selector: "input[id*='failure_frequency_days_per_year']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             bacteria_min: { selector: "input[id*='bacteria_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             bacteria_max: { selector: "input[id*='bacteria_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             viruses_min: { selector: "input[id*='viruses_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
@@ -339,6 +341,17 @@
             this.treatments = [];
             this.references = references;
         }
+        referenceIds(treatment) {
+            const refs = [
+                ...(Array.isArray(treatment?.viruses_references) ? treatment.viruses_references : []),
+                ...(Array.isArray(treatment?.bacteria_references) ? treatment.bacteria_references : []),
+                ...(Array.isArray(treatment?.protozoa_references) ? treatment.protozoa_references : []),
+            ];
+            for (const key of ["viruses_reference", "bacteria_reference", "protozoa_reference"]) {
+                if (treatment?.[key] != null) refs.push(treatment[key]);
+            }
+            return [...new Set(refs.filter(r => r != null && r !== ""))];
+        }
         addTreatment(form, values) {
             const formValues = form.getValues();
             this.treatments.push(values);
@@ -389,7 +402,7 @@
             for (const treatment of this.treatments){
                 if (!uniques.has(treatment.name)){
                     const all_refs_id = new Set();
-                    for (const r of [...treatment?.viruses_references, ...treatment?.bacteria_references, ...treatment?.protozoa_references]){
+                    for (const r of this.referenceIds(treatment)){
                         all_refs_id.add(r);
                     }
                     const superscripts = [...all_refs_id].map((r, i) => { return `<sup>[${i+1}]</sup>` }).join('');
@@ -401,6 +414,16 @@
                     inner += `<li>
                     <h5>${treatment.name}${superscripts}</h5>
                     <div class="text-muted small mb-4">${treatment.description}</div>
+                    <table class="table small">
+                        <tr>
+                            <th>Failure duration (minutes)</th>
+                            <th>Failure frequency (days/year)</th>
+                        </tr>
+                        <tr>
+                            <td>${treatment.failure_duration_minutes === null ? 'NA' : treatment.failure_duration_minutes}</td>
+                            <td>${treatment.failure_frequency_days_per_year === null ? 'NA' : treatment.failure_frequency_days_per_year}</td>
+                        </tr>
+                    </table>
                     <table class="table small">
                         <tr>
                             <th>Pathogen group</th>

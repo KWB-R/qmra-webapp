@@ -79,9 +79,36 @@ class TestInflowFormset(TestCase):
 
 
 class TestTreatmentForm(TestCase):
+    def test_that_failure_fields_are_exposed(self):
+        given_form = TreatmentForm()
+
+        assert_that(given_form.fields).contains_key("failure_duration_minutes")
+        assert_that(given_form.fields).contains_key("failure_frequency_days_per_year")
+
+    def test_that_failure_fields_validate_ranges(self):
+        data = dict(
+            name="Primary treatment",
+            failure_duration_minutes=0,
+            failure_frequency_days_per_year=366,
+            bacteria_min=0,
+            bacteria_max=1,
+            viruses_min=0,
+            viruses_max=1,
+            protozoa_min=0,
+            protozoa_max=1,
+        )
+        given_form = TreatmentForm(data=data)
+        given_form.fields["name"].choices = QMRATreatments.choices()
+        given_form.full_clean()
+
+        assert_that(given_form.errors).contains_key("failure_duration_minutes")
+        assert_that(given_form.errors).contains_key("failure_frequency_days_per_year")
+
     def test_that_negative_are_allowed(self):
         data = dict(
             name="Primary treatment",
+            failure_duration_minutes=30,
+            failure_frequency_days_per_year=0,
             bacteria_min=-2,
             bacteria_max=-1,
             viruses_min=-2,
@@ -99,6 +126,8 @@ class TestTreatmentForm(TestCase):
     def test_that_min_needs_to_be_less_than_max(self):
         default_data = dict(
             name="Primary treatment",
+            failure_duration_minutes=30,
+            failure_frequency_days_per_year=0,
             bacteria_min=0,
             bacteria_max=0,
             viruses_min=0,

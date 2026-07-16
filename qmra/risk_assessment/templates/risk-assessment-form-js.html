@@ -45,6 +45,9 @@
     let exposureForm = null;
 
     function getExposureData(name) {
+        if (!name || !defaultExposures || !defaultExposures[name]) {
+            return null;
+        }
         return {...defaultExposures[name]};
     };
     function getExposureForm() {
@@ -59,6 +62,15 @@
         exposureForm.querySelector("input[id*=volume_per_event]").step = values.volume_per_event;
     }
     function setExposureInfoValues(exposureInfo, values, references) {
+        if (!values) {
+            exposureInfo.querySelector("#exposure-info-name").innerHTML = "";
+            exposureInfo.querySelector("#exposure-info-description").innerHTML = "";
+            exposureInfo.querySelector("#exposure-info-values").innerHTML = "";
+            const $ref = exposureInfo.querySelector("#exposure-info-reference");
+            $ref.setAttribute("href", "");
+            $ref.innerHTML = "n.a.";
+            return;
+        }
         exposureInfo.querySelector("#exposure-info-name").innerHTML = values.name;
         exposureInfo.querySelector("#exposure-info-description").innerHTML = values.description;
         exposureInfo.querySelector("#exposure-info-values").innerHTML = `
@@ -87,6 +99,9 @@
         document.querySelector("select[id*='exposure_name']")
             .addEventListener("change", function(ev) {
                 const data = getExposureData(ev.target.value);
+                if (!data) {
+                    return;
+                }
                 setExposureFormValues(exposureForm, data);
                 setExposureInfoValues(exposureInfo, data, defaultReferences);
             });

@@ -54,3 +54,26 @@ class TestResultExport(TestCase):
             with open("test.zip", "wb") as f:
                 f.write(buffer.getvalue())
             assert_that(buffer).is_not_none()
+
+    def test_treatments_export_includes_failure_fields(self):
+        given_user = User.objects.create_user("test-user3", "test-user@test.com", "password")
+        given_ra = RiskAssessment.objects.create(
+            user=given_user,
+            events_per_year=1,
+            volume_per_event=2,
+        )
+        given_inflow = Inflow.objects.create(
+            risk_assessment=given_ra,
+            pathogen="Rotavirus",
+            min=0.1,
+            max=0.2,
+        )
+        given_treatment = Treatment.from_default(QMRATreatments.get("Primary treatment"), given_ra)
+        given_ra.inflows.set([given_inflow], bulk=False)
+        given_ra.treatments.set([given_treatment], bulk=False)
+        assess_risk(given_ra, [given_inflow], [given_treatment])
+
+        treatments_df = exports.treatments_as_df(given_ra.treatments)
+
+        assert_that(treatments_df.columns).contains("Failure duration (minutes)")
+        assert_that(treatments_df.columns).contains("Failure frequency (days/year)")

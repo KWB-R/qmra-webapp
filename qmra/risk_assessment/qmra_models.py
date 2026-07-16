@@ -266,6 +266,8 @@ class QMRATreatment(models.Model):
     name: str = models.CharField(max_length=256)
     group: str = models.CharField(max_length=256)
     description: str = models.CharField(max_length=512)
+    failure_duration_minutes = models.IntegerField(default=30)
+    failure_frequency_days_per_year = models.FloatField(default=0)
     bacteria_min: Optional[float] = models.FloatField(blank=True, null=True)
     bacteria_max: Optional[float] = models.FloatField(blank=True, null=True)
     bacteria_references = models.ManyToManyField(QMRAReference, related_name="bacteria_lrvs")
@@ -288,6 +290,8 @@ class QMRATreatment(models.Model):
             name=data['name'],
             group=data['group'],
             description=data['description'],
+            failure_duration_minutes=data.get('failure_duration_minutes', 30),
+            failure_frequency_days_per_year=data.get('failure_frequency_days_per_year', 0),
             bacteria_min=data['bacteria_min'],
             bacteria_max=data['bacteria_max'],
             viruses_min=data['viruses_min'],
@@ -302,6 +306,8 @@ class QMRATreatment(models.Model):
 
     def to_dict(self):
         data = model_to_dict(self)
+        data["failure_duration_minutes"] = self.failure_duration_minutes
+        data["failure_frequency_days_per_year"] = self.failure_frequency_days_per_year
         data["bacteria_references"] = [str(ref.pk) for ref in self.bacteria_references.all()]
         data["viruses_references"] = [str(ref.pk) for ref in self.viruses_references.all()]
         data["protozoa_references"] = [str(ref.pk) for ref in self.protozoa_references.all()]
@@ -324,12 +330,19 @@ class QMRATreatments(StaticEntity):
     source = "qmra/static/data/default-treatments.json"
     model = QMRATreatment
     primary_key = "name"
+    aliases = {
+        "Coagulation, flocculation and media filtration": "Conventional clarification",
+    }
 
     @classmethod
     def choices(cls):
         return [
             *[(x.name, x.name) for x in sorted(cls.data.values(), key=lambda x: x.name)],
         ]
+
+    @classmethod
+    def get(cls, pk: str):
+        return super().get(cls.aliases.get(pk, pk))
 
 
 class QMRAExposure(models.Model):
