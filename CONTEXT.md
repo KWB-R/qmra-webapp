@@ -148,4 +148,5 @@ A saved assessment that records the model version, data release, configuration a
 A saved assessment created under an earlier model or data version. Its treatment is an open question.
 
 **Assessment comparison**:
-A workflow for viewing several saved assessments side by side. Next phase.
+Viewing the results of several saved assessments side by side. Today this is one plot of infection-risk results per reference pathogen; comparing inputs or DALYs is next phase.
+_Avoid_: benchmark, diff

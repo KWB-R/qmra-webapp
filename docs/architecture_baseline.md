@@ -152,7 +152,7 @@ Pandas assembles the tabular exports, Plotly creates the figures, and Kaleido re
 - **Observability**: Prometheus middleware/endpoints and structlog-based request logging.
 - **Deployment**: Docker Compose and Gunicorn in a single web service.
 
-The assessment-list template contains UI text for selecting or comparing assessments, but no separate implemented comparison calculation or view was found in the inspected code.
+The assessment-list template implements a client-side comparison view: selected saved assessments' serialized results are rendered in a Plotly modal comparing annual infection probability per reference pathogen. There is no server-side comparison endpoint or model; the view reuses the stored per-assessment results.
 
 ## 8. Open questions for possible ADR treatment
 
@@ -163,7 +163,7 @@ These are unresolved or insufficiently explicit architectural points in the repo
 - Should calculation continue to be called directly from Django views, or is a stable internal calculation-engine boundary intended?
 - How should model/data versions and simulation settings be represented for saved results and exports?
 - How should historical assessments behave after scientific default data or calculation logic changes?
-- Is assessment comparison intended to become a real workflow, given the existing list-template UI text but no dedicated implementation?
+- Is the client-side infection-risk comparison plot intended to grow into a fuller comparison workflow (inputs, DALYs, persistence), and if so, does it need a server-side boundary?
 - Several inspected view paths retrieve `RiskAssessment` by ID without an explicit `user=request.user` filter. Is ownership scoping guaranteed elsewhere, or does this boundary require verification?
 - Which production security and operational settings are required for deployment? The repository currently includes development-oriented fallbacks such as `DEBUG=True`, a fallback secret key, and a dummy email backend; TLS, backup, and retention policies are not defined here.
 

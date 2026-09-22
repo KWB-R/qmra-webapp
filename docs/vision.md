@@ -80,7 +80,7 @@ The user can then run the calculation and review the results. The application do
 
 A user can add multiple treatment steps to a scenario. Each step contributes minimum and maximum LRVs for bacteria, viruses, and protozoa. The current calculation combines treatment steps by summing LRVs within each pathogen group.
 
-Users can explore alternative scenarios by changing the configuration and rerunning the assessment. There is no dedicated comparison view for multiple saved assessments.
+Users can explore alternative scenarios by changing the configuration and rerunning the assessment. On the saved-assessments page, a registered user can select several saved assessments and open a result-comparison view: one plot showing, per reference pathogen, the annual-infection-probability range of each selected assessment against the health-based reference level. This view compares infection-risk results only; it does not compare DALYs or show differences in inputs such as source water, exposure, or treatment train.
 
 ### Risk interpretation
 
@@ -115,7 +115,7 @@ The following capabilities are not part of the current implementation and should
 
 - **Treatment failure and downtime assessment:** configure failure frequency and average failure duration for treatment steps and quantify their effect on annual risk.
 - **Combined treatment failures:** represent simultaneous failures across treatment steps, including daily failure/no-failure states and corresponding treatment performance.
-- **Saved-assessment comparison:** compare multiple saved assessments, including differences in source water, exposure assumptions, treatment trains, LRV cases, and risk results.
+- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and LRV cases side by side.
 - **Reproducible assessment snapshots:** attach explicit model-version, data-library, reference, and simulation-settings metadata to saved and exported assessments.
 - **Historical assessment handling:** define whether assessments remain tied to their original model and data, are migrated, or can be rerun under a selected version.
 - **Extended interfaces:** assess the need for a stable calculation-engine boundary, public API, batch execution, notebook use, command-line use, or integration with other digital-water platforms.
@@ -204,7 +204,7 @@ The inspected test coverage is uneven. Calculation and form tests exist, but the
 - The model is limited to three reference pathogens.
 - The calculation uses simplified treatment assumptions and does not represent operational failures, downtime, or combined failures.
 - Uncertainty is represented through input ranges, stochastic sampling, and minimum-/maximum-LRV cases, not through a complete joint uncertainty model.
-- There is no dedicated comparison workflow for saved assessments.
+- Saved-assessment comparison is limited to a plot of infection-risk results; inputs and DALYs are not compared.
 - Export includes CSV, HTML, and PNG files in a ZIP; no Excel spreadsheet export was found in the inspected code.
 - Saved assessments lack explicit model-version, data-library release, and complete simulation-settings metadata.
 - Bundled references are available, but provenance is not captured completely for every saved or user-defined value.
@@ -242,5 +242,5 @@ The following questions remain open for future product and scientific developmen
 - Is there a future need for public API access, batch execution, notebook use, command-line use, or integration with other digital-water platforms?
 - What project data may be confidential or commercially sensitive even when it is not personal data, and what additional controls are required for saved assessments?
 - How should historical assessments behave when the scientific model, data library, or assessment schema changes: remain frozen to the original version, be migrated, or be rerunnable under a user-selected version?
-- What comparison capabilities are needed for saved assessments and alternative scenarios?
+- What comparison capabilities are needed for saved assessments and alternative scenarios beyond the existing infection-risk comparison plot?
 - Which deployment controls, operational metrics, performance targets, backup policies, retention rules, and incident-response processes are required for production use?

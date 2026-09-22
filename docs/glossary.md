@@ -113,7 +113,7 @@ A treatment step operating below its intended performance or being unavailable. 
 Simultaneous failures of multiple treatment steps. Not currently modelled.
 
 **Assessment comparison**
-A future workflow for comparing multiple saved assessments. Not currently implemented.
+Viewing the results of several saved assessments side by side. The current application offers one comparison plot of infection-risk results per reference pathogen; comparing inputs or DALYs is next-phase work.
 
 **Reproducible assessment snapshot**
 A saved assessment containing the exact model version, data release, configuration, and simulation settings needed to reproduce its result. The current application does not store this complete snapshot.
