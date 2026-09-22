@@ -2,7 +2,9 @@ import abc
 import dataclasses as dtc
 import enum
 import json
+import os
 from itertools import groupby
+from pathlib import Path
 from typing import Optional, Any
 
 import numpy as np
@@ -69,11 +71,25 @@ class StaticEntity(metaclass=abc.ABCMeta):
     def primary_key(self) -> str:
         pass
 
+    @classmethod
+    def _source_path(cls) -> Path:
+        static_root = os.getenv("STATIC_ROOT")
+        source_path = Path(cls.source)
+        if static_root:
+            try:
+                runtime_path = Path(static_root) / source_path.relative_to("qmra/static")
+            except ValueError:
+                runtime_path = None
+            else:
+                if runtime_path.exists():
+                    return runtime_path
+        return source_path
+
     @classproperty
     def raw_data(cls) -> dict[str, dict[str, Any]]:
         # because an admin can change this data while the app runs,
         # we need _raw_data to be loaded dynamically...
-        with open(cls.source, "r") as f:
+        with open(cls._source_path(), "r") as f:
             cls._raw_data = json.load(f)
         return cls._raw_data
 
