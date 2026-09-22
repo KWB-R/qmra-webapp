@@ -1,7 +1,8 @@
 # Domain model: open questions
 
-Status: open. Raised on 2026-09-22 while deriving `CONTEXT.md` from `docs/glossary.md`
-and cross-checking both against the code. Resolve each item, update `CONTEXT.md`, then
+Status: open. Raised on 2026-09-22 while deriving `CONTEXT.md` from the original
+`docs/glossary.md` and cross-checking both against the code. `CONTEXT.md` has since
+replaced that glossary, which was removed; "the glossary" below refers to `CONTEXT.md`. Resolve each item, update `CONTEXT.md`, then
 remove it from this list.
 
 ## Conflicts between glossary and code
