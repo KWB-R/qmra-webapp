@@ -1,25 +1,27 @@
 # 01: Onboard Malte to the AI development framework
 
-**What to build:** Malte can log into the Controlled server on Hetzner, open the qmra-webapp workspace, start Claude Code with his own authenticated session, and knows where the method starts. Follow the framework's admin onboarding page (Setup stage) end to end; his per-user config already exists in the framework repo.
+**What to build:** Malte can work on the QMRA web app the way our AI development framework describes. In practice this means three things. He can log in to our shared development server (a Linux machine hosted at Hetzner, which we call the "Controlled server"). He can open the QMRA project folder there. And he can start Claude Code, the AI coding assistant, with his own login. At the end he also knows where to read how our way of working starts.
+
+We follow the framework's onboarding page step by step. His personal setup file in the framework already exists.
 
 **Blocked by:** None (can start immediately)
 
 **Status:** in-progress
 
-Already done on the server (checked 2026-09-23):
+Already done on the server (checked on 23 September 2026):
 
-- [x] Per-user YAML exists in the framework repo (`admin/users/malte.yaml`, project qmra-webapp, full method skill set)
-- [x] Linux account `malte` created on the Controlled server with SSH key login
-- [x] Member of the `dev-qmra-webapp` group, so the project deploy key and `controlled-dev-git` work for him
-- [x] GitHub membership on KWB-R/qmra-webapp granted (admin permission)
+- [x] His setup file exists in the framework. It lists the QMRA project and the full set of Claude skills (small add-ons that teach Claude our method).
+- [x] His user account on the Controlled server exists. He logs in with an SSH key, a digital key pair used instead of a password.
+- [x] He is in the project group for the QMRA web app. This group gives him access to the shared Git key and to the `controlled-dev-git` command used to pull and push code.
+- [x] He has admin rights on the GitHub repository KWB-R/qmra-webapp.
 
-Remaining:
+Still to do:
 
-- [ ] Confirm the qmra-webapp workspace was cloned into his home and contains the `controlled-dev-git` note in its CLAUDE.md
-- [ ] Confirm he can `ssh` in from his own workstation with the server-login key and run `sudo controlled-dev-git pull` inside the workspace
-- [ ] Sit with him for the first `claude` launch: choose the subscription login, send the authorization URL to Nico, paste the code Nico returns. Schedule this when Nico is available, since the shared Claude subscription approval depends on him
-- [ ] He confirms "Trust this folder" for the qmra-webapp workspace himself
-- [ ] Check that his skills are linked in `~/.claude/skills` and match his YAML (run through `manage-user.sh`, never `06-install-ai-tools.sh` alone)
-- [ ] Record the audit event (admin, target user, project, action, timestamp, result)
-- [ ] Walk him through the method overview and the Project start phase, and point him at the open Docs PR (#17) as the current Vision and Glossary
-- [ ] Run `admin/scripts/05-validate-environment.sh` afterwards to confirm the account landed cleanly
+- [ ] Check that the QMRA project was copied into his home folder on the server, and that its CLAUDE.md file contains the note about `controlled-dev-git`.
+- [ ] Check that he can log in from his own computer with his server key, and that `sudo controlled-dev-git pull` works inside the project folder.
+- [ ] Sit with him for his first start of Claude Code. He chooses the subscription login. Claude shows a web address. We send it to Nico, who approves it and sends back a short code. Malte pastes that code into Claude. Plan this for a time when Nico is available, because our shared Claude subscription needs his approval.
+- [ ] Malte confirms the "Trust this folder" question himself the first time Claude opens the project.
+- [ ] Check that his Claude skills are installed and match his setup file. Always install them through the `manage-user.sh` script, not through the install script on its own.
+- [ ] Write the audit record: who did it, for whom, which project, what was done, when, and the result.
+- [ ] Walk him through the method overview and the "Project start" phase. Point him to the open pull request #17, which holds the current Vision and Glossary.
+- [ ] Run the environment check script `05-validate-environment.sh` afterwards to confirm that the account is set up correctly.
