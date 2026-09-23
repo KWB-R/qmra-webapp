@@ -1,6 +1,6 @@
 # QMRA Web Application
 
-A web tool for quantitative microbial risk assessment of water: a user describes a source water, a treatment train and an exposure, and the tool estimates the yearly infection risk and health burden for three reference pathogens. Bounded to steady-state scenarios; treatment failure, downtime and process design are out of scope.
+A web tool for quantitative microbial risk assessment of water: a user describes a source water, a treatment train and an exposure, and the tool estimates the yearly infection risk and health burden for three reference pathogens. Bounded to steady-state scenarios; process design is out of scope, and treatment failure is next phase.
 
 ## Language
 
@@ -11,7 +11,7 @@ A scenario together with the results of its risk calculation. Scenarios are comp
 _Avoid_: risk assessment (in prose), calculation, run, project
 
 **Scenario**:
-The inputs of a risk calculation: inflow concentrations, a treatment train and an exposure. Each scenario is calculated in two cases, best-case and worst-case.
+The inputs of a risk calculation: inflow concentrations, a treatment train and an exposure. The failure frequency and failure duration of each treatment step belong to the scenario, so scenarios can differ only in their failures. Each scenario is calculated in two cases, best-case and worst-case.
 _Avoid_: case (reserved for best-case and worst-case), configuration
 
 **Saved assessment**:
@@ -82,7 +82,7 @@ Source waters, inflow concentrations, treatment steps, exposures, pathogens and 
 _Avoid_: defaults, static data, system data, library
 
 **Personal definition**:
-A reusable source water, exposure or treatment step created by a registered user and offered alongside the bundled defaults.
+A reusable source water, exposure or treatment step created by a registered user and offered alongside the bundled defaults. A personal treatment step can carry its own failure frequency and failure duration.
 _Avoid_: custom entry, user data, own data
 
 **Site-specific input**:
@@ -107,11 +107,11 @@ Repeated random sampling of inflow concentrations and exposure events to estimat
 _Avoid_: stochastic run, sampling
 
 **Best-case**:
-The case of a scenario that gives the lower infection-risk estimate. For normal operation it uses every treatment step's maximum LRV. When treatment failure is modelled, it is extended by failure-derived LRVs.
+The case of a scenario that gives the lower infection-risk estimate. For normal operation it uses every treatment step's maximum LRV. On failure days it applies the mixed-water assumption.
 _Avoid_: maximum-LRV case, minimum risk scenario, optimistic case
 
 **Worst-case**:
-The case of a scenario that gives the higher infection-risk estimate. For normal operation it uses every treatment step's minimum LRV. When treatment failure is modelled, it is extended by failure-derived LRVs.
+The case of a scenario that gives the higher infection-risk estimate. For normal operation it uses every treatment step's minimum LRV. On failure days it assumes all consumed water was treated during the failure event.
 _Avoid_: minimum-LRV case, maximum risk scenario, conservative case
 
 **Annual probability of infection**:
@@ -144,18 +144,38 @@ Variation or lack of knowledge in an assessment. Represented today only through 
 ### Boundaries
 
 **Steady-state scenario**:
-A scenario whose source water, exposure and treatment performance are assumed constant over the year. This is the only kind the application models.
+A scenario whose inputs are assumed to be the same every year: source water, exposure, treatment performance and, once modelled, failure frequency and failure duration. Results are given per year, never per day, so a scenario with treatment failures is still steady-state. This is the only kind the application models.
 
 **Normal operation**:
 Every treatment step performing within its configured minimum and maximum LRVs. The only state the application models today.
 _Avoid_: regular operation, steady operation
 
 **Treatment failure**:
-A treatment step performing below its configured LRVs or being unavailable for a period. Not modelled; a next-phase concept.
-_Avoid_: outage, malfunction, downtime (alone)
+A treatment step losing its entire LRV for a period, so that it contributes no removal while it lasts. Any treatment step with a positive LRV can fail, including non-technical measures; recontamination cannot. A step fails only if it has a failure frequency above zero. Partial loss of removal is not modelled and not planned. Not modelled today; a next-phase concept.
+_Avoid_: damage, incident, outage, malfunction, downtime (alone)
+
+**Failure event**:
+One occurrence of a treatment failure in one treatment step. A step has at most one failure event per day.
+_Avoid_: damage event, incident
+
+**Failure day**:
+A day on which at least one treatment step has a failure event. Exposure events on a failure day are calculated with the reduced LRV.
+_Avoid_: damage day, incident day
+
+**Failure frequency**:
+The expected number of failure days per year for one treatment step. It is zero unless the user enters it. Which days fail is drawn at random, so a simulated year can have more or fewer failure days than expected.
+_Avoid_: failure rate, failure probability
+
+**Failure duration**:
+The average length of one failure event of one treatment step, in minutes within a day. It matters only under the mixed-water assumption.
+_Avoid_: downtime, outage time
+
+**Mixed-water assumption**:
+The best-case assumption that water consumed on a failure day is a mixture of water treated during the failure event and water treated in normal operation, in proportion to the failure duration. Worst-case instead assumes the consumed water was treated entirely during the failure event, regardless of its duration.
+_Avoid_: mixed concentration, dilution, storage effect
 
 **Combined failure**:
-Two or more treatment steps failing at the same time. Not modelled.
+Failure events in two or more treatment steps on the same day. Worst-case loses all their LRVs for the whole day. Under the mixed-water assumption the failure events are assumed to overlap as little as possible within the day: not at all if their durations fit into one day, otherwise only by the minutes that exceed a day.
 
 **Next phase**:
 Capabilities identified for future development and not present in the application today.
