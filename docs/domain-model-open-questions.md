@@ -50,5 +50,8 @@ should warn or cap.
 
 ## ADR candidates
 
-None so far. "An assessment holds exactly one scenario" is neither hard to reverse nor
-surprising, so it does not need an ADR.
+- **Written:** `docs/adr/0001-failure-days-drawn-per-exposure-event.md` (2026-09-23),
+  the decision to draw failure days per exposure event inside the Monte Carlo simulation
+  instead of following the source method's 365-day sequence.
+- **Not needed:** "An assessment holds exactly one scenario" is neither hard to reverse
+  nor surprising, so it does not need an ADR.
