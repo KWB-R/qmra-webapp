@@ -7,12 +7,12 @@ A web tool for quantitative microbial risk assessment of water: a user describes
 ### Assessment
 
 **Assessment**:
-One configured QMRA calculation together with its inputs and results. It holds exactly one scenario.
+A scenario together with the results of its risk calculation. Scenarios are compared by comparing assessments.
 _Avoid_: risk assessment (in prose), calculation, run, project
 
 **Scenario**:
-One combination of source-water, exposure and treatment-train assumptions. Today an assessment contains exactly one scenario; the term exists so that multi-scenario comparison can be discussed later.
-_Avoid_: case (reserved for LRV cases), configuration
+The inputs of a risk calculation: inflow concentrations, a treatment train and an exposure. Each scenario is calculated in two cases, best-case and worst-case.
+_Avoid_: case (reserved for best-case and worst-case), configuration
 
 **Saved assessment**:
 An assessment stored under a registered user's account so it can be listed, reopened, edited, deleted or exported.
@@ -32,20 +32,32 @@ _Avoid_: download, report (the report is one file inside the package)
 ### Inputs
 
 **Source water**:
-A named type of water before treatment, such as raw sewage or protected surface water. A source water is described by one inflow per reference pathogen.
+A named type of water before treatment, such as raw sewage or protected surface water. A source water is described by one inflow concentration per reference pathogen.
 _Avoid_: source, water type, feed water
 
-**Inflow**:
-The minimum and maximum concentration of one reference pathogen in a source water, in organisms per litre. An assessment has one inflow per selected pathogen.
-_Avoid_: concentration range, pathogen input, source concentration
+**Site-specific source water**:
+A bundled source water in an assessment whose inflow concentrations were entered or changed by hand, even a single value. It is named after the bundled source water, prefixed with "site-specific": selecting "groundwater" and editing the Rotavirus concentration gives "site-specific groundwater". A personal definition already carries the user's own name and keeps it when its values are edited. Inflow concentrations entered without selecting any source water form a plain "site-specific source water".
+_Avoid_: custom source water, modified source water, calling it by the unprefixed name
+
+**Inflow concentration**:
+The concentration of one reference pathogen in the source water entering the treatment train, in organisms per litre, given as a minimum and a maximum. An assessment has one inflow concentration per selected pathogen.
+_Avoid_: inflow (alone), concentration (alone), concentration range, pathogen input, source concentration
+
+**Outflow concentration**:
+The concentration of one reference pathogen leaving the treatment train: the inflow concentration reduced by the train's LRV for the pathogen's group. It is calculated, never entered, and differs between best-case and worst-case. It determines the dose ingested per exposure event.
+_Avoid_: outflow (alone), treated concentration, effluent concentration, dose
 
 **Exposure**:
 The assumed human contact with the treated water, given as events per year and ingested volume per event in litres.
 _Avoid_: exposure scenario, ingestion, use
 
 **Treatment step**:
-One treatment technology or process with a minimum and maximum log-removal value per pathogen group.
+Any step between source water and exposure that changes the pathogen concentration, with a minimum and maximum log-removal value per pathogen group. It can be a treatment technology or process, a non-technical measure such as a hygiene practice, or recontamination.
 _Avoid_: treatment (alone, when a step is meant), barrier, process, technology
+
+**Recontamination**:
+A treatment step with a negative LRV, representing pathogens entering the water after treatment, for example in storage or distribution.
+_Avoid_: negative treatment, contamination step
 
 **Treatment train**:
 The ordered sequence of treatment steps in a scenario. Its removal is the sum of the steps' LRVs per pathogen group.
@@ -66,7 +78,7 @@ _Avoid_: pathogen class, pathogen type
 ### Data origin
 
 **Bundled default data**:
-Source waters, inflows, treatment steps, exposures, pathogens and references shipped with the application.
+Source waters, inflow concentrations, treatment steps, exposures, pathogens and references shipped with the application.
 _Avoid_: defaults, static data, system data, library
 
 **Personal definition**:
@@ -78,7 +90,7 @@ A value typed in for one assessment to represent local evidence. The application
 _Avoid_: custom value, manual value, override
 
 **Reference**:
-A literature citation attached to a bundled inflow, exposure or LRV to show where the value came from.
+A literature citation attached to a bundled inflow concentration, exposure or LRV to show where the value came from.
 _Avoid_: source (collides with source water), citation, literature
 
 **Provenance**:
@@ -94,13 +106,13 @@ _Avoid_: infection model, dose model
 Repeated random sampling of inflow concentrations and exposure events to estimate a distribution of yearly risk instead of one number.
 _Avoid_: stochastic run, sampling
 
-**Maximum-LRV case**:
-The calculation using every step's maximum LRV. It gives the lower infection-risk estimate.
-_Avoid_: best case, minimum risk scenario, optimistic case
+**Best-case**:
+The case of a scenario that gives the lower infection-risk estimate. For normal operation it uses every treatment step's maximum LRV. When treatment failure is modelled, it is extended by failure-derived LRVs.
+_Avoid_: maximum-LRV case, minimum risk scenario, optimistic case
 
-**Minimum-LRV case**:
-The calculation using every step's minimum LRV. It gives the higher infection-risk estimate.
-_Avoid_: worst case, maximum risk scenario, conservative case
+**Worst-case**:
+The case of a scenario that gives the higher infection-risk estimate. For normal operation it uses every treatment step's minimum LRV. When treatment failure is modelled, it is extended by failure-derived LRVs.
+_Avoid_: minimum-LRV case, maximum risk scenario, conservative case
 
 **Annual probability of infection**:
 The estimated probability that a person is infected at least once in one year of exposure.
@@ -110,8 +122,12 @@ _Avoid_: infection risk (alone), yearly risk
 The estimated health burden in disability-adjusted life years per person per year, derived from the annual probability of infection through the pathogen's illness-to-infection ratio and burden per case.
 _Avoid_: DALY, burden, health impact
 
+**Risk measure**:
+One of the two outcomes the application reports per reference pathogen: annual probability of infection or DALYs per person per year.
+_Avoid_: metric, indicator, risk type
+
 **Risk distribution**:
-The set of sampled yearly outcomes for one reference pathogen and one LRV case, summarised by minimum, quartiles, median and maximum.
+The set of sampled yearly outcomes for one reference pathogen in best-case or worst-case, summarised by minimum, quartiles, median and maximum.
 _Avoid_: result set, spread
 
 **Health-based reference level**:
@@ -119,16 +135,20 @@ A comparison value shown next to results: one infection per ten thousand persons
 _Avoid_: legal limit, tolerable risk level, guideline value, threshold
 
 **Reference-level exceedance**:
-The verdict for one reference pathogen: whether the mean risk exceeds the health-based reference level in both LRV cases, only in the minimum-LRV case, or in neither.
+The verdict for one reference pathogen and one risk measure: whether the mean result exceeds the health-based reference level in both best-case and worst-case, only in worst-case, or in neither.
 _Avoid_: risk category, risk flag, pass/fail
 
 **Uncertainty**:
-Variation or lack of knowledge in an assessment. Represented today only through inflow ranges, random sampling and the two LRV cases.
+Variation or lack of knowledge in an assessment. Represented today only through inflow concentration ranges, random sampling and the spread between best-case and worst-case.
 
 ### Boundaries
 
 **Steady-state scenario**:
 A scenario whose source water, exposure and treatment performance are assumed constant over the year. This is the only kind the application models.
+
+**Normal operation**:
+Every treatment step performing within its configured minimum and maximum LRVs. The only state the application models today.
+_Avoid_: regular operation, steady operation
 
 **Treatment failure**:
 A treatment step performing below its configured LRVs or being unavailable for a period. Not modelled; a next-phase concept.

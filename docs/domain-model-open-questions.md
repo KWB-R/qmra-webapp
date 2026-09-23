@@ -1,61 +1,52 @@
 # Domain model: open questions
 
-Status: open. Raised on 2026-09-22 while deriving `CONTEXT.md` from the original
+Status: all items resolved or deferred (2026-09-23). Raised on 2026-09-22 while deriving `CONTEXT.md` from the original
 `docs/glossary.md` and cross-checking both against the code. `CONTEXT.md` has since
 replaced that glossary, which was removed; "the glossary" below refers to `CONTEXT.md`. Resolve each item, update `CONTEXT.md`, then
 remove it from this list.
 
-## Conflicts between glossary and code
+## Follow-ups from resolved items
 
-1. **"Inflow" has no glossary entry, but code and exports use it.**
-   The glossary describes source water as "represented by minimum and maximum pathogen
-   concentrations". In the code a source water is only a name and description; the
-   per-pathogen concentration range is a separate object called an inflow, and it is
-   exported to users as `inflows.csv`. `CONTEXT.md` now defines *Inflow* as the canonical
-   term and narrows *Source water* to the named type.
-   **Question:** keep "inflow", or choose another word for the per-pathogen range?
+- **Inflow / outflow concentration (resolved 2026-09-23).** The glossary now uses
+  *Inflow concentration* and *Outflow concentration*. Decided target for the code, to be
+  done in a later code change (this branch stays docs-only):
+  - identifiers `inflow` / `outflow` become `inflow_concentration` /
+    `outflow_concentration`;
+  - the export file `inflows.csv` becomes `inflow_concentration.csv`.
 
-2. **"Scenario" is used for three different things.**
-   - Glossary: one combination of source-water, exposure and treatment assumptions.
-   - Saved-assessments page: "maximum risk scenario" / "minimum risk scenario" for the
-     minimum-LRV and maximum-LRV cases.
-   - Guided tour: "custom exposure scenario" for an exposure.
-   `CONTEXT.md` lists the last two under *Avoid*.
-   **Question:** fix the UI wording in the docs PR, on a separate branch, or record only?
+  Configurator wording ("pathogen concentrations") is left as it is.
 
-3. **"Tolerable risk level" appears on the result plots.**
-   The glossary prefers "health-based reference level". The plot label is the one place
-   users see the competing term.
-   **Question:** same as 2.
+- **Site-specific source water (resolved 2026-09-23).** When a user enters or edits any
+  inflow concentration of a bundled source water by hand, the assessment's source water
+  becomes "site-specific <name>" (e.g. "site-specific groundwater"). Personal
+  definitions keep their own name when edited. The code does not do this yet: it keeps the
+  plain source water name next to the edited values, so saved assessments and exports
+  show "groundwater" for data that is not the bundled groundwater. To be changed in a
+  later code change.
 
-4. **Assessment and scenario are one entity in code.**
-   A saved assessment holds exactly one source water, one exposure and one treatment
-   train; there is no scenario object. `CONTEXT.md` keeps *Scenario* and states that an
-   assessment contains exactly one, so the term is ready for future comparison work.
-   **Question:** agree to keep the distinction in language only?
+## Deferred: UI wording that conflicts with the glossary
 
-## Terms added to CONTEXT.md that the glossary lacks
+Decided 2026-09-23: leave the UI as it is for now. The glossary keeps its terms and
+lists the UI words under *Avoid*. Where users see them today:
 
-- **Pathogen group** (bacteria, viruses, protozoa). LRVs are defined per group and the
-  engine maps each reference pathogen to its group.
-- **Reference**: a literature citation attached to bundled data. The code sometimes calls
-  this a "source", which collides with source water.
-- **Reference-level exceedance**: the three-way verdict per pathogen (exceeds in both LRV
-  cases, only in the minimum-LRV case, or neither). The code calls it a risk category
-  with values max / min / none. It was unnamed anywhere.
+- **"Tolerable risk level"** (glossary: *Health-based reference level*): result summary
+  text (`assessment-result.html`, five times, attributed to the WHO), FAQ (`faqs.html`),
+  result plots (`plots.py`, `views_v0.py`) and the saved-assessments plot
+  (`risk-assessment-list.html`).
+- **"Exposure scenario"** (glossary: *Exposure*): FAQ (`faqs.html`, five times), home and
+  configurator guided tours, form help text (`views_v0.py`).
+- **"Maximum / minimum risk scenario"** (glossary: *Worst-case* / *Best-case*): explanation text on the saved-assessments page (`risk-assessment-list.html`).
 
-**Question:** confirm these three terms and their names.
+## Deferred: LRV above 6
 
-## Scenarios to stress-test the model
-
-1. A registered user selects the bundled "groundwater" source water and then edits the
-   Rotavirus concentration by hand. Is the assessment's source water still "groundwater",
-   or is it now a site-specific input with no name? The code keeps the name and the edited
-   numbers, so the name no longer describes the data.
-2. The guided tour allows a negative LRV to simulate recontamination. Is a recontamination
-   step a treatment step, or a different concept that shares the form?
-3. A treatment step with a maximum LRV above 6 triggers a warning. Is 6 a domain rule
-   worth naming (an LRV plausibility limit), or only a UI nicety?
+Decided 2026-09-23: leave it for now; the origin of the rule is unclear. What the code
+does: each treatment step's maximum LRV per pathogen group is checked against 6
+(`models.py`, `above_max_lrv`). Above 6, the result page warns that "the WHO standards
+do not allow LRVs above 6 in order to promote redundancy and robustness in treatment
+trains" (`assessment-result.html`). Minimum LRVs and the train total are not checked,
+and the calculation still uses the value above 6. Open: confirm the WHO source, decide
+whether it is a domain rule worth naming (e.g. *single-step LRV limit*), and whether it
+should warn or cap.
 
 ## ADR candidates
 
