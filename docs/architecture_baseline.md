@@ -32,6 +32,16 @@ The deployment passes `DOMAIN_NAME` into the container. The repository does not 
 
 Django Prometheus middleware and URL endpoints expose metrics. `django-structlog` is used for request logging. `/health` and `/ready` force a database connection and return `Ok` when the check succeeds.
 
+### Build and deployment process
+
+Deployment is done by the GitHub pipeline in `.github/workflows/`. It builds a Docker image, copies it to the server by SSH and installs it with Helm on microk8s (`infra/helm/qmra/`, one values file per environment). Every push to `main` deploys to dev and then to production, with no approval step and whatever files changed. Every push to a pull-request branch deploys to dev. The addresses, checks and full pipeline description are in [`environments.md`](environments.md).
+
+**Where this differs from section 2 above**
+
+- Section 2 describes Docker Compose. The pipeline deploys with microk8s and Helm. Compose is only used by the older scripts in `infra/deployment_scripts/` (for example `04_deploy_latest.sh` for `dev.qmra.org`). No workflow calls them.
+- Section 2 says TLS is not defined in the repository. The Helm chart defines a Let's Encrypt issuer and a TLS ingress.
+- The tests run on Python 3.11, and the Docker image uses Python 3.12.5.
+
 ## 3. Main application flow
 
 The principal request path is:
