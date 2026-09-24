@@ -151,7 +151,7 @@ Every treatment step performing within its configured minimum and maximum LRVs. 
 _Avoid_: regular operation, steady operation
 
 **Treatment failure**:
-A treatment step losing its entire LRV for a period, so that it contributes no removal while it lasts. Any treatment step with a positive LRV can fail, including non-technical measures; recontamination cannot. A step fails only if it has a failure frequency above zero. Partial loss of removal is not modelled and not planned. Not modelled today; a next-phase concept.
+A treatment step losing all its positive LRVs for a period, so that it removes nothing while it lasts. LRVs of zero or below are not affected: a step with regrowth for one pathogen group keeps that negative LRV during a failure. Any treatment step with at least one positive LRV can fail, including non-technical measures; recontamination, having no positive LRV, cannot. A step fails only if it has a failure frequency above zero. Partial loss of removal is not modelled and not planned. Not modelled today; a next-phase concept.
 _Avoid_: damage, incident, outage, malfunction, downtime (alone)
 
 **Failure event**:

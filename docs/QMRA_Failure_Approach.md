@@ -88,11 +88,12 @@ For each combination of failing treatment steps, an LRV must then be calculated 
 Agreed in a domain-modeling session. Terms follow `CONTEXT.md`; the calculation approach
 is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
 
-1. **Entire loss only.** A failing treatment step loses its entire LRV, for all three
-   pathogen groups at once. Partial loss of removal is not modelled and not planned.
-2. **Which steps can fail.** Any treatment step with a positive LRV, including
-   non-technical measures such as hygiene practices. Recontamination steps (negative LRV)
-   cannot fail. A step fails only if its failure frequency is above zero.
+1. **Entire loss only.** A failing treatment step loses every positive LRV (above 0), for
+   all pathogen groups at once. LRVs of 0 or below are not affected by the failure.
+   Partial loss of removal is not modelled and not planned.
+2. **Which steps can fail.** Any treatment step with at least one positive LRV, including
+   non-technical measures such as hygiene practices. Recontamination steps (no positive
+   LRV) cannot fail. (Refined 2026-09-24, roadmap decision D4.) A step fails only if its failure frequency is above zero.
 3. **Inputs per treatment step.** Each step has one failure frequency (failure days per
    year, 0–365, default 0) and one failure duration (minutes, 1–1440, default 30). They
    are the same in best-case and worst-case. They are user input only; there is no
