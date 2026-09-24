@@ -5,7 +5,7 @@
 - **Deciders:** QMRA project team (domain-modeling session on the failure approach)
 - **Related:** `docs/QMRA_Failure_Approach.md` (Decisions section), `CONTEXT.md` (Treatment failure, Failure day, Failure frequency)
 - **TL;DR:** When treatment failures are added, each exposure event is randomly assigned to a failure day or a normal day inside the existing simulation, instead of counting 365 days per year as the source method does.
-- **Quality goals:** scientific correctness — one calculation path for single and combined failures, consistent with how the existing model builds yearly risk; understandable assumptions — failure frequency stays in the unit operators know (days per year).
+- **Quality goals:** Scientific correctness — one calculation path for single and combined failures, consistent with how the existing model builds yearly risk, so benchmark scenarios check one method; Input validity — failure frequency stays in the unit operators know (days per year).
 
 ## Context
 

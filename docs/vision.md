@@ -1,246 +1,146 @@
-# QMRA Product Vision
+# QMRA Vision
 
 ## Purpose
 
-QMRA is a web application for estimating microbial health risks in drinking-water and water-reuse scenarios.
-
-The application guides users through a quantitative microbial risk assessment without requiring them to build the calculation model from scratch. It combines:
-
-- pathogen concentrations in a selected or user-defined source water;
-- human exposure assumptions; and
-- treatment steps with minimum and maximum log-removal values (LRVs) for bacteria, viruses, and protozoa.
-
-The application runs a predefined probabilistic calculation and reports annual probability of infection and disability-adjusted life years (DALYs). It also compares calculated results with two health-based reference levels used by the application:
-
-- `1 × 10^-4` infections per person per year; and
-- `1 × 10^-6` DALYs per person per year.
-
-QMRA is intended for risk assessment, steady-state scenario exploration, planning, education, and communication. It is not a treatment-process design tool and its results are not, by themselves, proof of regulatory compliance or a sufficient basis for public-health decisions.
-
-## The problem QMRA addresses
-
-Quantitative microbial risk assessment is scientifically established, but applying it in practice requires users to assemble microbiological data, exposure assumptions, treatment-removal assumptions, dose-response parameters, health parameters, and uncertainty assumptions.
-
-QMRA brings these elements together in a guided web workflow. It provides bundled scientific defaults for early-stage assessment and allows users to replace relevant values with project-specific inputs. This reduces the setup effort while keeping the main inputs, assumptions, results, and reference levels visible for review and discussion.
-
-The application is most useful when users need to:
-
-- perform a quick initial assessment using available defaults;
-- explore how source-water, exposure, or treatment assumptions affect risk;
-- assess a project using locally available values for concentrations, exposure, or treatment removal;
-- communicate risk results using standard health metrics and reference levels; or
-- save and export a reviewable record of an assessment.
-
-## Value proposition
-
-QMRA turns selected or user-entered pathogen, exposure, and treatment-removal data into probabilistic estimates of microbial health risk.
-
-It provides:
-
-- a guided entry point for users who are not building a QMRA model themselves;
-- reusable default data for screening and scenario exploration;
-- control over the principal exposure, source-water, and treatment inputs;
-- distributions and summary statistics rather than one deterministic result;
-- outputs in annual infection probability and DALYs per person per year;
-- comparison with the application’s health-based reference levels; and
-- saved assessments and exports for registered users.
-
-The value of the result depends on the quality and local relevance of the inputs. The current model has a limited pathogen set, simplified treatment representation, and incomplete provenance metadata. It should therefore be used as a decision-support and communication tool, not as a complete representation of every operational or scientific uncertainty.
+Quantitative microbial risk assessment is well established, but applying it to a real water system means assembling pathogen data, exposure assumptions, treatment removal, dose-response and health parameters, which most water professionals cannot do from scratch. QMRA is a web application that does this for them: a user describes a source water, a treatment train and an exposure, and gets the annual probability of infection and DALYs per person per year for three reference pathogens, compared with health-based reference levels. It supports risk assessment, scenario exploration, planning, teaching and communication in drinking water and water reuse.
 
 ## Users
 
-QMRA is intended for a broad set of users involved in water-risk assessment and communication:
+- **Water-process and environmental engineers** need to compare treatment trains and see how treatment assumptions change the risk.
+- **Utility operators and water-safety professionals** need to assess their own plant with local values instead of literature defaults.
+- **Public-health specialists and regulators** need to review the inputs, assumptions and the comparison with reference levels without running the model themselves.
+- **QMRA researchers and domain experts** need to inspect inputs, distributions and references, and check results against their own calculations.
+- **Students and newcomers to QMRA** need a guided path with defaults and explanations to learn how a risk assessment works.
 
-- **Water-process and environmental engineers** can explore source-treatment-exposure combinations and test alternative treatment assumptions.
-- **Utility operators and water-safety professionals** can assess steady-state operating scenarios using local or project-specific values.
-- **Public-health specialists and regulatory stakeholders** can review assumptions, inputs, outputs, and health-based reference comparisons.
-- **QMRA researchers and domain experts** can inspect the configured inputs, distributions, references, and exported results.
-- **Students and non-expert users** can use the guided workflow, bundled defaults, validation, and explanatory content to learn about or explore QMRA.
+All of them use the same functions. The only difference in access is between guests, who cannot save, and registered users.
 
-These audiences do not have separate application roles or tailored calculation models. Registered users share the same access pattern and assessment functionality.
+## Main workflows
 
-## Main workflows and functionalities
+### Quick screening
 
-### Quick screening assessment
-
-A user can run an assessment without an account using bundled exposure, source-water, and treatment definitions. The user selects or accepts the available defaults, submits the assessment, and reviews the calculated risk results.
+1. A guest or registered user opens the assessment configurator.
+2. They select a bundled source water, bundled treatment steps and a bundled exposure.
+3. The application runs the Monte Carlo simulation and shows, per reference pathogen, the risk distributions of both risk measures in best-case and worst-case, with the reference-level exceedance. For a guest nothing is stored.
 
 ### Site-specific assessment
 
-A user can enter or modify:
+1. A guest or registered user starts from bundled data or their personal definitions.
+2. They replace values with local ones: inflow concentrations (which makes the source water a site-specific source water), LRVs of treatment steps, and exposure events per year and volume per event. Recontamination is entered as a treatment step with a negative LRV.
+3. The results are the same as in quick screening. The application does not check whether the entered values represent the site.
 
-- exposure events per year;
-- ingested water volume per event in litres;
-- minimum and maximum concentrations for each reference pathogen; and
-- minimum and maximum treatment LRVs for bacteria, viruses, and protozoa.
+### Save, reopen and export
 
-The user can then run the calculation and review the results. The application does not verify whether user-entered values are representative of a particular site.
+1. A registered user saves an assessment with a name and description.
+2. They can list, reopen, edit and delete saved assessments.
+3. For a saved assessment they download an export package: a ZIP with input tables, a result table, an HTML report and plots.
 
-### Treatment-train scenario analysis
+### Personal definitions
 
-A user can add multiple treatment steps to a scenario. Each step contributes minimum and maximum LRVs for bacteria, viruses, and protozoa. The current calculation combines treatment steps by summing LRVs within each pathogen group.
+1. A registered user creates a reusable source water, exposure or treatment step.
+2. The configurator offers it next to the bundled default data in every later assessment.
 
-Users can explore alternative scenarios by changing the configuration and rerunning the assessment. On the saved-assessments page, a registered user can select several saved assessments and open a result-comparison view: one plot showing, per reference pathogen, the annual-infection-probability range of each selected assessment against the health-based reference level. This view compares infection-risk results only; it does not compare DALYs or show differences in inputs such as source water, exposure, or treatment train.
+### Compare scenarios
 
-### Risk interpretation
+1. A registered user selects several saved assessments on the saved-assessments page.
+2. The assessment comparison shows one plot: the annual probability of infection per reference pathogen for each selected assessment, against the health-based reference level. DALYs and inputs are not compared.
 
-The result view provides:
+## Scope
 
-- annual probability of infection;
-- DALYs per person per year;
-- distributions for best-case and worst-case;
-- minimum, maximum, first quartile, median, and third quartile summary statistics;
-- grouped box plots;
-- comparison with the application’s two health-based reference levels; and
-- a reference-level exceedance: whether the calculated mean exceeds the displayed reference level in both cases, only in worst-case, or in neither.
+- Microbial risk in drinking water and water reuse, for three reference pathogens: Rotavirus, Campylobacter jejuni and Cryptosporidium parvum.
+- Steady-state scenarios: inflow concentrations given as minimum and maximum, a treatment train whose LRVs are summed per pathogen group, and an exposure given as events per year and volume per event.
+- A Monte Carlo simulation in two cases, best-case (maximum LRVs) and worst-case (minimum LRVs), reporting risk distributions with minimum, quartiles, median and maximum.
+- Two risk measures, each compared with its health-based reference level: 1 × 10⁻⁴ infections per person per year and 1 × 10⁻⁶ DALYs per person per year.
+- Bundled default data with references, personal definitions and site-specific inputs.
+- Guest use without saving; saving, comparison and export for registered users. The tool is free to use.
+- A warning when a treatment step's maximum LRV is above 6. The calculation still runs.
 
-The interface warns when a maximum LRV is above six. This warning does not prevent the calculation from running.
+Known limitations of the current product:
 
-### Saving, managing, and exporting assessments
+- Uncertainty is represented only through inflow concentration ranges, random sampling and the spread between best-case and worst-case, not through a complete uncertainty model.
+- Provenance is incomplete: bundled data carries references, but personal definitions and site-specific inputs do not.
+- Saved assessments and export packages do not record the model version, data release or simulation settings, so a result cannot be reproduced exactly later.
+- The assessment comparison covers annual probability of infection only.
 
-A guest user can run an assessment without saving it. A registered user can:
+## Out of scope
 
-- save an assessment with a name and description;
-- list saved assessments;
-- reopen and edit an assessment;
-- delete an assessment;
-- create reusable personal exposure, source-water, and treatment definitions; and
-- export a saved assessment.
+- Treatment process design and sizing, the order of treatment steps, and interactions between steps beyond the sum of their LRVs.
+- Chemical and physical hazards.
+- Conditions that change within a year, such as varying inflow concentrations or operating conditions. Results are yearly, never daily.
+- Partial loss of removal in a treatment step. Treatment failure, once modelled, means the entire loss of a step's LRV.
+- Proof of legal compliance. The health-based reference levels are comparison values, not legal limits, and results must not be the only basis for treatment design, regulatory or public-health decisions.
 
-The export is a ZIP package containing input CSV files, result CSV data, an HTML report, and PNG plots.
+## MVP
 
-### Next phase
+The current application is the base. The next useful version adds **treatment failure**, including combined failures, following `docs/QMRA_Failure_Approach.md` and ADR-0001. It serves utility operators and engineers who want to know how failures of their treatment steps affect the yearly risk.
 
-The following capabilities are not part of the current implementation and should be treated as next-phase work rather than existing functionality:
+Functionalities, each one Change:
 
-- **Treatment failure and downtime assessment:** configure failure frequency and average failure duration for treatment steps and quantify their effect on annual risk.
-- **Combined treatment failures:** represent simultaneous failures across treatment steps, including daily failure/no-failure states and corresponding treatment performance.
-- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and best-case and worst-case results side by side. Treatment failure depends on it: until DALYs can be compared, the DALY effect of different failure inputs cannot be evaluated side by side.
-- **Reproducible assessment snapshots:** attach explicit model-version, data-library, reference, and simulation-settings metadata to saved and exported assessments.
-- **Historical assessment handling:** define whether assessments remain tied to their original model and data, are migrated, or can be rerun under a selected version.
-- **Extended interfaces:** assess the need for a stable calculation-engine boundary, public API, batch execution, notebook use, command-line use, or integration with other digital-water platforms.
+1. **Failure inputs per treatment step.** In the assessment configurator, each treatment step with a positive LRV gets a failure frequency (failure days per year, 0–365, default 0) and a failure duration (minutes, 1–1440, default 30). The inputs belong to the scenario.
+2. **Failure inputs on personal treatment steps.** A personal treatment step can store its failure frequency and failure duration for reuse.
+3. **Calculation with failure days.** Inside the Monte Carlo simulation, each exposure event falls on a failure day of each step with probability failure frequency / 365. Worst-case loses the full LRV of every failing step; best-case applies the mixed-water assumption, with combined failures overlapping as little as possible.
+4. **Results and export including failures.** The result page, the reference-level exceedance and the export package show the result including failures, and the export records the failure inputs of each step.
 
-## Current calculation model
+Waits until later:
 
-The current engine calculates two treatment-performance cases:
+- Extended assessment comparison with DALYs and inputs. Until then, the DALY effect of different failure inputs is read from each assessment's own result page.
+- Reproducible assessment snapshots.
+- Handling of historical assessments after model or data changes.
+- Extended interfaces: a calculation-engine boundary, public API, batch, notebook or command-line use.
+- The naming follow-ups recorded in `docs/domain-model-open-questions.md`.
 
-- **best-case**, using every treatment step's maximum LRV and representing the lower infection-risk estimate; and
-- **worst-case**, using every treatment step's minimum LRV and representing the higher infection-risk estimate.
+## Success criteria
 
-For each treatment step, LRVs are summed by pathogen group across the treatment train. Treatment performance is constant within each case. The engine does not simulate changing operating conditions, treatment outages, daily failure states, simultaneous failures, or process-order effects beyond the LRV sum.
-
-The calculation uses stochastic sampling of source concentrations and exposure outcomes. It uses a fixed NumPy random-generator seed of `42` and default simulation sizes of 10,000 event samples and 1,000 simulated years.
-
-The current user-facing model supports three reference pathogens:
-
-- Rotavirus;
-- Campylobacter jejuni; and
-- Cryptosporidium parvum.
-
-Pathogen-specific dose-response and health parameters are supplied by the bundled default data.
-
-## Data and configuration
-
-The application provides bundled default data for:
-
-- reference pathogens;
-- dose-response and health parameters;
-- source-water definitions;
-- treatment definitions;
-- exposure definitions; and
-- scientific or guideline references.
-
-The inspected tests expect eight source-water definitions, 22 treatment definitions, and eight exposure definitions.
-
-Registered users can create personal exposure, source-water, and treatment definitions. Users can also override assessment values in the configurator. Personal values are not accompanied by the same reference metadata as bundled defaults.
-
-The assessment and export contain selected inputs and calculated results. They do not currently include an explicit model-version identifier, data-library release identifier, or complete simulation-settings snapshot.
-
-## Product principles
-
-QMRA should be:
-
-- **Scientifically defensible:** calculation logic, parameters, thresholds, defaults, and references should be reviewable and testable.
-- **Accessible:** the first valid assessment should be possible with a small number of clear steps and meaningful defaults.
-- **Transparent:** users should be able to distinguish bundled defaults from user-entered values and understand the main assumptions behind a result.
-- **Reproducible:** saved and exported assessments should eventually identify the exact model, data, configuration, and simulation settings used to produce the result.
-- **Interoperable:** exports should support both human review and further analysis in external tools.
-- **Safe to evolve:** changes to the scientific model, data, and user-facing interpretation should be versioned so historical results are not silently reinterpreted.
-- **Responsible in its claims:** the application should clearly distinguish risk assessment from treatment design, legal compliance, and operational reliability analysis.
+- A water utility can assess the effect of its own failure frequencies on the yearly risk, for both risk measures, without help from the development team.
+- Results for the bundled benchmark scenarios match the reference calculation within an agreed tolerance.
+- Domain experts at KWB accept the results and wording as defensible for use in projects.
 
 ## Quality goals
 
-The current repository provides calculation and regression tests, form validation, bundled scientific data, result plots, and export generation. These provide a foundation for quality, but they do not establish all desired quality properties.
+### Scientific correctness
 
-Important quality goals are:
+- **Goal**: calculated results match an independent reference calculation.
+- **Example situation**: a domain expert recalculates the worst-case Cryptosporidium risk of a bundled scenario in a spreadsheet and gets a different median.
+- **How we check it**: version-controlled benchmark scenarios with expected results from an independent calculation; regression tests run on every change and fail outside the agreed tolerance.
 
-- scientific correctness supported by version-controlled benchmark and regression scenarios;
-- valid and clearly labelled inputs with explicit units and min/max checks;
-- visible references and understandable assumptions;
-- reproducible results when the same complete assessment snapshot is used;
-- stable and reviewable export content;
-- appropriate privacy and access control for registered-user data; and
-- acceptable response time and reliability under expected use.
+### Traceability
 
-The inspected test coverage is uneven. Calculation and form tests exist, but the plot test is empty and the API test file contains no substantive test implementation.
+- **Goal**: for every input of an assessment, a reader can see whether it is bundled default data, a personal definition or a site-specific input, and for bundled data which reference it comes from.
+- **Example situation**: a reviewer at a health authority asks where the Rotavirus concentration of a "site-specific groundwater" came from.
+- **How we check it**: the export package lists the origin of each input and the reference of each bundled value; a test checks that every exported input has an origin and every bundled value a reference.
 
-## Constraints and assumptions
+### Reproducibility
 
-- The current user-facing model supports only Rotavirus, Campylobacter jejuni, and Cryptosporidium parvum.
-- Risk estimates depend strongly on the quality and local relevance of pathogen concentrations, exposure assumptions, and treatment LRVs.
-- Bundled defaults support screening and exploration but may not represent local conditions.
-- Treatment LRVs are treated as constant within best-case and within worst-case.
-- Treatment steps are combined by adding their LRVs by pathogen group.
-- Process order, changing influent concentrations, operating conditions, treatment interactions beyond the LRV sum, and treatment failures are not modelled.
-- Minimum and maximum input values and stochastic sampling represent only part of the uncertainty in a real water system.
-- The application assesses microbial risk; it does not assess chemical or physical hazards.
-- The application is not a treatment-process design tool.
-- Application reference levels and international guidance do not automatically establish compliance with local law.
-- Results should not be used as the sole basis for treatment design, regulatory compliance, or public-health decisions.
-- Guest users can run unsaved assessments; registered users can persist and export assessments.
+- **Goal**: a saved assessment gives the same result every time, and can be recalculated later under the same model and data.
+- **Example situation**: a year after a report, a utility reopens an assessment after a model update and gets different numbers without knowing why.
+- **How we check it**: each saved assessment and export package records the model version, data release and simulation settings; a test recalculates stored benchmark assessments and compares them with their recorded results.
 
-## Known limitations and uncertainties
+### Input validity
 
-- The model is limited to three reference pathogens.
-- The calculation uses simplified treatment assumptions and does not represent operational failures, downtime, or combined failures.
-- Uncertainty is represented through input ranges, stochastic sampling, and the spread between best-case and worst-case, not through a complete joint uncertainty model.
-- Saved-assessment comparison is limited to a plot of infection-risk results; inputs and DALYs are not compared.
-- Export includes CSV, HTML, and PNG files in a ZIP; no Excel spreadsheet export was found in the inspected code.
-- Saved assessments lack explicit model-version, data-library release, and complete simulation-settings metadata.
-- Bundled references are available, but provenance is not captured completely for every saved or user-defined value.
-- Repository inspection cannot verify production availability, response-time performance, TLS deployment, backups, retention and deletion behaviour, incident response, or the security posture of a deployed instance.
+- **Goal**: every input shows its unit and is checked against a plausible range; invalid values are rejected with a clear message.
+- **Example situation**: a user enters 2000 as volume per event, thinking in millilitres.
+- **How we check it**: form tests per input field for the unit label, the lower and upper bounds (for example failure frequency 0–365, failure duration 1–1440) and minimum ≤ maximum.
 
-## Access and free use
+### Export stability
 
-The application supports guest use for unsaved assessments and registered-user accounts for persistence and export. The documentation describes the tool as free to use, and no billing workflow was found in the inspected repository. The operating policy and availability of any deployed service require separate verification.
+- **Goal**: the content and layout of the export package change only on purpose.
+- **Example situation**: a utility's script that reads the result table breaks after an update renamed a column.
+- **How we check it**: a test compares the export package of a benchmark assessment with a stored reference export; changing it requires updating the reference and noting it in the release notes.
 
-## Evidence and scope of verification
+### Privacy of registered-user data
 
-This document describes the inspected repository state, including application code, templates, tests, documentation, and bundled default data. It does not make claims about deployment configuration or operational service behaviour unless those claims are separately verified.
-
-Relevant evidence:
-
-- [Repository README](https://github.com/KWB-R/qmra-webapp/blob/main/README.md)
-- [Current QMRA documentation](https://github.com/KWB-R/qmra-webapp/blob/main/docs/source/index.rst)
-- [Risk calculation](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/risk.py)
-- [Assessment views and access paths](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/views.py)
-- [Assessment forms and validation](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/forms.py)
-- [Assessment and result models](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/models.py)
-- [Default data models](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/qmra_models.py)
-- [Export implementation](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/exports.py)
-- [Result plots](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/plots.py)
-- [FAQ and limitations](https://github.com/KWB-R/qmra-webapp/blob/main/qmra/risk_assessment/templates/faqs.html)
-- [Calculation and regression tests](https://github.com/KWB-R/qmra-webapp/tree/main/qmra/risk_assessment/tests)
+- **Goal**: a registered user's saved assessments, export packages and personal definitions are accessible only to that user.
+- **Example situation**: a logged-in user changes the assessment ID in the URL to one belonging to another user.
+- **How we check it**: tests request every assessment, export and personal-definition URL as a different user and expect a refusal.
 
 ## Open questions
 
-The following questions remain open for future product and scientific development:
-
-- Should model and data-library versions receive explicit release identifiers and change logs, and should these identifiers be attached to every saved and exported assessment?
-- What information must be stored so that a saved assessment can be reproduced from the same model, data, configuration, and simulation settings?
-- Should the scientific calculation engine be separated behind a stable internal API or library boundary?
-- Is there a future need for public API access, batch execution, notebook use, command-line use, or integration with other digital-water platforms?
-- What project data may be confidential or commercially sensitive even when it is not personal data, and what additional controls are required for saved assessments?
-- How should historical assessments behave when the scientific model, data library, or assessment schema changes: remain frozen to the original version, be migrated, or be rerunnable under a user-selected version?
-- What comparison capabilities are needed for saved assessments and alternative scenarios beyond the existing infection-risk comparison plot?
-- Which deployment controls, operational metrics, performance targets, backup policies, retention rules, and incident-response processes are required for production use?
+- Should model and data releases get explicit identifiers and change logs, attached to every saved assessment and export package? (Wolfgang, Malte; for Architecture)
+- What must be stored so that a saved assessment can be reproduced from the same model, data, configuration and simulation settings? (Wolfgang, Malte; for Architecture)
+- Should the calculation engine be separated behind a stable internal boundary? (Wolfgang, Malte; for Architecture)
+- Is there a need for public API access, batch execution, notebook or command-line use, or integration with other digital-water platforms? (Wolfgang, Malte)
+- Which project data is confidential or commercially sensitive even when it is not personal data, and what controls do saved assessments need? (Wolfgang, Malte)
+- How should historical assessments behave when the model, data or assessment structure changes: stay frozen, be migrated, or be recalculated under a chosen version? (Wolfgang, Malte)
+- Beyond DALYs, which comparisons of saved assessments are needed: inputs, best-case and worst-case side by side, saved comparisons? (Wolfgang, Malte)
+- What tolerance counts as a match for the benchmark scenarios, and which domain experts accept the results? (Wolfgang, Malte)
+- Where does the rule "maximum LRV above 6" come from, and should it warn or cap? See `docs/domain-model-open-questions.md`. (Wolfgang, Malte)
+- Which response-time and reliability targets apply, and which deployment controls, backups, retention rules and incident-response processes are required for production use? (Wolfgang, Malte; for Architecture)

@@ -99,6 +99,8 @@ The current calculation flow is:
 
 The calculation does not currently model treatment failure, downtime, failure sequences, changing operating conditions, or a separate combined-failure mechanism. There is no persisted calculation-engine version or simulation-settings record in the inspected application model.
 
+Tests cover the calculation (including regression values), forms and the bundled default data; the default-data tests expect eight source-water, 22 treatment and eight exposure definitions. Coverage is uneven: the plot test is empty and the API test file has no substantive tests.
+
 ## 6. Main user workflows
 
 ### Anonymous assessment
