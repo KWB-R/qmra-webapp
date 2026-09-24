@@ -9,7 +9,7 @@ built directly. Changes are refined into tickets later. All Changes start from `
 
 ### C1 Failure inputs — Large
 
-Spec issue: #___
+Spec issue: #___ (draft: `docs/specs/c1-failure-inputs.md`)
 
 Purpose: users can enter a failure frequency and a failure duration for each treatment
 step, and they are stored with the scenario.
