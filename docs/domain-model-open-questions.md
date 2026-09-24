@@ -18,11 +18,14 @@ remove it from this list.
 
 - **Site-specific source water (resolved 2026-09-23).** When a user enters or edits any
   inflow concentration of a bundled source water by hand, the assessment's source water
-  becomes "site-specific <name>" (e.g. "site-specific groundwater"). Personal
-  definitions keep their own name when edited. The code does not do this yet: it keeps the
-  plain source water name next to the edited values, so saved assessments and exports
-  show "groundwater" for data that is not the bundled groundwater. To be changed in a
-  later code change.
+  becomes a site-specific source water. Naming rule for the code: it is named after the
+  bundled source water with the prefix "site-specific" (e.g. selecting "groundwater" and
+  editing the Rotavirus concentration gives "site-specific groundwater"). Inflow
+  concentrations entered without selecting any source water are named plain
+  "site-specific source water". Personal definitions already carry the user's own name
+  and keep it when edited. The code does not do this yet: it keeps the plain source water
+  name next to the edited values, so saved assessments and exports show "groundwater" for
+  data that is not the bundled groundwater. To be changed in a later code change.
 
 ## Deferred: UI wording that conflicts with the glossary
 

@@ -36,8 +36,8 @@ A named type of water before treatment, such as raw sewage or protected surface 
 _Avoid_: source, water type, feed water
 
 **Site-specific source water**:
-A bundled source water in an assessment whose inflow concentrations were entered or changed by hand, even a single value. It is named after the bundled source water, prefixed with "site-specific": selecting "groundwater" and editing the Rotavirus concentration gives "site-specific groundwater". A personal definition already carries the user's own name and keeps it when its values are edited. Inflow concentrations entered without selecting any source water form a plain "site-specific source water".
-_Avoid_: custom source water, modified source water, calling it by the unprefixed name
+A source water in an assessment whose inflow concentrations were entered or changed by hand, even a single value, or entered without selecting any source water. It is not a bundled source water any more, even if it was derived from one, and is not called by the bundled name.
+_Avoid_: custom source water, modified source water, calling it by the unprefixed bundled name
 
 **Inflow concentration**:
 The concentration of one reference pathogen in the source water entering the treatment train, in organisms per litre, given as a minimum and a maximum. An assessment has one inflow concentration per selected pathogen.
