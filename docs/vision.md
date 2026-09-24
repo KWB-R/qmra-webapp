@@ -88,11 +88,11 @@ The result view provides:
 
 - annual probability of infection;
 - DALYs per person per year;
-- distributions for the minimum-LRV and maximum-LRV cases;
+- distributions for best-case and worst-case;
 - minimum, maximum, first quartile, median, and third quartile summary statistics;
 - grouped box plots;
 - comparison with the application’s two health-based reference levels; and
-- a risk category based on whether the calculated mean exceeds the displayed reference level under the relevant LRV case.
+- a reference-level exceedance: whether the calculated mean exceeds the displayed reference level in both cases, only in worst-case, or in neither.
 
 The interface warns when a maximum LRV is above six. This warning does not prevent the calculation from running.
 
@@ -115,7 +115,7 @@ The following capabilities are not part of the current implementation and should
 
 - **Treatment failure and downtime assessment:** configure failure frequency and average failure duration for treatment steps and quantify their effect on annual risk.
 - **Combined treatment failures:** represent simultaneous failures across treatment steps, including daily failure/no-failure states and corresponding treatment performance.
-- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and LRV cases side by side.
+- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and best-case and worst-case results side by side.
 - **Reproducible assessment snapshots:** attach explicit model-version, data-library, reference, and simulation-settings metadata to saved and exported assessments.
 - **Historical assessment handling:** define whether assessments remain tied to their original model and data, are migrated, or can be rerun under a selected version.
 - **Extended interfaces:** assess the need for a stable calculation-engine boundary, public API, batch execution, notebook use, command-line use, or integration with other digital-water platforms.
@@ -124,8 +124,8 @@ The following capabilities are not part of the current implementation and should
 
 The current engine calculates two treatment-performance cases:
 
-- the **maximum-LRV case**, representing the lower infection-risk estimate; and
-- the **minimum-LRV case**, representing the higher infection-risk estimate.
+- **best-case**, using every treatment step's maximum LRV and representing the lower infection-risk estimate; and
+- **worst-case**, using every treatment step's minimum LRV and representing the higher infection-risk estimate.
 
 For each treatment step, LRVs are summed by pathogen group across the treatment train. Treatment performance is constant within each case. The engine does not simulate changing operating conditions, treatment outages, daily failure states, simultaneous failures, or process-order effects beyond the LRV sum.
 
@@ -189,7 +189,7 @@ The inspected test coverage is uneven. Calculation and form tests exist, but the
 - The current user-facing model supports only Rotavirus, Campylobacter jejuni, and Cryptosporidium parvum.
 - Risk estimates depend strongly on the quality and local relevance of pathogen concentrations, exposure assumptions, and treatment LRVs.
 - Bundled defaults support screening and exploration but may not represent local conditions.
-- Treatment LRVs are treated as constant within each LRV case.
+- Treatment LRVs are treated as constant within best-case and within worst-case.
 - Treatment steps are combined by adding their LRVs by pathogen group.
 - Process order, changing influent concentrations, operating conditions, treatment interactions beyond the LRV sum, and treatment failures are not modelled.
 - Minimum and maximum input values and stochastic sampling represent only part of the uncertainty in a real water system.
@@ -203,7 +203,7 @@ The inspected test coverage is uneven. Calculation and form tests exist, but the
 
 - The model is limited to three reference pathogens.
 - The calculation uses simplified treatment assumptions and does not represent operational failures, downtime, or combined failures.
-- Uncertainty is represented through input ranges, stochastic sampling, and minimum-/maximum-LRV cases, not through a complete joint uncertainty model.
+- Uncertainty is represented through input ranges, stochastic sampling, and the spread between best-case and worst-case, not through a complete joint uncertainty model.
 - Saved-assessment comparison is limited to a plot of infection-risk results; inputs and DALYs are not compared.
 - Export includes CSV, HTML, and PNG files in a ZIP; no Excel spreadsheet export was found in the inspected code.
 - Saved assessments lack explicit model-version, data-library release, and complete simulation-settings metadata.

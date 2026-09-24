@@ -72,7 +72,7 @@ The user/application database models are:
 - **`RiskAssessment`**: UUID, owner, timestamps, name, description, source and exposure names, events per year, volume per event, and related inflows, treatments, and results.
 - **`Inflow`**: UUID, assessment, pathogen name, and minimum/maximum concentration. Form values are presented in `N/L`.
 - **`Treatment`**: UUID, assessment, name, ordered `train_index`, and minimum/maximum LRVs for bacteria, viruses, and protozoa. It also detects configured maximum LRVs above 6 for warning display.
-- **`RiskAssessmentResult`**: assessment, pathogen, infection/DALY risk categories, and min/max/q1/q3/median statistics for both minimum-LRV and maximum-LRV cases.
+- **`RiskAssessmentResult`**: assessment, pathogen, the reference-level exceedance for infection and for DALYs, and min/max/q1/q3/median statistics for both best-case and worst-case.
 
 Assessment children and results are deleted with their assessment. Saved results are recalculated when required by the view layer.
 
