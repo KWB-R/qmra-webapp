@@ -92,6 +92,16 @@ microk8s helm -n qmra history qmra
 
 The databases are on the server at `/var/lib/qmra/qmra.db` and `/var/lib/qmra/default_qmra_data.db`; collected static files are at `/var/cache/qmra/static`.
 
+## Skipping the pipeline
+
+Put `[skip ci]` in a commit message and GitHub does not start the pipeline for that push. This is GitHub's documented behaviour. `[ci skip]`, `[no ci]`, `[skip actions]` and `[actions skip]` work the same way, and so does a final `skip-checks: true` line.
+
+- **On a pull-request branch:** use it in the last commit of the push. Nothing deploys to dev. The latest commit then has no test result. If a required check ever blocks the merge, push one more commit without the text.
+- **When merging into `main`:** write it in the description box of the merge dialog. Use "Create a merge commit" or "Squash and merge", because "Rebase and merge" creates no commit whose message you can edit. Nothing deploys to dev or production.
+- **Do not use it** when a change should really be tested and deployed. Skipped changes are deployed together with the next push that is not skipped.
+
+Status: not yet checked in this repository.
+
 ## Open points
 
 - **Nothing stops a production deploy.** Any merge into `main` goes to production, finished or not. The failure roadmap needs a way around this (decision D5 in `docs/failure_roadmap.md`).
