@@ -116,7 +116,10 @@ is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
    120 min give 4.2 % of the day at LRV 6, 8.3 % at LRV 6 and 87.5 % at LRV 10, a mixed
    LRV of about 6.9. UV and UF each down 900 min overlap by 360 min: 25 % at LRV 2 and
    2 × 37.5 % at LRV 6, a mixed LRV of about 2.6. Worst-case loses all failing steps'
-   LRVs for the whole day.
+   LRVs for the whole day. With three or more failing steps, the unavoidable overlap is
+   placed on the steps whose joint loss gives the lowest mixed concentration; in general,
+   best-case arranges the failure events of a day so that the mixed water has the lowest
+   concentration, which always implies minimal overlap (decided 2026-09-24).
 7. **Results.** Only the result including failures is shown, and the reference-level
    exceedance is taken on it. The effect of failures is seen by comparing scenarios with
    different failure inputs in the assessment comparison view. That view compares annual

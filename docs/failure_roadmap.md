@@ -26,7 +26,7 @@ beyond field labels and units (C4).
 
 ### C2 Failure calculation — Large
 
-Spec issue: #___
+Spec issue: #___ (draft: `docs/specs/c2-failure-calculation.md`)
 
 Purpose: results include treatment failures as decided in ADR-0001.
 
