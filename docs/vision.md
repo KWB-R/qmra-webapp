@@ -115,7 +115,7 @@ The following capabilities are not part of the current implementation and should
 
 - **Treatment failure and downtime assessment:** configure failure frequency and average failure duration for treatment steps and quantify their effect on annual risk.
 - **Combined treatment failures:** represent simultaneous failures across treatment steps, including daily failure/no-failure states and corresponding treatment performance.
-- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and best-case and worst-case results side by side.
+- **Extended saved-assessment comparison:** build on the existing infection-risk comparison plot to also compare DALYs and show differences in source water, exposure assumptions, treatment trains, and best-case and worst-case results side by side. Treatment failure depends on it: until DALYs can be compared, the DALY effect of different failure inputs cannot be evaluated side by side.
 - **Reproducible assessment snapshots:** attach explicit model-version, data-library, reference, and simulation-settings metadata to saved and exported assessments.
 - **Historical assessment handling:** define whether assessments remain tied to their original model and data, are migrated, or can be rerun under a selected version.
 - **Extended interfaces:** assess the need for a stable calculation-engine boundary, public API, batch execution, notebook use, command-line use, or integration with other digital-water platforms.

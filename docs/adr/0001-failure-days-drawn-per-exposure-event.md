@@ -54,5 +54,10 @@ single failing step.
   the volume treated during the downtime is much larger than the water demand of one
   event. That is expected to be true in most cases. Only best-case, through the
   mixed-water assumption, uses the duration.
+- The effect of failures is evaluated by comparing assessments with different failure
+  inputs in the assessment comparison view, which today compares annual probability of
+  infection only. Until the extended saved-assessment comparison adds DALYs, the DALY
+  effect of failures has to be read from each assessment's own result page. The failure
+  feature therefore depends on that next-phase work for a full side-by-side evaluation.
 - Anyone comparing the application against Hambsch et al. (2019) needs this ADR to explain
   the difference.

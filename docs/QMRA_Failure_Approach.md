@@ -118,7 +118,11 @@ is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
    LRVs for the whole day.
 7. **Results.** Only the result including failures is shown, and the reference-level
    exceedance is taken on it. The effect of failures is seen by comparing scenarios with
-   different failure inputs in the assessment comparison view.
+   different failure inputs in the assessment comparison view. That view compares annual
+   probability of infection only. Until the extended saved-assessment comparison (next
+   phase in `docs/vision.md`) adds DALYs, the DALY effect of failures is read from each
+   assessment's own result page. A failure can exceed the DALY reference level without
+   exceeding the infection one, so this matters.
 8. **Still steady-state.** Failure frequency and duration are the same every year and
    results are yearly, so a scenario with failures remains a steady-state scenario.
 
