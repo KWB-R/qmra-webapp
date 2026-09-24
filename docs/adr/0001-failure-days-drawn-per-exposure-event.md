@@ -48,5 +48,11 @@ single failing step.
   upper tail rather than a shifted median.
 - Two exposure events on the same calendar day are not forced to share the same failure
   state. This is accepted, since the model has no notion of calendar days.
+- Worst-case ignores the failure duration: a one-minute failure and a full-day failure
+  give the same worst-case result for that exposure event. The reasoning is that all water
+  consumed in one exposure event was treated during the downtime, which holds as long as
+  the volume treated during the downtime is much larger than the water demand of one
+  event. That is expected to be true in most cases. Only best-case, through the
+  mixed-water assumption, uses the duration.
 - Anyone comparing the application against Hambsch et al. (2019) needs this ADR to explain
   the difference.
