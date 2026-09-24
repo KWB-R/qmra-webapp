@@ -79,17 +79,18 @@ goals.
 - C4 depends on C2 (it explains the calculation's behaviour) and on C1.
 - C5 depends on C2 (it checks the implemented calculation).
 - Release depends on C1–C5: users must never see failure inputs without effect, results
-  they cannot trace, or results not checked against an independent calculation. Today every
-  merge into `main` deploys to production without approval (`docs/environments.md`), so how
-  this is enforced is open (D5).
+  they cannot trace, or results not checked against an independent calculation. Because
+  every merge into `main` deploys to production without approval (`docs/environments.md`),
+  merging any of C1–C5 into `main` before the release is not allowed (D5). Each Change stays an open pull
+  request, built on the pull request it depends on, and is tested on the dev environment.
 
 ## Parallel work
 
 - The Specs of C1 and C2 can be written in parallel; both rest on `CONTEXT.md` and ADR-0001.
-- After C1 is merged, C2 and C3 can be built in parallel.
-- C4 can be drafted while C2 is being built and finished once C2 is merged.
+- Once C1 is done, C2 and C3 can be built in parallel, both on top of C1's pull request.
+- C4 can be drafted while C2 is being built and finished once C2 is done.
 - The benchmark scenarios of C5 and their expected values (D2) can be prepared while C2 is
-  being built; only the comparison tests need C2 merged.
+  being built; only the comparison tests need C2 done.
 - C4 and C5 can be built in parallel.
 
 ## Sequence
@@ -97,8 +98,15 @@ goals.
 1. `/to-spec` C1 and C2 (in parallel).
 2. `/implement` C1.
 3. `/implement` C2; build C3 in parallel.
-4. Build C4 and C5 once C2 is merged.
-5. Release once C1–C5 are merged, D3 is settled and the mechanism chosen in D5 is lifted.
+4. Build C4 and C5 once C2 is done.
+5. Release: once C1–C5 are done and tested together on the dev environment and D3 is
+   settled, merge all five pull requests into `main` together. That deploys them to
+   production.
+
+"Done" means the pull request is reviewed and tested on the dev environment, but not merged.
+The dev environment shows only the pull request pushed last, so testing there is announced
+to the team first. Each open pull request is kept up to date with `main` to limit
+conflicts at the release.
 
 ## Unresolved decisions
 
@@ -107,7 +115,6 @@ goals.
 | D1 | Tolerance for matching benchmark scenarios. With an independent Monte Carlo script (D2), differences are only sampling noise or real errors | Wolfgang, Malte | — | C5 |
 | D2 | Who calculates the expected values; ideally not the author of C2 | Wolfgang, Malte | — | C5 |
 | D3 | Which one or two domain experts sign off the C5 benchmark comparison | Wolfgang, Malte | — | Release |
-| D5 | How failure inputs stay hidden from users until C1–C5 are done, because every merge into `main` deploys to production without approval (`docs/environments.md`). Options: a setting that keeps the failure inputs off until Release; a long-lived integration branch merged into `main` once (CI only runs for pull requests into `main`, so `ci.yaml` would have to change); or a required approval on the `prod` environment | Wolfgang, Malte | — | C1 Spec (a hiding setting is part of C1), Release |
 
 ## Resolved decisions
 
@@ -125,3 +132,10 @@ goals.
   reviewing the C5 benchmark comparison and confirming it in writing, for example in the
   C5 pull request. The explanations in C4 are not part of this sign-off. Who signs off is
   still open (D3).
+- **D5: no merge into `main` before the release (2026-09-24).** Merging any of C1–C5 into
+  `main` before the release is not allowed. They stay open pull requests, each
+  built on the one it depends on and tested on the dev environment, and are merged into
+  `main` together at the release. Rejected: a setting that hides failures in production
+  (extra code in C1), and a required approval for production deploys (would block urgent
+  fixes on `main`). Accepted cost: long-lived branches and conflicts to resolve with
+  `main`.

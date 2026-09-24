@@ -104,7 +104,7 @@ Status: checked on a pull-request branch on 24 September 2026 (commit `400279d`)
 
 ## Open points
 
-- **Nothing stops a production deploy.** Any merge into `main` goes to production, finished or not. The failure roadmap needs a way around this (decision D5 in `docs/failure_roadmap.md`).
+- **Nothing stops a production deploy.** Any merge into `main` goes to production, finished or not. The failure roadmap works around this by merging nothing into `main` until the release (decision D5 in `docs/failure_roadmap.md`).
 - **The metrics address is public** on both environments. It exposes request counts and timings. Decide whether it should be limited to the monitoring system.
 - **No rollback is defined.** `helm` keeps revisions, but no workflow or page uses them, and migrations are not reversed.
 - **One replica per environment.** A deploy probably interrupts the service for a short time. This was not measured.
