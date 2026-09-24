@@ -78,9 +78,10 @@ goals.
 - C3 depends on C1.
 - C4 depends on C2 (it explains the calculation's behaviour) and on C1.
 - C5 depends on C2 (it checks the implemented calculation).
-- Release depends on C1–C5: nothing is deployed until all five are merged, so users never
-  see failure inputs without effect, results they cannot trace, or results not checked
-  against an independent calculation.
+- Release depends on C1–C5: users must never see failure inputs without effect, results
+  they cannot trace, or results not checked against an independent calculation. Today every
+  merge into `main` deploys to production without approval (`docs/environments.md`), so how
+  this is enforced is open (D5).
 
 ## Parallel work
 
@@ -97,7 +98,7 @@ goals.
 2. `/implement` C1.
 3. `/implement` C2; build C3 in parallel.
 4. Build C4 and C5 once C2 is merged.
-5. Release once C1–C5 are merged and D3 is settled.
+5. Release once C1–C5 are merged, D3 is settled and the mechanism chosen in D5 is lifted.
 
 ## Unresolved decisions
 
@@ -106,6 +107,7 @@ goals.
 | D1 | Tolerance for matching benchmark scenarios. With an independent Monte Carlo script (D2), differences are only sampling noise or real errors | Wolfgang, Malte | — | C5 |
 | D2 | Who calculates the expected values; ideally not the author of C2 | Wolfgang, Malte | — | C5 |
 | D3 | Which one or two domain experts sign off the C5 benchmark comparison | Wolfgang, Malte | — | Release |
+| D5 | How failure inputs stay hidden from users until C1–C5 are done, because every merge into `main` deploys to production without approval (`docs/environments.md`). Options: a setting that keeps the failure inputs off until Release; a long-lived integration branch merged into `main` once (CI only runs for pull requests into `main`, so `ci.yaml` would have to change); or a required approval on the `prod` environment | Wolfgang, Malte | — | C1 Spec (a hiding setting is part of C1), Release |
 
 ## Resolved decisions
 
