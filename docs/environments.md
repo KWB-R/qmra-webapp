@@ -100,7 +100,7 @@ Put `[skip ci]` in a commit message and GitHub does not start the pipeline for t
 - **When merging into `main`:** write it in the description box of the merge dialog. Use "Create a merge commit" or "Squash and merge", because "Rebase and merge" creates no commit whose message you can edit. Nothing deploys to dev or production.
 - **Do not use it** when a change should really be tested and deployed. Skipped changes are deployed together with the next push that is not skipped.
 
-Status: not yet checked in this repository.
+Status: checked on a pull-request branch on 24 September 2026 (commit `400279d`): no run and no check started. Not yet checked on a merge into `main`; check the Actions tab right after the first time you do it.
 
 ## Open points
 
