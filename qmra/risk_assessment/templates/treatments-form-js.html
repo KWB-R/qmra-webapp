@@ -19,6 +19,8 @@
             viruses_max: { selector: "input[id*='viruses_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             protozoa_min: { selector: "input[id*='protozoa_min']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             protozoa_max: { selector: "input[id*='protozoa_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            failure_frequency: { selector: "input[id*='failure_frequency']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            failure_duration: { selector: "input[id*='failure_duration']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
         }
         constructor(div) {
             this.$form = div
@@ -31,6 +33,8 @@
         setValues(values) {
             for (let k of Object.keys(this.fields)) {
                 const v = values[k];
+                // bundled steps carry no failure inputs, so their new card keeps the form's defaults
+                if (v === undefined) continue;
                 this.fields[k].setter(this.$inputs[k], v);
                 this.$inputs[k].dispatchEvent(new Event("change"));
             }
@@ -374,7 +378,7 @@
             )
             this.plot.traces[formValues.id] = trace;
             this.plot.data.push(...Object.values(this.plot.traces[formValues.id].data))
-            for (let field of Object.keys(form.fields)) {
+            for (let field of Object.keys(form.fields).filter(name => name in trace.updates)) {
                 form.bindCallback(field, newValue => {
                     this.plot.traces[formValues.id].updates[field](newValue);
                     this.plot.update()

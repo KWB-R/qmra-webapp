@@ -116,7 +116,9 @@ failure frequency is 0 gives exactly the same results as before C2.
   train minus the removable maximum LRVs of the steps down in it. The failure events of the
   day are arranged within 1,440 minutes so that this average concentration is lowest. This
   gives no overlap when the durations fit into one day and otherwise the minimal overlap,
-  placed on the steps whose joint loss matters least (`CONTEXT.md`, *Combined failure*). For
+  placed on the steps whose joint loss matters least (`CONTEXT.md`, *Combined failure*).
+  Because the LRVs differ per pathogen group, the arrangement is chosen separately for each
+  reference pathogen; the failure days themselves stay shared. For
   a single failing step it equals Eq. 5 of the failure approach. With the few failing steps
   per day that occur in practice, the arrangement can be found exactly, for example by
   choosing the time share of each combination of failing steps.
@@ -163,7 +165,9 @@ failure frequency is 0 gives exactly the same results as before C2.
     by the constant mixed LRV from Eq. 5, computed by hand in the test.
   - **Combined failures:** two steps always failing with 900 + 900 minutes equal the
     hand-computed constant LRV with 360 minutes of overlap; three steps always failing with
-    durations above a day in total equal the hand-computed lowest-concentration arrangement.
+    durations above a day in total equal the hand-computed lowest-concentration arrangement;
+    with three steps whose least important pair differs between two pathogen groups, each
+    reference pathogen equals its own hand-computed arrangement.
   - **Monotonicity:** raising a failure frequency never lowers any mean; raising a failure
     duration never lowers a best-case mean and leaves worst-case unchanged.
   - **Case order:** worst-case mean ≥ best-case mean for every pathogen and risk measure,
