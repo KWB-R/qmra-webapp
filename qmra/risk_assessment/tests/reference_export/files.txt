@@ -1,0 +1,8 @@
+Reference assessment-report.html
+Reference assessment-result.csv
+exposure-assessment/
+exposure-assessment/inflows.csv
+exposure-assessment/treatments.csv
+results-plots/
+results-plots/dalys-pppy.png
+results-plots/infection-probability.png
