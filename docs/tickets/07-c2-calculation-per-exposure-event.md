@@ -12,7 +12,7 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), Ch
 
 **Status:** ready-for-agent
 
-- [ ] Every simulated exposure event has its own concentration sample, picked by position, and its own LRV. The random numbers are the same as today's.
-- [ ] Best-case and worst-case share the same calculation steps. Summary statistics and the reference-level exceedance are computed in one place.
-- [ ] The existing regression test passes with exactly the same numbers, and the existing test suite passes unchanged.
-- [ ] A new test at the calculation's public entry point shows that calculating the same scenario twice gives identical results.
+- [x] Every simulated exposure event has its own concentration sample, picked by position, and its own LRV. The random numbers are the same as today's.
+- [x] Best-case and worst-case share the same calculation steps. Summary statistics and the reference-level exceedance are computed in one place.
+- [x] The existing regression test passes with exactly the same numbers, and the existing test suite passes unchanged.
+- [x] A new test at the calculation's public entry point shows that calculating the same scenario twice gives identical results.

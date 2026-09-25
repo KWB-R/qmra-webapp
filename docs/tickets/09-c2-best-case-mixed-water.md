@@ -17,16 +17,16 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
 
 **Status:** ready-for-agent
 
-- [ ] A step with failure frequency 365 and failure duration 1,440 gives the same best-case results as the same scenario without that step's positive maximum LRVs.
-- [ ] A step with failure frequency 365 and failure duration 60 gives the same best-case results as the scenario with the train's best-case LRV replaced by the Eq. 5 mixed LRV, computed by hand in the test.
-- [ ] Two steps always failing with 900 + 900 minutes equal the hand-computed result with 360 minutes of overlap.
-- [ ] Three steps always failing within a day in total equal the hand-computed result without overlap.
-- [ ] Three steps always failing with more than a day in total equal the scenario without their positive maximum LRVs.
-- [ ] A failing step without removal for one pathogen group does not count for that group.
-- [ ] Raising a failure duration never lowers a best-case mean, and raising a failure frequency never lowers any mean.
-- [ ] Worst-case mean ≥ best-case mean for every reference pathogen and risk measure, with failures.
-- [ ] With every failure frequency at 0, all results equal today's exactly. The same scenario gives identical results every time. The existing test suite passes unchanged.
-- [ ] Manual check on the dev environment, announced to the team first:
+- [x] A step with failure frequency 365 and failure duration 1,440 gives the same best-case results as the same scenario without that step's positive maximum LRVs.
+- [x] A step with failure frequency 365 and failure duration 60 gives the same best-case results as the scenario with the train's best-case LRV replaced by the Eq. 5 mixed LRV, computed by hand in the test.
+- [x] Two steps always failing with 900 + 900 minutes equal the hand-computed result with 360 minutes of overlap.
+- [x] Three steps always failing within a day in total equal the hand-computed result without overlap.
+- [x] Three steps always failing with more than a day in total equal the scenario without their positive maximum LRVs.
+- [x] A failing step without removal for one pathogen group does not count for that group.
+- [x] Raising a failure duration never lowers a best-case mean, and raising a failure frequency never lowers any mean.
+- [x] Worst-case mean ≥ best-case mean for every reference pathogen and risk measure, with failures.
+- [x] With every failure frequency at 0, all results equal today's exactly. The same scenario gives identical results every time. The existing test suite passes unchanged.
+- [x] Manual check on the dev environment, announced to the team first:
   - Enter a scenario with failures and run it as a guest and as a registered user.
   - Confirm that the result page, the saved-assessments page, the assessment comparison and the export's result table show the changed results, with unchanged layout.
 - [ ] The calculation time for a drinking-water scenario (365 events per year) with failures is measured on the dev environment and recorded in the pull request.
