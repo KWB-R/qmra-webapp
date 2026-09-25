@@ -10,14 +10,14 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`). The Spec iss
 
 **Blocked by:** 04 (#21), 05 (#22)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
-- [ ] A schema migration adds failure frequency and failure duration to personal treatment steps. Existing personal treatment steps get failure frequency 0 and failure duration 30.
-- [ ] The personal treatment step form shows both fields with their units and applies the same shared rule as the configurator: the ranges, whole minutes, D4 and minimum ≤ maximum LRV. Invalid input is rejected and the message is shown in the form.
-- [ ] A personal treatment step saved with failure inputs appears with them in its owner's list of personal treatment steps. Another user's list does not contain it.
-- [ ] Adding a personal treatment step to an assessment copies its failure frequency and failure duration into the new step. Bundled steps still start at 0 and 30.
-- [ ] Changing the copied values in an assessment and saving leaves the personal treatment step unchanged.
-- [ ] HTTP-level tests cover the form rules, old personal treatment steps reading back 0 and 30, and owner-only visibility. The existing test suite passes unchanged.
+- [x] A schema migration adds failure frequency and failure duration to personal treatment steps. Existing personal treatment steps get failure frequency 0 and failure duration 30.
+- [x] The personal treatment step form shows both fields with their units and applies the same shared rule as the configurator: the ranges, whole minutes, D4 and minimum ≤ maximum LRV. Invalid input is rejected and the message is shown in the form.
+- [x] A personal treatment step saved with failure inputs appears with them in its owner's list of personal treatment steps. Another user's list does not contain it.
+- [x] Adding a personal treatment step to an assessment copies its failure frequency and failure duration into the new step. Bundled steps still start at 0 and 30.
+- [x] Changing the copied values in an assessment and saving leaves the personal treatment step unchanged.
+- [x] HTTP-level tests cover the form rules, old personal treatment steps reading back 0 and 30, and owner-only visibility. The existing test suite passes unchanged.
 - [ ] Manual check on the dev environment, announced to the team first:
   - Create a personal treatment step with failure inputs and add it to an assessment.
   - See the copied values, change them, save and reopen.

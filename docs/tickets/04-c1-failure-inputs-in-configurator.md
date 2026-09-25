@@ -10,15 +10,15 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`), Change C1 in
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
-- [ ] The minimum ≤ maximum LRV check is defined once and used by both treatment step forms. Nothing changes that a user can notice, and the existing test suite passes unchanged.
-- [ ] A schema migration adds failure frequency (a decimal number) and failure duration (a whole number) to the treatment steps of an assessment. Existing rows get failure frequency 0 and failure duration 30.
-- [ ] Each treatment step card in the configurator shows both fields below its LRV rows, labelled "Failure frequency (days per year)" and "Failure duration (minutes)". New steps start at 0 and 30, bundled steps included.
-- [ ] Failure frequency outside 0–365, and failure duration outside 1–1440 or not a whole number, are rejected with a message on the saved configurator. The duration range is checked even when the frequency is 0.
-- [ ] A fractional failure frequency such as 0.5 is accepted.
-- [ ] Saving an assessment and reopening it gives back the same failure values for each step. Editing them and saving again stores the new values.
-- [ ] Each value stays with its own step when other steps are removed. Two copies of the same bundled step can have different values.
-- [ ] An assessment created without failure values, as before the migration, reopens with failure frequency 0 and failure duration 30.
-- [ ] An assessment's result and export package are the same with and without failure inputs.
-- [ ] All of the above is covered by HTTP-level tests through Django's test client, and the existing test suite passes unchanged.
+- [x] The minimum ≤ maximum LRV check is defined once and used by both treatment step forms. Nothing changes that a user can notice, and the existing test suite passes unchanged.
+- [x] A schema migration adds failure frequency (a decimal number) and failure duration (a whole number) to the treatment steps of an assessment. Existing rows get failure frequency 0 and failure duration 30.
+- [x] Each treatment step card in the configurator shows both fields below its LRV rows, labelled "Failure frequency (days per year)" and "Failure duration (minutes)". New steps start at 0 and 30, bundled steps included.
+- [x] Failure frequency outside 0–365, and failure duration outside 1–1440 or not a whole number, are rejected with a message on the saved configurator. The duration range is checked even when the frequency is 0.
+- [x] A fractional failure frequency such as 0.5 is accepted.
+- [x] Saving an assessment and reopening it gives back the same failure values for each step. Editing them and saving again stores the new values.
+- [x] Each value stays with its own step when other steps are removed. Two copies of the same bundled step can have different values.
+- [x] An assessment created without failure values, as before the migration, reopens with failure frequency 0 and failure duration 30.
+- [x] An assessment's result and export package are the same with and without failure inputs.
+- [x] All of the above is covered by HTTP-level tests through Django's test client, and the existing test suite passes unchanged.
