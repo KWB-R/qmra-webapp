@@ -1,6 +1,8 @@
 """test computation of risk assessment"""
 import warnings
 
+import numpy as np
+
 from django.core.management import call_command
 from django.test import TestCase
 from assertpy import assert_that
@@ -239,3 +241,214 @@ class TestAssesRisk(TestCase):
                 except AssertionError as e:
                     failed += str(e) + "\n"
         warnings.warn(failed)
+
+    def test_same_scenario_gives_identical_results(self):
+        given_ra = RiskAssessment(events_per_year=365, volume_per_event=1)
+        given_inflows = [
+            Inflow(risk_assessment=given_ra, pathogen=inflow.pathogen.name, min=inflow.min, max=inflow.max)
+            for inflow in QMRAInflows.get("groundwater")
+        ]
+        given_treatments = [
+            Treatment(risk_assessment=given_ra, name="Primary treatment",
+                      bacteria_min=0, bacteria_max=0.5, viruses_min=0, viruses_max=0.1, protozoa_min=0, protozoa_max=1)
+        ]
+
+        def calculate():
+            results = assess_risk(given_ra, given_inflows, given_treatments, save=False)
+            return {pathogen: r.as_dict() for pathogen, r in results.items()}
+
+        assert_that(calculate()).is_equal_to(calculate())
+
+
+STATISTICS = ["min", "q1", "median", "q3", "max"]
+EXCEEDANCE_ORDER = ["none", "min", "max"]
+PATHOGENS = ["Rotavirus", "Campylobacter jejuni", "Cryptosporidium parvum"]
+
+
+def calculate(steps: list[dict], events_per_year=365) -> dict[str, dict]:
+    """The results of a scenario with these treatment steps, as returned by the calculation."""
+    given_ra = RiskAssessment(events_per_year=events_per_year, volume_per_event=1)
+    given_inflows = [Inflow(risk_assessment=given_ra, pathogen=p, min=0.1, max=10) for p in PATHOGENS]
+    given_treatments = [Treatment(risk_assessment=given_ra, name=f"step {i}", **step) for i, step in enumerate(steps)]
+    results = assess_risk(given_ra, given_inflows, given_treatments, save=False)
+    return {pathogen: r.as_dict() for pathogen, r in results.items()}
+
+
+def case_statistics(result: dict, case: str) -> list[float]:
+    """Both risk measures of one case: 'minimum_lrv' is worst-case, 'maximum_lrv' is best-case."""
+    return [result[f"{measure}_{case}_{stat}"] for measure in ["infection", "dalys"] for stat in STATISTICS]
+
+
+# made-up steps whose LRVs keep the risk well below 1, so failures change the results visibly
+STRONG_STEP = dict(bacteria_min=3, bacteria_max=4, viruses_min=3, viruses_max=4, protozoa_min=3, protozoa_max=4)
+WEAK_STEP = dict(bacteria_min=2, bacteria_max=3, viruses_min=2, viruses_max=3, protozoa_min=2, protozoa_max=3)
+
+
+class TestFailureDaysWorstCase(TestCase):
+
+    def test_failure_frequency_0_gives_the_results_without_failure_inputs(self):
+        without = calculate([STRONG_STEP, WEAK_STEP])
+        with_zero = calculate([dict(STRONG_STEP, failure_frequency=0, failure_duration=600),
+                               dict(WEAK_STEP, failure_frequency=0, failure_duration=1)])
+
+        assert_that(with_zero).is_equal_to(without)
+
+    def test_always_failing_step_loses_its_positive_minimum_lrvs_in_worst_case(self):
+        failing = calculate([dict(STRONG_STEP, failure_frequency=365), WEAK_STEP])
+        without_min_lrvs = calculate([dict(STRONG_STEP, bacteria_min=0, viruses_min=0, protozoa_min=0), WEAK_STEP])
+
+        for pathogen in PATHOGENS:
+            with self.subTest(pathogen):
+                assert_that(case_statistics(failing[pathogen], "minimum_lrv")).is_equal_to(
+                    case_statistics(without_min_lrvs[pathogen], "minimum_lrv"))
+
+    def test_higher_failure_frequency_never_lowers_the_risk(self):
+        results = [calculate([dict(STRONG_STEP, failure_frequency=f), WEAK_STEP]) for f in [0, 1, 10, 100, 365]]
+
+        for pathogen in PATHOGENS:
+            for step, (lower, higher) in enumerate(zip(results, results[1:])):
+                with self.subTest(pathogen=pathogen, step=step):
+                    for case in ["minimum_lrv", "maximum_lrv"]:
+                        for low, high in zip(case_statistics(lower[pathogen], case),
+                                             case_statistics(higher[pathogen], case)):
+                            assert_that(high).is_greater_than_or_equal_to(low)
+                    for exceedance in ["infection_risk", "dalys_risk"]:
+                        assert_that(EXCEEDANCE_ORDER.index(higher[pathogen][exceedance])).is_greater_than_or_equal_to(
+                            EXCEEDANCE_ORDER.index(lower[pathogen][exceedance]))
+        worst_median = [r["Rotavirus"]["infection_minimum_lrv_median"] for r in results]
+        assert_that(worst_median[-1]).is_greater_than(worst_median[0])
+
+    def test_failure_duration_does_not_change_worst_case(self):
+        short = calculate([dict(STRONG_STEP, failure_frequency=50, failure_duration=1), WEAK_STEP])
+        long = calculate([dict(STRONG_STEP, failure_frequency=50, failure_duration=1440), WEAK_STEP])
+
+        for pathogen in PATHOGENS:
+            assert_that(case_statistics(long[pathogen], "minimum_lrv")).is_equal_to(
+                case_statistics(short[pathogen], "minimum_lrv"))
+
+    def test_worst_case_is_never_below_best_case(self):
+        for frequencies in [(0, 0), (0, 5), (20, 5), (365, 5)]:
+            results = calculate([dict(STRONG_STEP, failure_frequency=frequencies[0]),
+                                 dict(WEAK_STEP, failure_frequency=frequencies[1])])
+            for pathogen in PATHOGENS:
+                with self.subTest(frequencies=frequencies, pathogen=pathogen):
+                    for worst, best in zip(case_statistics(results[pathogen], "minimum_lrv"),
+                                           case_statistics(results[pathogen], "maximum_lrv")):
+                        assert_that(worst).is_greater_than_or_equal_to(best)
+
+    def test_failure_removes_only_positive_lrvs(self):
+        # bacteria regrow at this step, viruses are removed, protozoa pass unchanged
+        step = dict(bacteria_min=-1, bacteria_max=-0.5, viruses_min=3, viruses_max=4, protozoa_min=0, protozoa_max=0)
+        normal = calculate([step, WEAK_STEP])
+        failing = calculate([dict(step, failure_frequency=365), WEAK_STEP])
+
+        assert_that(failing["Campylobacter jejuni"]).is_equal_to(normal["Campylobacter jejuni"])
+        assert_that(failing["Cryptosporidium parvum"]).is_equal_to(normal["Cryptosporidium parvum"])
+        assert_that(failing["Rotavirus"]["infection_minimum_lrv_median"]).is_greater_than(
+            normal["Rotavirus"]["infection_minimum_lrv_median"])
+
+    def test_same_scenario_with_failures_gives_identical_results(self):
+        steps = [dict(STRONG_STEP, failure_frequency=12.5), dict(WEAK_STEP, failure_frequency=40)]
+
+        assert_that(calculate(steps, events_per_year=20)).is_equal_to(calculate(steps, events_per_year=20))
+
+
+def all_groups(lrv_min: float, lrv_max: float) -> dict:
+    return dict(bacteria_min=lrv_min, bacteria_max=lrv_max, viruses_min=lrv_min, viruses_max=lrv_max,
+                protozoa_min=lrv_min, protozoa_max=lrv_max)
+
+
+def mixed_lrv(best_case_lrv: float, segments: list[tuple[float, float]]) -> float:
+    """By hand: -log10 of the time-weighted mixed concentration, from (minutes, LRV lost) segments of one day."""
+    idle = 1440 - sum(minutes for minutes, _ in segments)
+    concentration = idle * 10 ** -best_case_lrv + sum(minutes * 10 ** -(best_case_lrv - lost)
+                                                      for minutes, lost in segments)
+    return -np.log10(concentration / 1440)
+
+
+def assert_best_case_close(results: dict, reference: dict, pathogens: list[str]):
+    for pathogen in pathogens:
+        for value, expected in zip(case_statistics(results[pathogen], "maximum_lrv"),
+                                   case_statistics(reference[pathogen], "maximum_lrv")):
+            assert_that(value).described_as(pathogen).is_close_to(expected, abs(expected) * 1e-9)
+
+
+# a step that never fails, so that the train keeps some removal on every failure day
+BASE_STEP = all_groups(3, 4)
+
+
+class TestMixedWaterBestCase(TestCase):
+
+    def test_always_failing_full_day_loses_the_positive_maximum_lrvs_in_best_case(self):
+        failing = calculate([dict(STRONG_STEP, failure_frequency=365, failure_duration=1440), WEAK_STEP])
+        without_max_lrvs = calculate([dict(STRONG_STEP, bacteria_max=0, viruses_max=0, protozoa_max=0), WEAK_STEP])
+
+        assert_best_case_close(failing, without_max_lrvs, PATHOGENS)
+
+    def test_always_failing_part_of_the_day_gives_the_mixed_lrv_of_eq_5(self):
+        failing = calculate([dict(all_groups(0, 4), failure_frequency=365, failure_duration=60), BASE_STEP])
+        eq_5 = mixed_lrv(8, [(60, 4)])
+        reference = calculate([all_groups(0, eq_5)])
+
+        assert_best_case_close(failing, reference, PATHOGENS)
+
+    def test_two_steps_over_a_day_overlap_by_the_extra_minutes(self):
+        failing = calculate([dict(all_groups(0, 4), failure_frequency=365, failure_duration=900),
+                             dict(all_groups(0, 3), failure_frequency=365, failure_duration=900), BASE_STEP])
+        # 360 minutes both down, 540 minutes each alone
+        overlap_360 = mixed_lrv(11, [(360, 7), (540, 4), (540, 3)])
+        reference = calculate([all_groups(0, overlap_360)])
+
+        assert_best_case_close(failing, reference, PATHOGENS)
+
+    def test_three_steps_within_a_day_do_not_overlap(self):
+        failing = calculate([dict(all_groups(0, 1), failure_frequency=365, failure_duration=400),
+                             dict(all_groups(0, 1), failure_frequency=365, failure_duration=400),
+                             dict(all_groups(0, 3), failure_frequency=365, failure_duration=400), BASE_STEP])
+        no_overlap = mixed_lrv(9, [(400, 1), (400, 1), (400, 3)])
+        reference = calculate([all_groups(0, no_overlap)])
+
+        assert_best_case_close(failing, reference, PATHOGENS)
+
+    def test_three_steps_over_a_day_count_like_worst_case(self):
+        failing = calculate([dict(all_groups(0, 1), failure_frequency=365, failure_duration=800),
+                             dict(all_groups(0, 1), failure_frequency=365, failure_duration=800),
+                             dict(all_groups(0, 3), failure_frequency=365, failure_duration=400), BASE_STEP])
+        # all three steps down for the whole day: only the step that never fails is left
+        reference = calculate([BASE_STEP])
+
+        assert_best_case_close(failing, reference, PATHOGENS)
+
+    def test_only_steps_that_lose_lrv_for_the_pathogen_group_count(self):
+        # the third step removes no protozoa, so for protozoa this is a day with two failing steps
+        steps = [all_groups(0, 1), all_groups(0, 1), dict(all_groups(0, 1), protozoa_max=0)]
+        failing = calculate([dict(step, failure_frequency=365, failure_duration=900) for step in steps] + [BASE_STEP])
+        two_steps_overlapping = mixed_lrv(6, [(360, 2), (540, 1), (540, 1)])
+        reference = calculate([dict(all_groups(3, 4), protozoa_min=0, protozoa_max=two_steps_overlapping)])
+
+        assert_best_case_close(failing, reference, PATHOGENS)
+
+    def test_three_steps_crossing_a_day_raise_best_case(self):
+        within, over = [calculate([dict(all_groups(0, 1), failure_frequency=100, failure_duration=duration)] * 3 + [BASE_STEP])
+                        for duration in [480, 481]]
+
+        for pathogen in PATHOGENS:
+            for before, after in zip(case_statistics(within[pathogen], "maximum_lrv"),
+                                     case_statistics(over[pathogen], "maximum_lrv")):
+                assert_that(after).is_greater_than_or_equal_to(before)
+        assert_that(over["Rotavirus"]["infection_maximum_lrv_median"]).is_greater_than(
+            within["Rotavirus"]["infection_maximum_lrv_median"])
+
+    def test_longer_failure_duration_never_lowers_best_case(self):
+        results = [calculate([dict(STRONG_STEP, failure_frequency=100, failure_duration=duration),
+                              dict(WEAK_STEP, failure_frequency=100, failure_duration=duration)])
+                   for duration in [1, 60, 600, 1000, 1440]]
+
+        for pathogen in PATHOGENS:
+            for pair, (shorter, longer) in enumerate(zip(results, results[1:])):
+                with self.subTest(pathogen=pathogen, pair=pair):
+                    for short, long in zip(case_statistics(shorter[pathogen], "maximum_lrv"),
+                                           case_statistics(longer[pathogen], "maximum_lrv")):
+                        assert_that(long).is_greater_than_or_equal_to(short)
+        best_median = [r["Rotavirus"]["infection_maximum_lrv_median"] for r in results]
+        assert_that(best_median[-1]).is_greater_than(best_median[0])

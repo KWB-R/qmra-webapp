@@ -21,7 +21,7 @@ at least one positive LRV accept failure inputs (D4); values of a personal treat
 carried into the assessment; saving, reopening and editing keep them. Existing saved
 assessments get failure frequency 0, so their results are unchanged.
 
-Not included: any effect on the calculation (C2), export and report (C3), explanations
+Not included: any effect on the calculation (C2), the export (C3), explanations
 beyond field labels and units (C4).
 
 ### C2 Failure calculation — Large
@@ -33,23 +33,27 @@ Purpose: results include treatment failures as decided in ADR-0001.
 Scope: failure days drawn per exposure event and per treatment step inside the Monte Carlo
 simulation; worst-case loses the full LRV of every failing step; best-case applies the
 mixed-water assumption; a failure removes only positive LRVs, LRVs of 0 or below stay
-(D4); combined failures overlap as little as possible; the result page
+(D4); combined failures that fit into a day do not overlap, two steps longer than a day
+overlap only by the extra minutes, and three or more steps longer than a day in total count
+like worst-case; the result page
 and the reference-level exceedance show the result including failures. With every failure
 frequency at 0, results equal today's. Tested with checks that need no external expected
 values: failure frequency 0 reproduces today's results exactly, worst-case risk is never
 below best-case, a higher failure frequency never lowers the risk, LRVs of 0 or below are
-unaffected, and combined failures overlap minimally in best-case.
+unaffected, and combined failures follow the best-case rules for overlap.
 
 Not included: the comparison with an independent calculation (C5), showing normal
 operation next to the result with failures (decided against), DALYs in the assessment
 comparison (later).
 
-### C3 Failure inputs in export and report — Small
+### C3 Failure inputs in the export — Small
 
-The export package's treatment table and the HTML report show each treatment step's failure
-frequency and failure duration, so a reader can see which failures a result is based on.
-Left out: renaming export files (`inflows.csv` → `inflow_concentration.csv` waits until
-later), origin and reference columns for inputs, changes to the assessment comparison.
+The export package's treatment table shows each treatment step's failure frequency and
+failure duration, so a reader can see which failures a result is based on. Left out: the
+HTML report, which shows no inputs at all and so doesn't show failure inputs either
+(decided 2026-09-25); renaming export files (`inflows.csv` → `inflow_concentration.csv`
+waits until later); origin and reference columns for inputs; changes to the assessment
+comparison.
 
 ### C4 Explain treatment failure — Small
 

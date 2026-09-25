@@ -77,7 +77,7 @@ Functionalities, each one Change:
 
 1. **Failure inputs per treatment step.** In the assessment configurator, each treatment step with at least one positive LRV gets a failure frequency (failure days per year, 0–365, default 0) and a failure duration (minutes, 1–1440, default 30). The inputs belong to the scenario.
 2. **Failure inputs on personal treatment steps.** A personal treatment step can store its failure frequency and failure duration for reuse.
-3. **Calculation with failure days.** Inside the Monte Carlo simulation, each exposure event falls on a failure day of each step with probability failure frequency / 365. Worst-case loses the full LRV of every failing step; best-case applies the mixed-water assumption, with combined failures overlapping as little as possible.
+3. **Calculation with failure days.** Inside the Monte Carlo simulation, each exposure event falls on a failure day of each step with probability failure frequency / 365. Worst-case loses the full LRV of every failing step; best-case applies the mixed-water assumption: combined failures that fit into a day do not overlap, two steps longer than a day overlap only by the extra minutes, and three or more steps longer than a day in total count like worst-case.
 4. **Results and export including failures.** The result page, the reference-level exceedance and the export package show the result including failures, and the export records the failure inputs of each step.
 
 Waits until later:
