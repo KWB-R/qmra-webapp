@@ -1,5 +1,6 @@
 """failure inputs of treatment steps, tested over HTTP like a browser uses the configurator"""
 import io
+import re
 from html.parser import HTMLParser
 from zipfile import ZipFile
 
@@ -56,6 +57,12 @@ def configurator_data(response) -> dict:
     return parser.data
 
 
+def field_errors(response, name: str) -> list[str]:
+    """The error messages the configurator shows below the input with this name."""
+    return re.findall(rf'<span id="error_\d+_id_{re.escape(name)}"><strong>(.*?)</strong></span>',
+                      response.content.decode())
+
+
 def add_step(data: dict, name: str, **values):
     """Add a treatment step card the way the configurator's script does: copy the empty form."""
     n = int(data["treatments-TOTAL_FORMS"])
@@ -78,25 +85,30 @@ def failure_inputs_per_step(data: dict) -> list[dict]:
     ]
 
 
+def new_configurator(client) -> dict:
+    """A new configurator with groundwater, drinking water and no treatment steps yet."""
+    data = configurator_data(client.get(reverse("assessment")))
+    for i in range(3):
+        data[f"inflow-{i}-min"] = "10"
+        data[f"inflow-{i}-max"] = "100"
+    data["ra-source_name"] = "groundwater"
+    data["ra-exposure_name"] = "drinking water"
+    data["ra-events_per_year"] = "365"
+    data["ra-volume_per_event"] = "1"
+    return data
+
+
 LRVS = dict(bacteria_min=1, bacteria_max=2, viruses_min=1, viruses_max=2, protozoa_min=1, protozoa_max=2)
 
 
-class TestFailureInputs(TestCase):
+class LoggedInTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user("test-user", "test-user@test.com", "password")
         self.client.force_login(self.user)
 
-    def new_configurator(self) -> dict:
-        data = configurator_data(self.client.get(reverse("assessment")))
-        for i in range(3):
-            data[f"inflow-{i}-min"] = "10"
-            data[f"inflow-{i}-max"] = "100"
-        data["ra-source_name"] = "groundwater"
-        data["ra-exposure_name"] = "drinking water"
-        data["ra-events_per_year"] = "365"
-        data["ra-volume_per_event"] = "1"
-        return data
+
+class TestFailureInputs(LoggedInTestCase):
 
     def post_configurator(self, data: dict, assessment: RiskAssessment = None):
         url = reverse("assessment") if assessment is None else reverse("assessment", args=[assessment.id])
@@ -128,7 +140,7 @@ class TestFailureInputs(TestCase):
         assert_that(int(data["treatments-__prefix__-failure_duration"])).is_equal_to(30)
 
     def test_bundled_step_starts_at_defaults(self):
-        data = self.new_configurator()
+        data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS)
 
         assessment = self.save_new(data)
@@ -138,7 +150,7 @@ class TestFailureInputs(TestCase):
         ])
 
     def test_failure_inputs_survive_save_and_reopen_per_step(self):
-        data = self.new_configurator()
+        data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS, failure_frequency="0.5", failure_duration="15")
         add_step(data, "Primary treatment", **LRVS, failure_frequency="12", failure_duration="600")
         add_step(data, "Slow sand filtration", **LRVS, failure_frequency="365", failure_duration="1440")
@@ -152,7 +164,7 @@ class TestFailureInputs(TestCase):
         ])
 
     def test_editing_stores_new_values_and_values_stay_with_their_step(self):
-        data = self.new_configurator()
+        data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS, failure_frequency="1", failure_duration="10")
         add_step(data, "Slow sand filtration", **LRVS, failure_frequency="2", failure_duration="20")
         add_step(data, "Primary treatment", **LRVS, failure_frequency="3", failure_duration="30")
@@ -182,7 +194,7 @@ class TestFailureInputs(TestCase):
         ]
         for frequency, duration, message in cases:
             with self.subTest(frequency=frequency, duration=duration):
-                data = self.new_configurator()
+                data = new_configurator(self.client)
                 add_step(data, "Primary treatment", **LRVS,
                          failure_frequency=frequency, failure_duration=duration)
 
@@ -195,7 +207,7 @@ class TestFailureInputs(TestCase):
     def test_range_bounds_are_accepted(self):
         for frequency, duration in [("0", "1"), ("365", "1440"), ("0.5", "30")]:
             with self.subTest(frequency=frequency, duration=duration):
-                data = self.new_configurator()
+                data = new_configurator(self.client)
                 add_step(data, "Primary treatment", **LRVS,
                          failure_frequency=frequency, failure_duration=duration)
 
@@ -214,7 +226,7 @@ class TestFailureInputs(TestCase):
         ])
 
     def test_result_and_export_do_not_change_with_failure_inputs(self):
-        data = self.new_configurator()
+        data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS)
         add_step(data, "Slow sand filtration", **LRVS)
         assessment = self.save_new(data)
@@ -230,3 +242,108 @@ class TestFailureInputs(TestCase):
         assert_that(failure_inputs_per_step(self.reopen(assessment))[0]["failure_frequency"]).is_equal_to(20)
         assert_that(self.results(assessment)).is_equal_to(results_before)
         assert_that(self.export(assessment)).is_equal_to(export_before)
+
+
+NO_LRVS = dict(bacteria_min="", bacteria_max="", viruses_min="", viruses_max="", protozoa_min="", protozoa_max="")
+D4_REJECTED = {
+    "empty LRVs": NO_LRVS,
+    "zero LRVs": dict(NO_LRVS, bacteria_min=0, bacteria_max=0, viruses_min=0, viruses_max=0),
+    "recontamination": dict(bacteria_min=-1, bacteria_max=-0.5, viruses_min=-1, viruses_max=-0.5,
+                            protozoa_min=-1, protozoa_max=-0.5),
+}
+D4_ACCEPTED = {
+    "one positive maximum": dict(NO_LRVS, protozoa_min=0, protozoa_max=2),
+    "regrowth in one group": dict(bacteria_min=-1, bacteria_max=-0.5, viruses_min=1, viruses_max=2,
+                                  protozoa_min=1, protozoa_max=2),
+}
+D4_MESSAGE = "failure frequency must be 0 for a treatment step without a positive LRV"
+
+
+class TestFailureOnlyWithPositiveLrv(LoggedInTestCase):
+
+    def save_with_step(self, lrvs: dict, failure_frequency: str):
+        data = new_configurator(self.client)
+        add_step(data, "Primary treatment", **lrvs, failure_frequency=failure_frequency, failure_duration="30")
+        return self.client.post(reverse("assessment"), data)
+
+    def test_step_without_positive_lrv_cannot_fail(self):
+        for case, lrvs in D4_REJECTED.items():
+            with self.subTest(case):
+                response = self.save_with_step(lrvs, failure_frequency="1")
+
+                assert_that(response.status_code).is_equal_to(200)
+                assert_that(field_errors(response, "treatments-0-failure_frequency")).is_equal_to([D4_MESSAGE])
+                assert_that(RiskAssessment.objects.filter(user=self.user).count()).is_equal_to(0)
+
+    def test_step_without_positive_lrv_keeps_failure_frequency_0(self):
+        for case, lrvs in D4_REJECTED.items():
+            with self.subTest(case):
+                response = self.save_with_step(lrvs, failure_frequency="0")
+
+                assert_that(response.status_code).is_equal_to(302)
+
+    def test_step_with_one_positive_lrv_can_fail(self):
+        for case, lrvs in D4_ACCEPTED.items():
+            with self.subTest(case):
+                response = self.save_with_step(lrvs, failure_frequency="1")
+
+                assert_that(response.status_code).is_equal_to(302)
+
+
+class TestGuestFailureInputs(TestCase):
+
+    def guest_result(self, **step_values):
+        data = new_configurator(self.client)
+        add_step(data, "Primary treatment", **{**LRVS, **step_values})
+        return self.client.post(reverse("assessment-result"), data)
+
+    def test_guest_sees_failure_fields(self):
+        response = self.client.get(reverse("assessment"))
+
+        assert_that(response.content.decode()).contains(
+            "Failure frequency (days per year)", "Failure duration (minutes)")
+
+    def test_guest_result_with_failure_inputs_is_shown_and_not_stored(self):
+        response = self.guest_result(failure_frequency="12", failure_duration="60")
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(RiskAssessment.objects.count()).is_equal_to(0)
+        assert_that(Treatment.objects.count()).is_equal_to(0)
+
+    def test_guest_result_sends_back_messages_of_invalid_inputs(self):
+        cases = [
+            (dict(failure_frequency="366"), "treatments-0-failure_frequency",
+             "failure frequency must be between 0 and 365 days per year"),
+            (dict(failure_duration="2.5"), "treatments-0-failure_duration", "Enter a whole number."),
+            (dict(bacteria_min="3", bacteria_max="1"), "treatments-0-bacteria_min", "min. must be less than max"),
+        ]
+        for step_values, field, message in cases:
+            with self.subTest(field=field, message=message):
+                response = self.guest_result(**step_values)
+
+                assert_that(response.status_code).is_equal_to(422)
+                assert_that(response.json()["errors"]).contains_entry({field: [message]})
+                assert_that(RiskAssessment.objects.count()).is_equal_to(0)
+
+    def test_guest_result_rejects_failing_step_without_positive_lrv(self):
+        for case, lrvs in D4_REJECTED.items():
+            with self.subTest(case):
+                response = self.guest_result(**lrvs, failure_frequency="1")
+
+                assert_that(response.status_code).is_equal_to(422)
+                assert_that(response.json()["errors"]).contains_entry(
+                    {"treatments-0-failure_frequency": [D4_MESSAGE]})
+
+    def test_guest_result_accepts_step_without_positive_lrv_and_failure_frequency_0(self):
+        for case, lrvs in D4_REJECTED.items():
+            with self.subTest(case):
+                response = self.guest_result(**lrvs, failure_frequency="0")
+
+                assert_that(response.status_code).is_equal_to(200)
+
+    def test_guest_result_accepts_failing_step_with_one_positive_lrv(self):
+        for case, lrvs in D4_ACCEPTED.items():
+            with self.subTest(case):
+                response = self.guest_result(**lrvs, failure_frequency="1")
+
+                assert_that(response.status_code).is_equal_to(200)

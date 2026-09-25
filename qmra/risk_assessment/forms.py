@@ -26,7 +26,8 @@ FAILURE_INPUT_RANGES = {
 
 
 def check_treatment_step(form, cleaned_data):
-    """Minimum LRV at most maximum LRV per pathogen group, and failure inputs within their ranges.
+    """Minimum LRV at most maximum LRV per pathogen group, failure inputs within their ranges,
+    and a failure frequency above 0 only for a step with a positive LRV.
 
     Shared by the configurator and the personal treatment step form. Whole minutes are enforced
     by the failure duration's field type; failure inputs a form does not have are skipped.
@@ -38,6 +39,10 @@ def check_treatment_step(form, cleaned_data):
         value = cleaned_data.get(field)
         if value is not None and not low <= value <= high:
             form.add_error(field, f"{field.replace('_', ' ')} must be between {low} and {high} {unit}")
+    # a failure removes only positive LRVs, so a step without one cannot fail (D4)
+    has_positive_lrv = any(_zero_if_none(cleaned_data.get(field)) > 0 for pair in LRV_FIELDS for field in pair)
+    if _zero_if_none(cleaned_data.get("failure_frequency")) > 0 and not has_positive_lrv:
+        form.add_error("failure_frequency", "failure frequency must be 0 for a treatment step without a positive LRV")
 
 
 class RiskAssessmentForm(forms.ModelForm):

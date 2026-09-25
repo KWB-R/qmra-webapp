@@ -2,6 +2,7 @@ import io
 
 from crispy_forms.utils import render_crispy_form
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.context_processors import csrf
@@ -53,6 +54,24 @@ def assess_and_save_results(risk_assessment: RiskAssessment) -> RiskAssessment:
     for r in results.values():
         r.save()
     return RiskAssessment.objects.get(id=risk_assessment.id)
+
+
+def errors_by_field_name(risk_assessment_form, inflow_form, treatment_form) -> dict[str, list[str]]:
+    """Error messages keyed by the name of the input they belong to; the rest under NON_FIELD_ERRORS."""
+    errors = {}
+
+    def add(key, messages):
+        errors.setdefault(key, []).extend(messages)
+
+    for field, messages in risk_assessment_form.errors.items():
+        add(field if field == NON_FIELD_ERRORS else risk_assessment_form.add_prefix(field), messages)
+    for formset in [inflow_form, treatment_form]:
+        # formset.deleted_forms is empty for an invalid formset, so removed steps are filtered here
+        for form in [f for f in formset.forms if not formset._should_delete_form(f)]:
+            for field, messages in form.errors.items():
+                add(field if field == NON_FIELD_ERRORS else form.add_prefix(field), messages)
+        add(NON_FIELD_ERRORS, formset.non_form_errors())
+    return {key: messages for key, messages in errors.items() if messages}
 
 
 @login_required(login_url="/login")
@@ -181,9 +200,8 @@ def risk_assessment_result(request):
                                                             for t in treatments
                                                             if len(t.above_max_lrv())}))
         else:
-            # print(inflow_form.errors)
-            # print(treatment_form.errors)
-            return HttpResponse(status=422)
+            return JsonResponse(dict(errors=errors_by_field_name(risk_assessment_form, inflow_form, treatment_form)),
+                                status=422)
 
     elif request.method == "GET":
         risk_assessment_id = request.GET.get("id")
