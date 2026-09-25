@@ -99,6 +99,13 @@ def new_configurator(client) -> dict:
     return data
 
 
+def layout(csv: bytes) -> list[str]:
+    """The lines of an exported table with every number replaced, so only its rows and columns remain."""
+    return [re.sub(r"-?\d+(\.\d+)?(e[-+]?\d+)?", "#", line) for line in csv.decode().splitlines()]
+
+
+# high enough that failures change the results visibly instead of leaving them at a risk of 1
+HIGH_LRVS = dict(bacteria_min=3, bacteria_max=4, viruses_min=3, viruses_max=4, protozoa_min=3, protozoa_max=4)
 LRVS = dict(bacteria_min=1, bacteria_max=2, viruses_min=1, viruses_max=2, protozoa_min=1, protozoa_max=2)
 
 
@@ -226,23 +233,42 @@ class TestFailureInputs(LoggedInTestCase):
             dict(name="Primary treatment", failure_frequency=0, failure_duration=30)
         ])
 
-    def test_result_and_export_do_not_change_with_failure_inputs(self):
+    def saved_assessment_with_two_steps(self) -> RiskAssessment:
         data = new_configurator(self.client)
-        add_step(data, "Primary treatment", **LRVS)
-        add_step(data, "Slow sand filtration", **LRVS)
-        assessment = self.save_new(data)
+        add_step(data, "Primary treatment", **HIGH_LRVS)
+        add_step(data, "Slow sand filtration", **HIGH_LRVS)
+        return self.save_new(data)
+
+    def test_result_and_export_do_not_change_with_failure_frequency_0(self):
+        assessment = self.saved_assessment_with_two_steps()
+        results_before = self.results(assessment)
+        export_before = self.export(assessment)
+
+        data = self.reopen(assessment)
+        data["treatments-0-failure_duration"] = "120"
+        data["treatments-1-failure_duration"] = "1440"
+        self.post_configurator(data, assessment)
+
+        assert_that(failure_inputs_per_step(self.reopen(assessment))[0]["failure_duration"]).is_equal_to(120)
+        assert_that(self.results(assessment)).is_equal_to(results_before)
+        assert_that(self.export(assessment)).is_equal_to(export_before)
+
+    def test_export_keeps_its_files_and_columns_with_failures(self):
+        assessment = self.saved_assessment_with_two_steps()
         results_before = self.results(assessment)
         export_before = self.export(assessment)
 
         data = self.reopen(assessment)
         data["treatments-0-failure_frequency"] = "20"
-        data["treatments-0-failure_duration"] = "120"
         data["treatments-1-failure_frequency"] = "365"
         self.post_configurator(data, assessment)
 
-        assert_that(failure_inputs_per_step(self.reopen(assessment))[0]["failure_frequency"]).is_equal_to(20)
-        assert_that(self.results(assessment)).is_equal_to(results_before)
-        assert_that(self.export(assessment)).is_equal_to(export_before)
+        assert_that(self.results(assessment)).is_not_equal_to(results_before)
+        export_after = self.export(assessment)
+        assert_that(sorted(export_after)).is_equal_to(sorted(export_before))
+        for name in export_before:
+            if name.endswith(".csv"):
+                assert_that(layout(export_after[name])).described_as(name).is_equal_to(layout(export_before[name]))
 
 
 NO_LRVS = dict(bacteria_min="", bacteria_max="", viruses_min="", viruses_max="", protozoa_min="", protozoa_max="")
