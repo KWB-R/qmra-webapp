@@ -175,7 +175,7 @@ The best-case assumption that water consumed on a failure day is a mixture of wa
 _Avoid_: mixed concentration, dilution, storage effect
 
 **Combined failure**:
-Failure events in two or more treatment steps on the same day. Worst-case loses all their LRVs for the whole day. Under the mixed-water assumption the failure events are arranged within the day so that the mixed water has the lowest pathogen concentration. This means they do not overlap if their durations fit into one day, and otherwise overlap only by the minutes that exceed a day, shared by the steps whose joint loss matters least.
+Failure events in two or more treatment steps on the same day. Worst-case loses all their LRVs for the whole day. Under the mixed-water assumption the failure events do not overlap if their durations fit into one day. Two failure events longer than a day in total overlap only by the minutes that exceed a day. Three or more failure events longer than a day in total count like worst-case: all these steps are down for the whole day. Only steps that lose LRV for the pathogen group count, so the same day can count like worst-case for one reference pathogen and not for another.
 
 **Next phase**:
 Capabilities identified for future development and not present in the application today.

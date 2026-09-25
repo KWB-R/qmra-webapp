@@ -33,12 +33,14 @@ Purpose: results include treatment failures as decided in ADR-0001.
 Scope: failure days drawn per exposure event and per treatment step inside the Monte Carlo
 simulation; worst-case loses the full LRV of every failing step; best-case applies the
 mixed-water assumption; a failure removes only positive LRVs, LRVs of 0 or below stay
-(D4); combined failures overlap as little as possible; the result page
+(D4); combined failures that fit into a day do not overlap, two steps longer than a day
+overlap only by the extra minutes, and three or more steps longer than a day in total count
+like worst-case; the result page
 and the reference-level exceedance show the result including failures. With every failure
 frequency at 0, results equal today's. Tested with checks that need no external expected
 values: failure frequency 0 reproduces today's results exactly, worst-case risk is never
 below best-case, a higher failure frequency never lowers the risk, LRVs of 0 or below are
-unaffected, and combined failures overlap minimally in best-case.
+unaffected, and combined failures follow the best-case rules for overlap.
 
 Not included: the comparison with an independent calculation (C5), showing normal
 operation next to the result with failures (decided against), DALYs in the assessment

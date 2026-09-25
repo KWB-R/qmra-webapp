@@ -24,8 +24,10 @@ treatment step with probability failure frequency / 365. On a failure day:
   whole day, whatever the failure duration;
 - **best-case** applies the mixed-water assumption: the consumed water is a mixture of water
   treated during the failure events and water treated in normal operation, in proportion to
-  the failure durations, with the failure events arranged within the day so that the mixed
-  water has the lowest pathogen concentration.
+  the failure durations. Failure events that fit into one day do not overlap; two steps
+  longer than a day in total overlap only by the minutes beyond the day; three or more steps
+  longer than a day in total count like worst-case for that day. Only steps that lose LRV
+  for the pathogen group count.
 
 LRVs of 0 or below are never affected (D4). The result page, the reference-level
 exceedance, the saved results and the result table in the export package all show the
@@ -60,9 +62,11 @@ failure frequency is 0 gives exactly the same results as before C2.
     day to be combined, so that combined failures are not missed.
 12. As a user, I want a combined failure in best-case to assume that failure events do not
     overlap when they fit into one day, so that best-case stays the favourable assumption.
-13. As a user, I want combined failure events longer than a day in total to overlap only as
-    much as necessary, on the steps whose joint loss matters least, so that best-case stays
-    favourable without a jump at 24 hours.
+13. As a user, I want two failure events longer than a day in total to overlap only by the
+    minutes beyond the day, so that best-case stays favourable without a jump at 24 hours.
+    When three or more steps fail on the same day for longer than a day in total, I accept
+    that best-case counts that day like worst-case, since so much downtime on one day is a
+    rare exception.
 14. As a user, I want a failure to remove only the positive LRVs of a step, so that a step
     with regrowth (a negative LRV) in one pathogen group does not improve during a failure.
 15. As a user, I want a pathogen group whose LRV at a step is 0 or empty to be unaffected by
@@ -113,13 +117,19 @@ failure frequency is 0 gives exactly the same results as before C2.
 - **Best-case on a failure day (mixed-water assumption).** The day is split into time
   segments by which failing steps are down. The event's LRV is −log₁₀ of the time-weighted
   average of 10^(−LRV of each segment), where a segment's LRV is the best-case LRV of the
-  train minus the removable maximum LRVs of the steps down in it. The failure events of the
-  day are arranged within 1,440 minutes so that this average concentration is lowest. This
-  gives no overlap when the durations fit into one day and otherwise the minimal overlap,
-  placed on the steps whose joint loss matters least (`CONTEXT.md`, *Combined failure*). For
-  a single failing step it equals Eq. 5 of the failure approach. With the few failing steps
-  per day that occur in practice, the arrangement can be found exactly, for example by
-  choosing the time share of each combination of failing steps.
+  train minus the removable maximum LRVs of the steps down in it (`CONTEXT.md`, *Combined
+  failure*):
+  - failure events whose durations fit into 1,440 minutes do not overlap; for a single
+    failing step this equals Eq. 5 of the failure approach;
+  - two failure events longer than a day in total overlap only by the minutes beyond the day;
+  - three or more failure events longer than a day in total count like worst-case: all these
+    steps are down for the whole day and lose their removable maximum LRVs. Only steps with a
+    removable maximum LRV for the pathogen group count, since a failure changes nothing where
+    a step removes nothing (D4); so a day can count like worst-case for one reference
+    pathogen and not for another. This replaces
+    the lowest-concentration arrangement decided on 2026-09-24, which needed a numerical
+    solver for a rare exception (decided 2026-09-25).
+  Every rule has a closed formula, so no solver is needed.
 - **Concentration sampling unchanged.** The sampled inflow concentrations and the choice of
   which sample each simulated event uses stay exactly as today, including the fixed seed.
   The failure draws come from their own fixed-seed random generator. When all failure
@@ -162,8 +172,10 @@ failure frequency is 0 gives exactly the same results as before C2.
     give the same best-case results as the scenario with the train's best-case LRV replaced
     by the constant mixed LRV from Eq. 5, computed by hand in the test.
   - **Combined failures:** two steps always failing with 900 + 900 minutes equal the
-    hand-computed constant LRV with 360 minutes of overlap; three steps always failing with
-    durations above a day in total equal the hand-computed lowest-concentration arrangement.
+    hand-computed constant LRV with 360 minutes of overlap; three steps always failing within
+    a day in total equal the hand-computed LRV without overlap; three steps always failing
+    with more than a day in total equal the scenario without their positive maximum LRVs;
+    a failing step without removal for one pathogen group does not count for that group.
   - **Monotonicity:** raising a failure frequency never lowers any mean; raising a failure
     duration never lowers a best-case mean and leaves worst-case unchanged.
   - **Case order:** worst-case mean ≥ best-case mean for every pathogen and risk measure,
@@ -183,8 +195,8 @@ failure frequency is 0 gives exactly the same results as before C2.
 ## Acceptance criteria
 
 1. The calculation follows the rules above: failure days per exposure event, worst-case
-   full loss, best-case mixed-water assumption with the lowest-concentration arrangement,
-   and only positive LRVs lost.
+   full loss, best-case mixed-water assumption with the combined-failure rules above, and
+   only positive LRVs lost.
 2. With every failure frequency at 0, all results equal today's exactly.
 3. All tests listed above pass, and the existing suite passes unchanged.
 4. The result page, the reference-level exceedance, saved results, the assessment comparison
@@ -220,11 +232,12 @@ data* (no change to access).
 
 ## Further Notes
 
-- The rule for arranging three or more failure events of one day in best-case was decided
-  on 2026-09-24 while writing this Spec and added to `CONTEXT.md` (*Combined failure*) and
-  to decision 6 in `docs/QMRA_Failure_Approach.md`. Overlapping two failure events never
-  lowers the mixed concentration, so the lowest-concentration arrangement always has
-  minimal overlap and agrees with the rule for two steps.
+- The rule for three or more failure events of one day in best-case changed during
+  implementation (#26, 2026-09-25). The lowest-concentration arrangement decided on
+  2026-09-24 needed a linear program whose standard solver failed when the failing steps
+  lose about 16 LRV or more together. Since such days are a rare exception, they now count
+  like worst-case. `CONTEXT.md` (*Combined failure*) and decision 6 in
+  `docs/QMRA_Failure_Approach.md` are updated.
 - No contradiction with ADR-0001 was found. ADR-0001 notes that two exposure events on the
   same calendar day need not share a failure state; this Spec keeps that.
 - Results with failures will differ from a hand calculation with Eq. 6 of the failure

@@ -1,6 +1,57 @@
 {% load static %}
 <script type="text/javascript">
+    // guests have no save button to re-render the configurator with errors, so their messages are placed here
+    function clearFormErrors() {
+        const formElement = document.querySelector("form[id=configurator]");
+        document.querySelectorAll(".guest-error").forEach(e => e.remove());
+        formElement.querySelectorAll("[aria-invalid][data-guest-error]").forEach(input => {
+            input.classList.remove("is-invalid");
+            input.removeAttribute("aria-invalid");
+            input.removeAttribute("data-guest-error");
+        });
+        document.querySelectorAll("[data-guest-error-step]").forEach(summary => {
+            summary.style.border = "";
+            summary.removeAttribute("data-guest-error-step");
+        });
+    }
+    function errorElement(tag, className, text) {
+        const elem = document.createElement(tag);
+        elem.className = `${className} guest-error`;
+        elem.textContent = text;
+        return elem;
+    }
+    function showFormErrors(errors) {
+        const formElement = document.querySelector("form[id=configurator]");
+        const unplaced = [];
+        let firstStepButton = null;
+        for (const [name, messages] of Object.entries(errors)) {
+            const input = formElement.querySelector(`[name="${name}"]`);
+            if (input === null) {
+                unplaced.push(...messages);
+                continue;
+            }
+            input.classList.add("is-invalid");
+            input.setAttribute("aria-invalid", "true");
+            input.setAttribute("data-guest-error", "");
+            input.after(errorElement("span", "invalid-feedback d-block", messages.join(" ")));
+            const step = input.closest("div[id^='treatments-n-']");
+            const summary = step && document.querySelector(`#summary-${step.id}`);
+            if (summary && !summary.hasAttribute("data-guest-error-step")) {
+                summary.style.border = "solid 2px var(--danger)";
+                summary.setAttribute("data-guest-error-step", "");
+                summary.after(errorElement("span", "invalid-feedback d-block", "contains errors"));
+                firstStepButton = firstStepButton || summary.querySelector("button[id^=focus-]");
+            }
+        }
+        if (firstStepButton) firstStepButton.click();
+        const result = document.querySelector("#assessment-result");
+        result.innerHTML = "";
+        result.append(errorElement("div", "alert alert-danger m-3", "The assessment could not be run. Please correct the marked inputs."));
+        unplaced.forEach(message => result.append(errorElement("div", "alert alert-danger mx-3", message)));
+    }
     function getResultsNoSave() {
+            clearFormErrors();
+            const saveButton = document.querySelector("#save-risk-assessment-btn");  // only registered users have it
             const showResult = document.querySelector("#show-result");
             showResult.setAttribute("hidden", "");
             document.querySelector("main").appendChild(showResult);
@@ -14,14 +65,18 @@
                 body: frm
                 }).then(r => {
                     if (r.ok) return r.text();
+                    if (r.status === 422 && saveButton === null) {
+                        return r.json().then(body => { showFormErrors(body.errors); return null; });
+                    }
                     throw new Error("422");
                 }).then(html => {
+                    if (html === null) return false;  // no result: the guest's errors are shown instead
                     document.querySelector("#assessment-result").innerHTML = html;
                     document.querySelector("#assessment-result").querySelectorAll("script").forEach(s => eval(s.innerHTML));
                     document.querySelector("#assessment-result").classList.add("up-to-date");
                     return true;
                 }).catch(err => {
-                    document.querySelector("#save-risk-assessment-btn").click();
+                    saveButton.click();
                     return false;
                 });
         }
