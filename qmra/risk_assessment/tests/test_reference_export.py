@@ -26,18 +26,27 @@ def is_compared(name: str) -> bool:
     return not name.endswith("/") and name not in PLOTS
 
 
-SIGNIFICANT_DIGITS = 10
+NUMBER = re.compile(r"-?\d+(?:\.\d+)?(?:e[-+]?\d+)?")
+# Tiny best-case probabilities are computed as 1 - exp(-k * dose), where most digits cancel, so machines with other
+# processors or math libraries differ by up to about 1e-5 relative (seen between CI and a developer machine).
+RELATIVE_TOLERANCE = 1e-3
 
 
 def masked(name: str, content: bytes) -> str:
-    """The content of an exported file as it is compared: the plots embedded in the report are masked, and decimal
-    numbers are rounded to 10 significant digits. Numpy versions, Python versions and processors differ in the last
-    digits of the Monte Carlo results; every real change to a value is far larger than that."""
+    """The content of an exported file as it is compared; the plots embedded in the report are masked."""
     text = content.decode("utf-8")
     if name.endswith(".html"):
         text, plots = re.subn(r"base64,\s*[A-Za-z0-9+/=]+", "base64, <plot>", text)
         assert_that(plots).described_as(f"plots masked in {name}").is_equal_to(len(PLOTS))
-    return re.sub(r"-?\d+\.\d+(?:e[-+]?\d+)?", lambda m: f"{float(m.group()):.{SIGNIFICANT_DIGITS}g}", text)
+    return text
+
+
+def assert_same_content(name: str, actual: str, expected: str):
+    """The text of a file identical, and each of its numbers within the relative tolerance."""
+    assert_that(NUMBER.sub("#", actual)).described_as(name).is_equal_to(NUMBER.sub("#", expected))
+    for value, reference in zip(NUMBER.findall(actual), NUMBER.findall(expected)):
+        assert_that(float(value)).described_as(f"{name}: {value} instead of {reference}").is_close_to(
+            float(reference), abs(float(reference)) * RELATIVE_TOLERANCE)
 
 
 class TestReferenceExport(TestCase):
@@ -91,5 +100,4 @@ class TestReferenceExport(TestCase):
                 assert_that(content).described_as(name).is_not_empty()
             elif is_compared(name):
                 assert_that(str(PACKAGE / name)).described_as(f"reference of {name}").exists()
-                assert_that(masked(name, content)).described_as(name).is_equal_to(
-                    (PACKAGE / name).read_text(encoding="utf-8"))
+                assert_same_content(name, masked(name, content), (PACKAGE / name).read_text(encoding="utf-8"))

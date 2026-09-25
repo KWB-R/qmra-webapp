@@ -8,9 +8,10 @@ and layout of the export package change only on purpose.
 - `package/` holds the exported tables and the HTML report. The report embeds the plots,
   which are masked as `<plot>`. The plots themselves are only checked for presence, because
   their rendering can differ between machines.
-- Decimal numbers are stored and compared rounded to 10 significant digits. Numpy versions,
-  Python versions and processors differ in the last digits of the Monte Carlo results (CI
-  and a developer machine did); a real change to a value is far larger than that.
+- The text of each file must stay identical, and each number must match within 0.1 %
+  relative. Tiny best-case probabilities are computed as 1 − exp(−k · dose), where most
+  digits cancel, so machines with other processors or math libraries differ by up to about
+  10⁻⁵ relative (seen between CI and a developer machine). A real change is far larger.
 
 The benchmark assessment's inputs are fixed values in the test, not bundled default data, so
 a new release of bundled source waters or treatment steps doesn't change the reference. The

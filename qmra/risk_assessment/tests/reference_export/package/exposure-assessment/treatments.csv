@@ -1,7 +1,7 @@
 Treatment,Pathogen group,Maximum LRV,Minimum LRV,Failure frequency (days per year),Failure duration (minutes)
-Slow sand filtration,Viruses,4,0.25,0,30
-Slow sand filtration,Bacteria,6,2,0,30
-Slow sand filtration,Protozoa,5,0.3,0,30
-"UV disinfection 20 mJ/cm2, drinking",Viruses,3,1,10,60
-"UV disinfection 20 mJ/cm2, drinking",Bacteria,6,4.6,10,60
-"UV disinfection 20 mJ/cm2, drinking",Protozoa,3,2.5,10,60
+Slow sand filtration,Viruses,4.0,0.25,0.0,30
+Slow sand filtration,Bacteria,6.0,2.0,0.0,30
+Slow sand filtration,Protozoa,5.0,0.3,0.0,30
+"UV disinfection 20 mJ/cm2, drinking",Viruses,3.0,1.0,10.0,60
+"UV disinfection 20 mJ/cm2, drinking",Bacteria,6.0,4.6,10.0,60
+"UV disinfection 20 mJ/cm2, drinking",Protozoa,3.0,2.5,10.0,60
