@@ -6,7 +6,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Row, Column, HTML, Submit
 
-from qmra.risk_assessment.forms import _zero_if_none
+from qmra.risk_assessment.forms import check_treatment_step
 from qmra.user.models import User
 
 
@@ -184,17 +184,5 @@ class UserTreatmentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        b_min = _zero_if_none(cleaned_data.get("bacteria_min", 0))
-        b_max = _zero_if_none(cleaned_data.get("bacteria_max", 0))
-        v_min = _zero_if_none(cleaned_data.get("viruses_min", 0))
-        v_max = _zero_if_none(cleaned_data.get("viruses_max", 0))
-        p_min = _zero_if_none(cleaned_data.get("protozoa_min", 0))
-        p_max = _zero_if_none(cleaned_data.get("protozoa_max", 0))
-        msg = "min. must be less than max"
-        if b_min > b_max:
-            self.add_error("bacteria_min", msg)
-        if v_min > v_max:
-            self.add_error("viruses_min", msg)
-        if p_min > p_max:
-            self.add_error("protozoa_min", msg)
+        check_treatment_step(self, cleaned_data)
         return cleaned_data
