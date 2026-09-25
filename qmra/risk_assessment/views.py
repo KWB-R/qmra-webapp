@@ -310,13 +310,13 @@ def create_treatment(request):
             # handle duplicate names
             if any(UserExposure.objects.filter(name=treatment_form.instance.name, user=request.user).all()):
                 treatment_form.add_error("name", "'name' must be unique. You already have a treatment with this name")
-                ctx = {}
-                ctx.update(csrf(request))
-                return HttpResponse(render_crispy_form(treatment_form, context=ctx), status=422)
-            treatment_form.instance.user = request.user
-            treatment_form.save(commit=True)
-            return HttpResponseRedirect(request.META["HTTP_REFERER"])
-        return HttpResponse(status=422)
+            else:
+                treatment_form.instance.user = request.user
+                treatment_form.save(commit=True)
+                return HttpResponseRedirect(request.META["HTTP_REFERER"])
+        ctx = {}
+        ctx.update(csrf(request))
+        return HttpResponse(render_crispy_form(treatment_form, context=ctx), status=422)
     return HttpResponse(status=404)
 
 

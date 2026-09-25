@@ -138,6 +138,8 @@ class UserTreatment(models.Model):
     viruses_max = models.FloatField(blank=True, null=True)
     protozoa_min = models.FloatField(blank=True, null=True)
     protozoa_max = models.FloatField(blank=True, null=True)
+    failure_frequency = models.FloatField(default=0)  # failure days per year
+    failure_duration = models.IntegerField(default=30)  # minutes
 
 
 class UserTreatmentForm(forms.ModelForm):
@@ -150,7 +152,9 @@ class UserTreatmentForm(forms.ModelForm):
             'viruses_min',
             'viruses_max',
             "protozoa_min",
-            "protozoa_max"
+            "protozoa_max",
+            "failure_frequency",
+            "failure_duration",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -167,6 +171,8 @@ class UserTreatmentForm(forms.ModelForm):
         self.fields['viruses_max'].label = ""
         self.fields['protozoa_min'].label = ""
         self.fields['protozoa_max'].label = ""
+        self.fields['failure_frequency'].label = "Failure frequency (days per year)"
+        self.fields['failure_duration'].label = "Failure duration (minutes)"
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
             Field("name"),
@@ -179,6 +185,7 @@ class UserTreatmentForm(forms.ModelForm):
                 Column("viruses_min"), Column("viruses_max")),
             Row(Column(HTML(f"<label {label_style}>Protozoa LRV:</label>")),
                 Column("protozoa_min"), Column("protozoa_max")),
+            Row(Column("failure_frequency"), Column("failure_duration")),
             Submit('submit', 'Submit')
         )
 

@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from qmra.risk_assessment.models import RiskAssessment, Inflow, Treatment
+from qmra.risk_assessment.user_models import UserTreatment
 from qmra.user.models import User
 
 
@@ -107,17 +108,17 @@ class LoggedInTestCase(TestCase):
         self.user = User.objects.create_user("test-user", "test-user@test.com", "password")
         self.client.force_login(self.user)
 
+    def save_new(self, data: dict) -> RiskAssessment:
+        response = self.client.post(reverse("assessment"), data)
+        assert_that(response.status_code).is_equal_to(302)
+        return RiskAssessment.objects.get(user=self.user)
+
 
 class TestFailureInputs(LoggedInTestCase):
 
     def post_configurator(self, data: dict, assessment: RiskAssessment = None):
         url = reverse("assessment") if assessment is None else reverse("assessment", args=[assessment.id])
         return self.client.post(url, data)
-
-    def save_new(self, data: dict) -> RiskAssessment:
-        response = self.post_configurator(data)
-        assert_that(response.status_code).is_equal_to(302)
-        return RiskAssessment.objects.get(user=self.user)
 
     def reopen(self, assessment: RiskAssessment) -> dict:
         return configurator_data(self.client.get(reverse("assessment", args=[assessment.id])))
@@ -347,3 +348,94 @@ class TestGuestFailureInputs(TestCase):
                 response = self.guest_result(**lrvs, failure_frequency="1")
 
                 assert_that(response.status_code).is_equal_to(200)
+
+
+def personal_step_form(response) -> str:
+    """The HTML of the personal treatment step form on the configurator page."""
+    html = response.content.decode()
+    start = html.index('id="user-treatment-form"')
+    return html[start:html.index("</form>", start)]
+
+
+class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
+
+    def create_personal_step(self, name="Plant UV", **values):
+        data = dict(name=name, **LRVS, failure_frequency="0", failure_duration="30")
+        data.update(values)
+        return self.client.post(reverse("treatment"), data, HTTP_REFERER=reverse("assessment"))
+
+    def personal_steps(self, client=None) -> dict:
+        return (client or self.client).get(reverse("treatments")).json()
+
+    def failure_inputs(self, name: str) -> tuple:
+        step = self.personal_steps()[name]
+        return step["failure_frequency"], step["failure_duration"]
+
+    def test_form_shows_failure_fields_with_units_and_defaults(self):
+        form = personal_step_form(self.client.get(reverse("assessment")))
+
+        assert_that(form).contains("Failure frequency (days per year)", "Failure duration (minutes)")
+        assert_that(form).matches(r'name="failure_frequency" value="0"')
+        assert_that(form).matches(r'name="failure_duration" value="30"')
+
+    def test_failure_inputs_appear_in_the_owners_list(self):
+        response = self.create_personal_step(failure_frequency="2.5", failure_duration="90")
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90))
+
+    def test_other_users_do_not_see_the_personal_step(self):
+        self.create_personal_step(failure_frequency="2.5", failure_duration="90")
+        other = User.objects.create_user("other-user", "other-user@test.com", "password")
+        other_client = self.client_class()
+        other_client.force_login(other)
+
+        assert_that(self.personal_steps(other_client)).does_not_contain_key("Plant UV")
+
+    def test_invalid_values_are_rejected_with_a_message(self):
+        cases = [
+            (dict(failure_frequency="366"), "failure frequency must be between 0 and 365 days per year"),
+            (dict(failure_duration="0"), "failure duration must be between 1 and 1440 minutes"),
+            (dict(failure_duration="2.5"), "Enter a whole number."),
+            (dict(failure_duration=""), "This field is required."),
+            (dict(NO_LRVS, failure_frequency="1"), D4_MESSAGE),
+            (dict(bacteria_min="3", bacteria_max="1"), "min. must be less than max"),
+        ]
+        for values, message in cases:
+            with self.subTest(message=message, values=values):
+                response = self.create_personal_step(**values)
+
+                assert_that(response.status_code).is_equal_to(422)
+                assert_that(response.content.decode()).contains(message)
+                assert_that(self.personal_steps()).is_empty()
+
+    def test_valid_values_including_d4_cases_are_accepted(self):
+        cases = {
+            "bounds low": dict(failure_frequency="0", failure_duration="1"),
+            "bounds high": dict(failure_frequency="365", failure_duration="1440"),
+            "no positive LRV, frequency 0": dict(NO_LRVS, failure_frequency="0"),
+            **{case: dict(lrvs, failure_frequency="1") for case, lrvs in D4_ACCEPTED.items()},
+        }
+        for case, values in cases.items():
+            with self.subTest(case):
+                response = self.create_personal_step(name=case, **values)
+
+                assert_that(response.status_code).is_equal_to(302)
+                assert_that(self.personal_steps()).contains_key(case)
+
+    def test_personal_step_from_before_failure_inputs_offers_defaults(self):
+        UserTreatment.objects.create(user=self.user, name="Old step", **LRVS)
+
+        assert_that(self.failure_inputs("Old step")).is_equal_to((0, 30))
+
+    def test_changing_the_copy_in_an_assessment_leaves_the_personal_step_unchanged(self):
+        self.create_personal_step(failure_frequency="2.5", failure_duration="90")
+        data = new_configurator(self.client)
+        add_step(data, "Plant UV", **LRVS, failure_frequency="10", failure_duration="15")
+
+        assessment = self.save_new(data)
+
+        assert_that(failure_inputs_per_step(configurator_data(
+            self.client.get(reverse("assessment", args=[assessment.id]))))).is_equal_to([
+                dict(name="Plant UV", failure_frequency=10, failure_duration=15)])
+        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90))
