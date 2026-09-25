@@ -239,3 +239,20 @@ class TestAssesRisk(TestCase):
                 except AssertionError as e:
                     failed += str(e) + "\n"
         warnings.warn(failed)
+
+    def test_same_scenario_gives_identical_results(self):
+        given_ra = RiskAssessment(events_per_year=365, volume_per_event=1)
+        given_inflows = [
+            Inflow(risk_assessment=given_ra, pathogen=inflow.pathogen.name, min=inflow.min, max=inflow.max)
+            for inflow in QMRAInflows.get("groundwater")
+        ]
+        given_treatments = [
+            Treatment(risk_assessment=given_ra, name="Primary treatment",
+                      bacteria_min=0, bacteria_max=0.5, viruses_min=0, viruses_max=0.1, protozoa_min=0, protozoa_max=1)
+        ]
+
+        def calculate():
+            results = assess_risk(given_ra, given_inflows, given_treatments, save=False)
+            return {pathogen: r.as_dict() for pathogen, r in results.items()}
+
+        assert_that(calculate()).is_equal_to(calculate())
