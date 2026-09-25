@@ -26,13 +26,18 @@ def is_compared(name: str) -> bool:
     return not name.endswith("/") and name not in PLOTS
 
 
+SIGNIFICANT_DIGITS = 10
+
+
 def masked(name: str, content: bytes) -> str:
-    """The content of an exported file as it is compared; the plots embedded in the report are masked."""
+    """The content of an exported file as it is compared: the plots embedded in the report are masked, and decimal
+    numbers are rounded to 10 significant digits. Numpy versions, Python versions and processors differ in the last
+    digits of the Monte Carlo results; every real change to a value is far larger than that."""
     text = content.decode("utf-8")
     if name.endswith(".html"):
         text, plots = re.subn(r"base64,\s*[A-Za-z0-9+/=]+", "base64, <plot>", text)
         assert_that(plots).described_as(f"plots masked in {name}").is_equal_to(len(PLOTS))
-    return text
+    return re.sub(r"-?\d+\.\d+(?:e[-+]?\d+)?", lambda m: f"{float(m.group()):.{SIGNIFICANT_DIGITS}g}", text)
 
 
 class TestReferenceExport(TestCase):
