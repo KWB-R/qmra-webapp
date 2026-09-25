@@ -4,6 +4,7 @@ import re
 from html.parser import HTMLParser
 from zipfile import ZipFile
 
+import pandas as pd
 from assertpy import assert_that
 from django.test import TestCase
 from django.urls import reverse
@@ -97,6 +98,9 @@ def new_configurator(client) -> dict:
     data["ra-events_per_year"] = "365"
     data["ra-volume_per_event"] = "1"
     return data
+
+
+TREATMENTS_CSV = "exposure-assessment/treatments.csv"
 
 
 def layout(csv: bytes) -> list[str]:
@@ -233,13 +237,20 @@ class TestFailureInputs(LoggedInTestCase):
             dict(name="Primary treatment", failure_frequency=0, failure_duration=30)
         ])
 
+    @staticmethod
+    def exported_failure_inputs(export: dict) -> list[tuple]:
+        """(treatment, pathogen group, failure frequency, failure duration) of each row of the exported treatment table."""
+        table = pd.read_csv(io.BytesIO(export[TREATMENTS_CSV]))
+        return list(table[["Treatment", "Pathogen group", "Failure frequency (days per year)",
+                           "Failure duration (minutes)"]].itertuples(index=False, name=None))
+
     def saved_assessment_with_two_steps(self) -> RiskAssessment:
         data = new_configurator(self.client)
         add_step(data, "Primary treatment", **HIGH_LRVS)
         add_step(data, "Slow sand filtration", **HIGH_LRVS)
         return self.save_new(data)
 
-    def test_result_and_export_do_not_change_with_failure_frequency_0(self):
+    def test_failure_frequency_0_changes_neither_results_nor_export_beyond_the_durations(self):
         assessment = self.saved_assessment_with_two_steps()
         results_before = self.results(assessment)
         export_before = self.export(assessment)
@@ -251,7 +262,24 @@ class TestFailureInputs(LoggedInTestCase):
 
         assert_that(failure_inputs_per_step(self.reopen(assessment))[0]["failure_duration"]).is_equal_to(120)
         assert_that(self.results(assessment)).is_equal_to(results_before)
-        assert_that(self.export(assessment)).is_equal_to(export_before)
+        # the export records the new durations in the treatment table; everything else stays identical
+        export_after = self.export(assessment)
+        durations = {duration for *_, duration in self.exported_failure_inputs(export_after)}
+        export_after.pop(TREATMENTS_CSV)
+        export_before.pop(TREATMENTS_CSV)
+        assert_that(export_after).is_equal_to(export_before)
+        assert_that(durations).is_equal_to({120, 1440})
+
+    def test_export_records_the_failure_inputs_of_each_step(self):
+        data = new_configurator(self.client)
+        add_step(data, "Primary treatment", **HIGH_LRVS, failure_frequency="12.5", failure_duration="90")
+        add_step(data, "Slow sand filtration", **HIGH_LRVS)
+        assessment = self.save_new(data)
+
+        groups = ["Viruses", "Bacteria", "Protozoa"]
+        assert_that(self.exported_failure_inputs(self.export(assessment))).is_equal_to(
+            [("Primary treatment", group, 12.5, 90) for group in groups]
+            + [("Slow sand filtration", group, 0, 30) for group in groups])
 
     def test_export_keeps_its_files_and_columns_with_failures(self):
         assessment = self.saved_assessment_with_two_steps()
