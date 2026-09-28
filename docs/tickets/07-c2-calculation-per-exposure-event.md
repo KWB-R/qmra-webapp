@@ -10,7 +10,7 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), Ch
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** in-progress (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
 
 - [x] Every simulated exposure event has its own concentration sample, picked by position, and its own LRV. The random numbers are the same as today's.
 - [x] Best-case and worst-case share the same calculation steps. Summary statistics and the reference-level exceedance are computed in one place.
