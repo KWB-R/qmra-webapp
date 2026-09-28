@@ -10,7 +10,7 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`), roadmap deci
 
 **Blocked by:** 04 (#21)
 
-**Status:** in-progress
+**Status:** review
 
 - [x] A failure frequency above 0 is rejected, with a message on the failure frequency field, if none of the step's six LRVs (minimum and maximum for bacteria, viruses and protozoa) is above 0. An empty LRV counts as 0.
 - [x] A step whose only positive LRV is one maximum (for example protozoa 0–2) accepts a failure frequency above 0.

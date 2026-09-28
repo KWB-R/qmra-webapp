@@ -15,7 +15,7 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
 
 **Blocked by:** 08 (#25)
 
-**Status:** ready-for-agent
+**Status:** review (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
 
 - [x] A step with failure frequency 365 and failure duration 1,440 gives the same best-case results as the same scenario without that step's positive maximum LRVs.
 - [x] A step with failure frequency 365 and failure duration 60 gives the same best-case results as the scenario with the train's best-case LRV replaced by the Eq. 5 mixed LRV, computed by hand in the test.
@@ -30,3 +30,11 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
   - Enter a scenario with failures and run it as a guest and as a registered user.
   - Confirm that the result page, the saved-assessments page, the assessment comparison and the export's result table show the changed results, with unchanged layout.
 - [ ] The calculation time for a drinking-water scenario (365 events per year) with failures is measured on the dev environment and recorded in the pull request.
+
+Review on 2026-09-28 (against the Spec, ADR-0001 and the code of the three C2 commits):
+
+- [x] The calculation matches the Spec: failure days per exposure event from a fixed-seed generator shared by both cases and all pathogens; worst-case loses only positive minimum LRVs; best-case follows the mixed-water rules including the three-or-more exception; LRVs of 0 or below are untouched. The hand-computed examples of decision 6 (mixed LRV about 6.9 and about 2.6) agree with the code's formula.
+- [x] The concentration samples are picked by position with the same generator calls as before, so results without failures stay bit-identical. The PR records a 28-scenario check of this.
+- [x] Wording left over from before D4 (fixed 2026-09-28): `CONTEXT.md` (*Combined failure*: "loses all their LRVs"), `docs/vision.md` MVP item 3 and the C2 scope in `docs/failure_roadmap.md` still say worst-case loses the *full* LRV of a failing step. It should say every *positive* LRV.
+- [ ] Decide whether it is acceptable that the failure draws of a step depend on its position in the train. Two scenarios that differ only by an extra non-failing step placed *before* a failing one give slightly different results, because the later step's random stream changes. The difference is sampling noise, but it can surprise a user comparing two saved assessments, and C5's independent script must use the same keying to match.
+- [ ] The Spec still says "Status: draft" and "Spec issue: #___". Set it to implemented and create the Spec issue, or record that C2 has none.

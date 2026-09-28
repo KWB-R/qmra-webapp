@@ -10,7 +10,7 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`). The Spec iss
 
 **Blocked by:** 04 (#21), 05 (#22)
 
-**Status:** in-progress
+**Status:** review
 
 - [x] A schema migration adds failure frequency and failure duration to personal treatment steps. Existing personal treatment steps get failure frequency 0 and failure duration 30.
 - [x] The personal treatment step form shows both fields with their units and applies the same shared rule as the configurator: the ranges, whole minutes, D4 and minimum ≤ maximum LRV. Invalid input is rejected and the message is shown in the form.
