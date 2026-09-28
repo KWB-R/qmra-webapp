@@ -31,7 +31,7 @@ Spec issue: #___ (draft: `docs/specs/c2-failure-calculation.md`)
 Purpose: results include treatment failures as decided in ADR-0001.
 
 Scope: failure days drawn per exposure event and per treatment step inside the Monte Carlo
-simulation; worst-case loses the full LRV of every failing step; best-case applies the
+simulation; worst-case loses every positive LRV of every failing step; best-case applies the
 mixed-water assumption; a failure removes only positive LRVs, LRVs of 0 or below stay
 (D4); combined failures that fit into a day do not overlap, two steps longer than a day
 overlap only by the extra minutes, and three or more steps longer than a day in total count
