@@ -10,7 +10,7 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
 
 **Blocked by:** 07 (#24), 04 (#21, C1 stored failure inputs)
 
-**Status:** in-progress (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
+**Status:** review (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
 
 - [x] With every failure frequency at 0, all results equal today's exactly, including the existing regression test's numbers.
 - [x] A step with failure frequency 365 gives the same worst-case results as the same scenario without that step's positive minimum LRVs.

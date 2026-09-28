@@ -15,7 +15,7 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
 
 **Blocked by:** 08 (#25)
 
-**Status:** in-progress (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
+**Status:** review (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
 
 - [x] A step with failure frequency 365 and failure duration 1,440 gives the same best-case results as the same scenario without that step's positive maximum LRVs.
 - [x] A step with failure frequency 365 and failure duration 60 gives the same best-case results as the scenario with the train's best-case LRV replaced by the Eq. 5 mixed LRV, computed by hand in the test.

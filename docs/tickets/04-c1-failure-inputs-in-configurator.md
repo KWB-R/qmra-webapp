@@ -10,7 +10,7 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`), Change C1 in
 
 **Blocked by:** None (can start immediately)
 
-**Status:** in-progress
+**Status:** review
 
 - [x] The minimum ≤ maximum LRV check is defined once and used by both treatment step forms. Nothing changes that a user can notice, and the existing test suite passes unchanged.
 - [x] A schema migration adds failure frequency (a decimal number) and failure duration (a whole number) to the treatment steps of an assessment. Existing rows get failure frequency 0 and failure duration 30.
