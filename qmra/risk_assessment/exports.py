@@ -27,7 +27,10 @@ def treatments_as_df(treatments: QuerySet[Treatment]) -> pd.DataFrame:
             "Treatment": [t.name] * 3,
             "Pathogen group": ["Viruses", "Bacteria", "Protozoa"],
             "Maximum LRV": [t.viruses_max, t.bacteria_max, t.protozoa_max],
-            "Minimum LRV": [t.viruses_min, t.bacteria_min, t.protozoa_min]
+            "Minimum LRV": [t.viruses_min, t.bacteria_min, t.protozoa_min],
+            # a step's failure inputs apply to all its pathogen groups
+            "Failure frequency (days per year)": [t.failure_frequency] * 3,
+            "Failure duration (minutes)": [t.failure_duration] * 3,
         })]
     return pd.concat(dfs)
 
