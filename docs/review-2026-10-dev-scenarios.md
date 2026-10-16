@@ -47,18 +47,23 @@ Each finding gets one type:
   (replacing the worst-case part of ADR-0001) and as roadmap decision D6, and update
   `CONTEXT.md` and the C2 spec.
 
-Open questions:
+Answers (2026-10-16):
 
-1. Combined failures: under the mixed-water assumption the failure events are arranged so
-   that the mixed water has the *lowest* pathogen concentration. Should worst-case use the
-   same arrangement, or the arrangement with the *highest* concentration (as much overlap as
-   possible)?
-2. Terms: "worst-case" in `CONTEXT.md` is defined partly by the failure rule, and the
-   mixed-water assumption is called a best-case assumption. Both definitions need rewording.
-   Do the names best-case and worst-case stay?
-3. ADR-0001's reason for ignoring the duration in worst-case (the water of one exposure
-   event was treated during the downtime) is dropped. Is there any exposure for which it
-   should still apply?
+1. Combined failures: no arrangement within the day. Each treatment step first gets a
+   daily average LRV for the failure day, averaged by concentration, with
+   d = failure duration / 1440 min:
+
+   $LRV_{day} = -\log_{10}\left(d \cdot 10^{-LRV_{fail}} + (1 - d) \cdot 10^{-LRV}\right)$
+
+   The train LRV of the day is the sum of the steps' daily LRVs. $LRV_{fail}$ is 0 for one
+   unit and the F2 formula for more units. This equals placing each failure at a random
+   time of day, independently of the other steps. On days with one failing step the
+   result equals the current mixed-water rule; with several failing steps it is lower
+   than the current best-case. Worked example: [Daily average LRV for treatment failures:
+   worked example](https://claude.ai/code/artifact/2ea53cad-0d3f-4e40-90f8-e57a8867cc87).
+2. Terms: still open. Proposed: keep best-case and worst-case; reword their definitions
+   in `CONTEXT.md` so they differ only by the maximum or minimum LRV.
+3. ADR-0001's reason for the full-day loss in worst-case: dropped for every exposure.
 
 ### F2 Number of parallel units as a new failure input
 
