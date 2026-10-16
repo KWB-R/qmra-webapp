@@ -1,6 +1,6 @@
 # ADR-0001: Failure days are drawn per exposure event inside the Monte Carlo simulation
 
-- **Status:** Accepted
+- **Status:** Accepted; the LRV on a failure day (worst-case full loss, best-case mixed water) is superseded by ADR-0002
 - **Date:** 2026-09-23
 - **Deciders:** QMRA project team (domain-modeling session on the failure approach)
 - **Related:** `docs/QMRA_Failure_Approach.md` (Decisions section), `CONTEXT.md` (Treatment failure, Failure day, Failure frequency)
@@ -25,7 +25,8 @@ direct meaning for the calculation.
 Failure frequency is entered in failure days per year per treatment step. Inside the
 Monte Carlo simulation, each exposure event falls on a failure day of each step
 independently, with probability failure frequency / 365. Events on a failure day use the
-LRV with the failing steps removed (worst-case) or the mixed-water LRV (best-case). There
+LRV with the failing steps removed (worst-case) or the mixed-water LRV (best-case); since
+ADR-0002 both cases use the daily LRV of the failing steps. There
 is no separate deterministic calculation path based on Eq. 6, including for the case of a
 single failing step.
 

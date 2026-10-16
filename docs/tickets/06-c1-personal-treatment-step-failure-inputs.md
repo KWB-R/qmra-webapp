@@ -18,7 +18,7 @@ Source: Spec C1 Failure inputs (`docs/specs/c1-failure-inputs.md`). The Spec iss
 - [x] Adding a personal treatment step to an assessment copies its failure frequency and failure duration into the new step. Bundled steps still start at 0 and 30.
 - [x] Changing the copied values in an assessment and saving leaves the personal treatment step unchanged.
 - [x] HTTP-level tests cover the form rules, old personal treatment steps reading back 0 and 30, and owner-only visibility. The existing test suite passes unchanged.
-- [ ] Manual check on the dev environment, announced to the team first:
+- [x] Manual check on the dev environment, announced to the team first:
   - Create a personal treatment step with failure inputs and add it to an assessment.
   - See the copied values, change them, save and reopen.
   - Confirm that the personal treatment step itself is unchanged.
