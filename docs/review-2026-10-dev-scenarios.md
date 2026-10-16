@@ -61,8 +61,8 @@ Answers (2026-10-16):
    result equals the current mixed-water rule; with several failing steps it is lower
    than the current best-case. Worked example: [Daily average LRV for treatment failures:
    worked example](https://claude.ai/code/artifact/2ea53cad-0d3f-4e40-90f8-e57a8867cc87).
-2. Terms: still open. Proposed: keep best-case and worst-case; reword their definitions
-   in `CONTEXT.md` so they differ only by the maximum or minimum LRV.
+2. Terms: keep best-case and worst-case; their definitions in `CONTEXT.md` now differ
+   only by the maximum or minimum LRV.
 3. ADR-0001's reason for the full-day loss in worst-case: dropped for every exposure.
 
 ### F2 Number of parallel units as a new failure input
@@ -112,7 +112,7 @@ Answers (2026-10-16):
 4. Failure frequency: stays the failure days per year of the whole step, any one of its
    units failing.
 5. LRVs of 0 or below: stay unchanged during a failure (D4).
-6. Non-technical measures: still open. `CONTEXT.md` names them as a kind of treatment step
+6. Non-technical measures: agreed to the proposal below. `CONTEXT.md` names them as a kind of treatment step
    (for example a hygiene practice), but the application does not tell them apart: a
    treatment step has a name, a group and LRVs, and all 22 bundled treatment steps are
    treatment technologies. A non-technical measure can only appear as a personal treatment
@@ -123,7 +123,14 @@ Answers (2026-10-16):
 
 ## Decisions taken in this review
 
-None yet.
+- **D6** One daily LRV rule for both cases (F1), recorded in `docs/failure_roadmap.md` and
+  ADR-0002.
+- **D7** Number of parallel units (F2), recorded in `docs/failure_roadmap.md` and ADR-0002.
+- `CONTEXT.md` updated: best-case, worst-case, treatment failure, failure event, failure
+  day, failure frequency, failure duration, mixed-water assumption, combined failure; new
+  terms parallel units, failure LRV, daily LRV.
+- `docs/QMRA_Failure_Approach.md` decisions 1, 3, 4 and 6 marked as changed or replaced;
+  ADR-0001 marked as partly superseded.
 
 ## Follow-up tickets
 
