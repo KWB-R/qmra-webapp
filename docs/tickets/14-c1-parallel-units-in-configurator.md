@@ -6,7 +6,7 @@ The shared validation rule that both treatment step forms use is extended with t
 
 Delivered on branch `c1-failure-inputs` as part of the C1 pull request (#28). The pull request is tested on the dev environment again and not merged before the release (D5).
 
-Source: Spec C1 Failure inputs, revision for D7 (`docs/specs/c1-failure-inputs.md`), Change C1 in `docs/failure_roadmap.md`, roadmap decision D7, ADR-0002. The Spec issue does not exist yet. GitHub issue: not created yet.
+Source: Spec C1 Failure inputs, revision for D7 (`docs/specs/c1-failure-inputs.md`), Change C1 in `docs/failure_roadmap.md`, roadmap decision D7, ADR-0002. The Spec issue does not exist yet. GitHub issue #36.
 
 **Blocked by:** None (can start immediately)
 
