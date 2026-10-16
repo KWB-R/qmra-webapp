@@ -90,6 +90,7 @@ class TestTreatmentForm(TestCase):
             protozoa_max=-1,
             failure_frequency=0,
             failure_duration=30,
+            parallel_units=1,
         )
         given_form = TreatmentForm(data=data)
         # ugly hack to work around dynamic choices...
@@ -109,6 +110,7 @@ class TestTreatmentForm(TestCase):
             protozoa_max=0,
             failure_frequency=0,
             failure_duration=30,
+            parallel_units=1,
         )
         for prfx in ["bacteria", "viruses", "protozoa"]:
             mn = prfx + "_min"
