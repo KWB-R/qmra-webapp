@@ -90,19 +90,23 @@ is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
 
 1. **Entire loss only.** A failing treatment step loses every positive LRV (above 0), for
    all pathogen groups at once. LRVs of 0 or below are not affected by the failure.
-   Partial loss of removal is not modelled and not planned.
+   Partial loss of removal is not modelled and not planned. *Changed 2026-10-16 (D7,
+   ADR-0002): a failure stops one of the step's parallel units, so a step with more than
+   one unit keeps part of its LRV.*
 2. **Which steps can fail.** Any treatment step with at least one positive LRV, including
    non-technical measures such as hygiene practices. Recontamination steps (no positive
    LRV) cannot fail. (Refined 2026-09-24, roadmap decision D4.) A step fails only if its failure frequency is above zero.
 3. **Inputs per treatment step.** Each step has one failure frequency (failure days per
    year, 0–365, default 0) and one failure duration (minutes, 1–1440, default 30). They
-   are the same in best-case and worst-case. They are user input only; there is no
+   are the same in best-case and worst-case. *Since 2026-10-16 (D7) a third input, the
+   number of parallel units (whole number of 1 or more, default 1).* They are user input only; there is no
    bundled failure data. They belong to the scenario, and a personal treatment step can
    store them for reuse.
 4. **Worst-case ignores the failure duration.** On a failure day, worst-case assumes all
    consumed water was treated during the failure event, so a 1-minute and a 24-hour
    failure give the same result. Only best-case uses the duration (Eq. 5, the
-   mixed-water assumption).
+   mixed-water assumption). *Replaced 2026-10-16 (D6, ADR-0002): both cases use the
+   duration through the daily LRV.*
 5. **Draws per exposure event, one calculation path.** The application builds yearly risk
    from exposure events, not from 365 days. Each exposure event falls on a failure day of
    each treatment step independently, with probability failure frequency / 365, inside
@@ -121,7 +125,8 @@ is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
    all these steps are down for the whole day. Only steps that lose LRV for the pathogen
    group count (decided 2026-09-25, replacing the
    lowest-concentration arrangement of 2026-09-24, which needed a numerical solver for a
-   rare exception).
+   rare exception). *Replaced 2026-10-16 (D6, ADR-0002): each failing step gets its own
+   daily LRV and these are summed, so no overlap rules are needed.*
 7. **Results.** Only the result including failures is shown, and the reference-level
    exceedance is taken on it. The effect of failures is seen by comparing scenarios with
    different failure inputs in the assessment comparison view. That view compares annual

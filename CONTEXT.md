@@ -11,7 +11,7 @@ A scenario together with the results of its risk calculation. Scenarios are comp
 _Avoid_: risk assessment (in prose), calculation, run, project
 
 **Scenario**:
-The inputs of a risk calculation: inflow concentrations, a treatment train and an exposure. The failure frequency and failure duration of each treatment step belong to the scenario, so scenarios can differ only in their failures. Each scenario is calculated in two cases, best-case and worst-case.
+The inputs of a risk calculation: inflow concentrations, a treatment train and an exposure. The failure frequency, failure duration and number of parallel units of each treatment step belong to the scenario, so scenarios can differ only in their failures. Each scenario is calculated in two cases, best-case and worst-case.
 _Avoid_: case (reserved for best-case and worst-case), configuration
 
 **Saved assessment**:
@@ -107,11 +107,11 @@ Repeated random sampling of inflow concentrations and exposure events to estimat
 _Avoid_: stochastic run, sampling
 
 **Best-case**:
-The case of a scenario that gives the lower infection-risk estimate. For normal operation it uses every treatment step's maximum LRV. On failure days it applies the mixed-water assumption.
+The case of a scenario that gives the lower infection-risk estimate. It uses every treatment step's maximum LRV, in normal operation and as the starting point of the daily LRV on failure days.
 _Avoid_: maximum-LRV case, minimum risk scenario, optimistic case
 
 **Worst-case**:
-The case of a scenario that gives the higher infection-risk estimate. For normal operation it uses every treatment step's minimum LRV. On failure days it assumes all consumed water was treated during the failure event.
+The case of a scenario that gives the higher infection-risk estimate. It uses every treatment step's minimum LRV, in normal operation and as the starting point of the daily LRV on failure days.
 _Avoid_: minimum-LRV case, maximum risk scenario, conservative case
 
 **Annual probability of infection**:
@@ -151,31 +151,43 @@ Every treatment step performing within its configured minimum and maximum LRVs. 
 _Avoid_: regular operation, steady operation
 
 **Treatment failure**:
-A treatment step losing all its positive LRVs for a period, so that it removes nothing while it lasts. LRVs of zero or below are not affected: a step with regrowth for one pathogen group keeps that negative LRV during a failure. Any treatment step with at least one positive LRV can fail, including non-technical measures; recontamination, having no positive LRV, cannot. A step fails only if it has a failure frequency above zero. Partial loss of removal is not modelled and not planned. Not modelled today; a next-phase concept.
+One parallel unit of a treatment step stopping for a period, so that the water it handles is not treated while it lasts. A step with one unit loses all its positive LRVs during the failure; a step with more units keeps the share treated by the other units (failure LRV). LRVs of zero or below are not affected: a step with regrowth for one pathogen group keeps that negative LRV during a failure. Any treatment step with at least one positive LRV can fail, including non-technical measures; recontamination, having no positive LRV, cannot. A step fails only if it has a failure frequency above zero. Partial loss of removal is modelled only through parallel units. Not modelled today; a next-phase concept.
 _Avoid_: damage, incident, outage, malfunction, downtime (alone)
 
 **Failure event**:
-One occurrence of a treatment failure in one treatment step. A step has at most one failure event per day.
+One occurrence of a treatment failure in one treatment step. It stops one parallel unit of the step. A step has at most one failure event per day.
 _Avoid_: damage event, incident
 
 **Failure day**:
-A day on which at least one treatment step has a failure event. Exposure events on a failure day are calculated with the reduced LRV.
+A day on which at least one treatment step has a failure event. Exposure events on a failure day are calculated with the daily LRV of each failing step.
 _Avoid_: damage day, incident day
 
 **Failure frequency**:
-The expected number of failure days per year for one treatment step. It is zero unless the user enters it. Which days fail is drawn at random, so a simulated year can have more or fewer failure days than expected.
+The expected number of failure days per year for one treatment step, counting a day on which any one of its parallel units fails. It is zero unless the user enters it. Which days fail is drawn at random, so a simulated year can have more or fewer failure days than expected.
 _Avoid_: failure rate, failure probability
 
 **Failure duration**:
-The average length of one failure event of one treatment step, in minutes within a day. It matters only under the mixed-water assumption.
+The average length of one failure event of one treatment step, in minutes within a day. It sets the share of the day weighted with the failure LRV in the daily LRV, in best-case and worst-case.
 _Avoid_: downtime, outage time
 
+**Parallel units**:
+The number of equal units of a treatment step that share its water, a whole number of 1 or more (default 1). A failure event stops one unit while the others keep working. Units failing together, for example through a shared power supply, are not modelled; such a step is entered with one unit. Every treatment step that accepts failure inputs has it, and a personal treatment step can store it.
+_Avoid_: lines, trains (reserved for treatment train), redundancy
+
+**Failure LRV**:
+The LRV of one treatment step while one of its N parallel units is stopped: −log10((N − 1)/N · 10^−LRV + 1/N), with the untreated and the treated water mixed by concentration. It is 0 for one unit and at most log10 N, for example 0.3 for two units. LRVs of zero or below stay unchanged.
+_Avoid_: reduced LRV, residual LRV
+
 **Mixed-water assumption**:
-The best-case assumption that water consumed on a failure day is a mixture of water treated during the failure event and water treated in normal operation, in proportion to the failure duration. Worst-case instead assumes the consumed water was treated entirely during the failure event, regardless of its duration.
+The assumption, in best-case and worst-case, that water consumed on a failure day is a mixture of water treated during the failure event and water treated in normal operation, in proportion to the failure duration.
 _Avoid_: mixed concentration, dilution, storage effect
 
+**Daily LRV**:
+The LRV of one failing treatment step on a failure day under the mixed-water assumption: −log10(d · 10^−failure LRV + (1 − d) · 10^−LRV), with d = failure duration / 1440 minutes, averaged by concentration, never by LRV. The LRV is the step's maximum LRV in best-case and its minimum LRV in worst-case. The treatment train's LRV on a failure day is the sum of the daily LRVs of its failing steps and the LRVs of the other steps.
+_Avoid_: average LRV, mixed LRV
+
 **Combined failure**:
-Failure events in two or more treatment steps on the same day. Worst-case loses all their positive LRVs for the whole day. Under the mixed-water assumption the failure events do not overlap if their durations fit into one day. Two failure events longer than a day in total overlap only by the minutes that exceed a day. Three or more failure events longer than a day in total count like worst-case: all these steps are down for the whole day. Only steps that lose LRV for the pathogen group count, so the same day can count like worst-case for one reference pathogen and not for another.
+Failure events in two or more treatment steps on the same day. Each failing step gets its own daily LRV and the daily LRVs are summed. This equals placing each failure event at a random time of day, independently of the other steps, so no overlap rules are needed.
 
 **Next phase**:
 Capabilities identified for future development and not present in the application today.
