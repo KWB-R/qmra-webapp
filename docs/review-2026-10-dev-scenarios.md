@@ -98,23 +98,23 @@ LRV during a failure, whatever the normal LRV of the step:
 | 4         | 0.49         | 0.59         | 0.60         | 0.60         |
 | 10        | 0.72         | 0.96         | 1.00         | 1.00         |
 
-Open questions:
+Answers (2026-10-16):
 
-1. Formula: is the reading above correct, mixing the untreated and the treated shares by
-   concentration and not by LRV? (Averaging LRVs, for example (2 × 4 + 1 × 0) / 3 ≈ 2.7 for
-   three units, would give a much higher LRV than the 0.48 above.)
-2. Is the upper limit of $\log_{10} N$ intended? With 2 units the step keeps only about
-   0.3 log during a failure, so the number of units changes results much less than
-   the first version of F2 could.
-3. Range: is there an upper limit for the number of units (for example 100)?
-4. Failure frequency: does it stay the number of failure days per year of the *step*
-   (any one of its units failing), or does it become the failure days per year of *each
-   unit*? The text above assumes the step.
-5. LRVs of 0 or below: they stay unchanged during a failure, as today (D4)?
-6. Non-technical measures (for example a hygiene practice): can they have more than one
-   parallel unit, or is the input shown only for treatment technologies?
-7. Personal treatment steps store the number of parallel units too, like failure frequency
-   and failure duration (C1 ticket 06)?
+1. Formula: confirmed. The untreated and the treated shares are mixed by concentration.
+2. Upper limit of $\log_{10} N$: intended. A step with 2 units keeps 0.3 log during a
+   failure.
+3. Range: whole number of 1 or more, no upper limit.
+4. Failure frequency: stays the failure days per year of the whole step, any one of its
+   units failing.
+5. LRVs of 0 or below: stay unchanged during a failure (D4).
+6. Non-technical measures: still open. `CONTEXT.md` names them as a kind of treatment step
+   (for example a hygiene practice), but the application does not tell them apart: a
+   treatment step has a name, a group and LRVs, and all 22 bundled treatment steps are
+   treatment technologies. A non-technical measure can only appear as a personal treatment
+   step. Proposed: show the number of parallel units on every treatment step that accepts
+   failure inputs (D4), with the default of 1.
+7. Personal treatment steps: store the number of parallel units like failure frequency and
+   failure duration (C1 ticket 06).
 
 ## Decisions taken in this review
 
