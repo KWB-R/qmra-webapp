@@ -90,36 +90,43 @@ is recorded in `docs/adr/0001-failure-days-drawn-per-exposure-event.md`.
 
 1. **Entire loss only.** A failing treatment step loses every positive LRV (above 0), for
    all pathogen groups at once. LRVs of 0 or below are not affected by the failure.
-   Partial loss of removal is not modelled and not planned.
+   Partial loss of removal is not modelled and not planned. *Changed 2026-10-16 (D7,
+   ADR-0002): a failure stops one of the step's parallel units, so a step with more than
+   one unit keeps part of its LRV.*
 2. **Which steps can fail.** Any treatment step with at least one positive LRV, including
    non-technical measures such as hygiene practices. Recontamination steps (no positive
    LRV) cannot fail. (Refined 2026-09-24, roadmap decision D4.) A step fails only if its failure frequency is above zero.
 3. **Inputs per treatment step.** Each step has one failure frequency (failure days per
    year, 0–365, default 0) and one failure duration (minutes, 1–1440, default 30). They
-   are the same in best-case and worst-case. They are user input only; there is no
+   are the same in best-case and worst-case. *Since 2026-10-16 (D7) a third input, the
+   number of parallel units (whole number of 1 or more, default 1).* They are user input only; there is no
    bundled failure data. They belong to the scenario, and a personal treatment step can
    store them for reuse.
 4. **Worst-case ignores the failure duration.** On a failure day, worst-case assumes all
    consumed water was treated during the failure event, so a 1-minute and a 24-hour
    failure give the same result. Only best-case uses the duration (Eq. 5, the
-   mixed-water assumption).
+   mixed-water assumption). *Replaced 2026-10-16 (D6, ADR-0002): both cases use the
+   duration through the daily LRV.*
 5. **Draws per exposure event, one calculation path.** The application builds yearly risk
    from exposure events, not from 365 days. Each exposure event falls on a failure day of
    each treatment step independently, with probability failure frequency / 365, inside
    the existing Monte Carlo simulation. The section-3 approach is implemented directly;
    Eq. 6 is not implemented as a separate path, not even for a single failing step. See
    ADR-0001.
-6. **Combined failures in best-case.** Eq. 5 is extended so that failure events of
-   different steps on the same day overlap as little as possible: not at all if their
-   durations fit into 1,440 minutes, otherwise only by the minutes beyond a full day.
+6. **Combined failures in best-case.** Eq. 5 is extended to failure events of different
+   steps on the same day: they do not overlap if their durations fit into 1,440 minutes,
+   and two steps longer than a day in total overlap only by the minutes beyond a full day.
    Example (best-case LRV 10 = UV 4 + UF 4 + other steps 2): UV down 60 min and UF down
    120 min give 4.2 % of the day at LRV 6, 8.3 % at LRV 6 and 87.5 % at LRV 10, a mixed
    LRV of about 6.9. UV and UF each down 900 min overlap by 360 min: 25 % at LRV 2 and
    2 × 37.5 % at LRV 6, a mixed LRV of about 2.6. Worst-case loses all failing steps'
-   LRVs for the whole day. With three or more failing steps, the unavoidable overlap is
-   placed on the steps whose joint loss gives the lowest mixed concentration; in general,
-   best-case arranges the failure events of a day so that the mixed water has the lowest
-   concentration, which always implies minimal overlap (decided 2026-09-24).
+   LRVs for the whole day. If three or more steps fail on the same day and their
+   durations add up to more than 1,440 minutes, best-case counts that day like worst-case:
+   all these steps are down for the whole day. Only steps that lose LRV for the pathogen
+   group count (decided 2026-09-25, replacing the
+   lowest-concentration arrangement of 2026-09-24, which needed a numerical solver for a
+   rare exception). *Replaced 2026-10-16 (D6, ADR-0002): each failing step gets its own
+   daily LRV and these are summed, so no overlap rules are needed.*
 7. **Results.** Only the result including failures is shown, and the reference-level
    exceedance is taken on it. The effect of failures is seen by comparing scenarios with
    different failure inputs in the assessment comparison view. That view compares annual
