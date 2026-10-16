@@ -59,8 +59,7 @@ Answers (2026-10-16):
    unit and the F2 formula for more units. This equals placing each failure at a random
    time of day, independently of the other steps. On days with one failing step the
    result equals the current mixed-water rule; with several failing steps it is lower
-   than the current best-case. Worked example: [Daily average LRV for treatment failures:
-   worked example](https://claude.ai/code/artifact/2ea53cad-0d3f-4e40-90f8-e57a8867cc87).
+   than the current best-case. Worked example: `docs/failure-daily-lrv-example.md`.
 2. Terms: keep best-case and worst-case; their definitions in `CONTEXT.md` now differ
    only by the maximum or minimum LRV.
 3. ADR-0001's reason for the full-day loss in worst-case: dropped for every exposure.

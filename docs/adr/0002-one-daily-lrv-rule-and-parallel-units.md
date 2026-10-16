@@ -5,7 +5,7 @@
 - **Deciders:** QMRA project team (review of the failure work on dev, October 2026)
 - **Related:** ADR-0001 (this ADR replaces its rule for the LRV on a failure day),
   `docs/review-2026-10-dev-scenarios.md` (findings F1, F2), roadmap decisions D6 and D7,
-  worked example: [Daily average LRV for treatment failures](https://claude.ai/code/artifact/2ea53cad-0d3f-4e40-90f8-e57a8867cc87)
+  worked example: `docs/failure-daily-lrv-example.md`
 - **TL;DR:** On a failure day, best-case and worst-case both weight each failing step's
   loss by the failure duration, and a step with several parallel units loses only the share
   of the failing unit.
@@ -81,3 +81,14 @@ The per-event draw of failure days in ADR-0001 stays unchanged.
   the current best-case rule, which keeps part of the C2 work.
 - A comparison with Hambsch et al. (2019) now differs from the source also in worst-case,
   which the source calculates without the duration.
+- The daily LRV averages the concentration over the day. Drawing per exposure event
+  whether it falls inside the failure, with probability d, gives the same risk at low
+  doses, but a slightly lower one at high doses, where the dose-response curve flattens.
+  The average concentration was chosen on purpose: it is the more conservative of the two
+  and gives one LRV per step and day to export, explain and benchmark.
+- The default failure duration stays 30 minutes. With the default, worst-case results
+  are much less conservative than under ADR-0001 (for a step with LRV 4 and one unit, a
+  daily LRV of 1.7 instead of 0). This was accepted on purpose; C4 explains that the
+  duration affects both cases.
+- Units of a step that fail together, for example through a shared power supply, are not
+  modelled. Such a step is entered with one unit.

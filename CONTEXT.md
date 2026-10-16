@@ -171,7 +171,7 @@ The average length of one failure event of one treatment step, in minutes within
 _Avoid_: downtime, outage time
 
 **Parallel units**:
-The number of equal units of a treatment step that share its water, a whole number of 1 or more (default 1). A failure event stops one unit while the others keep working. Every treatment step that accepts failure inputs has it, and a personal treatment step can store it.
+The number of equal units of a treatment step that share its water, a whole number of 1 or more (default 1). A failure event stops one unit while the others keep working. Units failing together, for example through a shared power supply, are not modelled; such a step is entered with one unit. Every treatment step that accepts failure inputs has it, and a personal treatment step can store it.
 _Avoid_: lines, trains (reserved for treatment train), redundancy
 
 **Failure LRV**:
