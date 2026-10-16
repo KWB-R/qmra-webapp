@@ -1,6 +1,7 @@
 # Progress: treatment failure (C1–C5)
 
-Status: 2026-09-29. Work of 2026-09-24 to 2026-09-28 on the Changes in `docs/failure_roadmap.md`.
+Status: 2026-10-16. Work of 2026-09-24 to 2026-09-28 on the Changes in `docs/failure_roadmap.md`,
+and the rework after the dev review of October 2026 (D6, D7).
 Nothing is merged into `main` (roadmap decision D5): each Change is a draft pull request that
 targets `main` only so that the pipeline deploys it to dev. The production jobs run only for
 `main` itself.
@@ -9,9 +10,9 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 
 | Change | Branch (based on) | Pull request | Tickets | State |
 |---|---|---|---|---|
-| C1 Failure inputs | `c1-failure-inputs` (`main`) | #28 | #21, #22, #23 (`docs/tickets/04`–`06`) | Built, tested manually on dev |
-| C2 Failure calculation | `c2-failure-calculation` (C1) | #29 | #24, #25, #26 (`07`–`09`) | Built, tested manually on dev |
-| C3 Failure inputs in the export | `c3-failure-inputs-in-export` (C2) | #34 | #30, #31 (`10`, `11`) | Built, deployed to dev, manual check open |
+| C1 Failure inputs | `c1-failure-inputs` (`main`) | #28 | #21, #22, #23 (`docs/tickets/04`–`06`); #36, #37 (`14`, `15`) | Reopened for D7: spec revised, tickets 14–15 ready |
+| C2 Failure calculation | `c2-failure-calculation` (C1) | #29 | #24, #25, #26 (`07`–`09`) | Built; reopened for D6/D7, spec and tickets not revised yet |
+| C3 Failure inputs in the export | `c3-failure-inputs-in-export` (C2) | #34 | #30, #31 (`10`, `11`) | Built, deployed to dev, manual check open; reopened for D7 (units column), ticket not written yet |
 | C4 Explain treatment failure | not created yet (will be based on C2) | — | #32, #33 (`12`, `13`) | Tickets ready |
 | C5 Failure benchmark | — | — | — | Waits for decisions D1–D3 |
 
@@ -21,6 +22,12 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 - **Statuses:** tickets 04–11 are set to "review".
 - **Review notes:** ticket 09 records a review of the C2 commits against the Spec, ADR-0001 and the code; tickets 10 and 11 record a review of the C3 commits.
 - **D4 wording:** `CONTEXT.md`, the roadmap and the vision now say that worst-case loses every *positive* LRV of a failing step, as the code does.
+
+**Dev review of October 2026** (`docs/review-2026-10-dev-scenarios.md`, merged into `main` as #35):
+- **D6:** best-case and worst-case use one rule on a failure day, the daily LRV of each failing step (ADR-0002). It replaces the worst-case full-day loss and the overlap rules built in #25 and #26.
+- **D7:** a third failure input, the number of parallel units; a failure stops one unit (ADR-0002).
+- **Rework:** in new tickets on the existing pull requests (roadmap, "Rework of C1–C3"). `main` was merged into C1–C3 on 2026-10-16 (docs only).
+- **C1:** spec revised for D7 (`e9d5ce7`), tickets 14 (#36) and 15 (#37) written.
 
 ## What each Change delivers
 
