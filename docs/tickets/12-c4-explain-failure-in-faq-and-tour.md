@@ -18,7 +18,7 @@
 
 The text uses the glossary terms from `CONTEXT.md`. It is a draft written by Claude and must be reviewed by a domain expert before the release. The pull request says so.
 
-Delivered on a new branch based on `c2-failure-calculation`, together with #33 as the C4 pull request (a draft into `main` only so that it deploys to dev; not merged before the release, D5).
+Delivered on a new branch `c4-failure-explanations` based on `c3-failure-inputs-in-export` (so the C4 tickets and the export are there), together with #33 as the C4 pull request (a draft into `main` only so that it deploys to dev; not merged before the release, D5).
 
 Source: Change C4 in `docs/failure_roadmap.md` (Small, no Spec), `CONTEXT.md` (Treatment failure, Failure day, Failure frequency, Failure duration, Parallel units, Failure LRV, Mixed-water assumption, Daily LRV, Combined failure), ADR-0001, ADR-0002, roadmap decisions D4, D6 and D7, the worked example `docs/failure-daily-lrv-example.md`, and the C2 Spec. GitHub issue #32.
 
