@@ -12,6 +12,8 @@ Source: Spec C2 Failure calculation (`docs/specs/c2-failure-calculation.md`), AD
 
 **Status:** review (built in pull request #29; CI green on `a8a1972`; the pull request stays open until the release, D5)
 
+**Partly replaced (2026-10-17):** The worst-case loss for the whole day regardless of the failure duration is replaced by the daily LRV of Ticket 16 (D6, ADR-0002); the failure-day draws stay.
+
 - [x] With every failure frequency at 0, all results equal today's exactly, including the existing regression test's numbers.
 - [x] A step with failure frequency 365 gives the same worst-case results as the same scenario without that step's positive minimum LRVs.
 - [x] Raising a failure frequency never lowers any mean. Changing a failure duration leaves worst-case unchanged.
