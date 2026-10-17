@@ -16,15 +16,15 @@ Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-fail
 
 **Status:** ready-for-agent
 
-- [ ] Both cases calculate a failing step's daily LRV from its failure duration, starting from the step's maximum LRV in best-case and its minimum LRV in worst-case, and sum the daily LRVs of all steps failing that day over the train.
-- [ ] The worst-case full-day loss and the best-case overlap rules are removed from the calculation.
-- [ ] With every failure frequency at 0, all results equal today's exactly, including the existing regression test's numbers.
-- [ ] A step always failing for 1,440 minutes gives the same results in both cases as the scenario without that step's positive LRVs.
-- [ ] The results match the worked example (`docs/failure-daily-lrv-example.md`), allowing for its two-decimal rounding: one step with LRV 4 failing 60 minutes next to a step with LRV 3 gives the results of a train with constant LRV 4.38; both steps failing 60 minutes, 4 h, 12 h and 16 h each give those of 2.75, 1.55, 0.60 and 0.35.
-- [ ] In the 60-minute combined case, the result differs clearly from a train with the plain LRV average of 6.71.
-- [ ] Raising a failure duration never lowers any mean, in either case; raising a failure frequency never lowers any mean; worst-case mean is never below best-case mean.
-- [ ] D4: a negative LRV of one pathogen group stays unchanged when the step fails, a group with LRV 0 is unaffected, and a step with minimum LRV 0 and a positive maximum LRV changes only best-case when it fails.
-- [ ] The same scenario gives identical results on every calculation.
-- [ ] The first-version tests for the worst-case full-day loss, the duration not changing worst-case, and the best-case overlap rules are replaced or removed as the Spec names them. All other tests pass.
+- [x] Both cases calculate a failing step's daily LRV from its failure duration, starting from the step's maximum LRV in best-case and its minimum LRV in worst-case, and sum the daily LRVs of all steps failing that day over the train.
+- [x] The worst-case full-day loss and the best-case overlap rules are removed from the calculation.
+- [x] With every failure frequency at 0, all results equal today's exactly, including the existing regression test's numbers.
+- [x] A step always failing for 1,440 minutes gives the same results in both cases as the scenario without that step's positive LRVs.
+- [x] The results match the worked example (`docs/failure-daily-lrv-example.md`), allowing for its two-decimal rounding: one step with LRV 4 failing 60 minutes next to a step with LRV 3 gives the results of a train with constant LRV 4.38; both steps failing 60 minutes, 4 h, 12 h and 16 h each give those of 2.75, 1.55, 0.60 and 0.35.
+- [x] In the 60-minute combined case, the result differs clearly from a train with the plain LRV average of 6.71.
+- [x] Raising a failure duration never lowers any mean, in either case; raising a failure frequency never lowers any mean; worst-case mean is never below best-case mean.
+- [x] D4: a negative LRV of one pathogen group stays unchanged when the step fails, a group with LRV 0 is unaffected, and a step with minimum LRV 0 and a positive maximum LRV changes only best-case when it fails.
+- [x] The same scenario gives identical results on every calculation.
+- [x] The first-version tests for the worst-case full-day loss, the duration not changing worst-case, and the best-case overlap rules are replaced or removed as the Spec names them. All other tests pass.
 
 Quality goals (`docs/vision.md`): Scientific correctness (expected values from the worked example, not from the code), Reproducibility (fixed seeds, frequency 0 unchanged).
