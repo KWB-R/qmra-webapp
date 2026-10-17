@@ -135,4 +135,7 @@ Answers (2026-10-16):
 
 | Ticket | Finding | Change | Branch |
 |--------|---------|--------|--------|
-|        |         |        |        |
+| 14 (#36) Number of parallel units on a treatment step in the configurator | F2 (D7) | C1 | `c1-failure-inputs` |
+| 15 (#37) Personal treatment steps store the number of parallel units | F2 (D7) | C1 | `c1-failure-inputs` |
+| 16 (#38) Both cases use the daily LRV of each failing step | F1 (D6) | C2 | `c2-failure-calculation` |
+| 17 (#39) The failure LRV follows from the number of parallel units | F2 (D7) | C2 | `c2-failure-calculation` |
