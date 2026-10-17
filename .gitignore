@@ -12,3 +12,5 @@ prod-migrations/
 .vscode
 test.zip
 .vs
+node_modules/
+*.log
