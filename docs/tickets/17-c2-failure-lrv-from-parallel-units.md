@@ -18,7 +18,7 @@ Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-fail
 - [x] Raising the number of parallel units never raises any mean.
 - [x] All tests pass, and the export package keeps its files and columns with failures.
 - [ ] The calculation time of a drinking-water scenario (365 events per year) with failures is measured and recorded in the C2 pull request.
-- [ ] Manual check on the dev environment, announced to the team first:
+- [x] Manual check on the dev environment, announced to the team first (2026-10-17, passed):
   - Enter the worked example's two steps with failures and run them as a guest and as a registered user.
   - Change the failure duration and the number of parallel units, and see both cases react.
   - Confirm that the result page, the saved-assessments page and the export's result table show the changed results.
