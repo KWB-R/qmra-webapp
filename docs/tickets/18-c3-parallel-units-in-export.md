@@ -21,7 +21,7 @@ Source: Change C3 in `docs/failure_roadmap.md` (Small, no Spec), roadmap decisio
 - [x] No other file of the export package changes; the HTML report shows no inputs, as before.
 - [x] The reference export is updated in the same commit, by the new column only, and the reference test passes.
 - [ ] The change is noted for the release notes in `docs/progress.md` and in the C3 pull request.
-- [ ] Manual check on the dev environment, announced to the team first (also completes Ticket 11's open check):
+- [x] Manual check on the dev environment, announced to the team first (also completes Ticket 11's open check) (2026-10-17, passed):
   - Download the export of an assessment with failure inputs, including a number of parallel units above 1.
   - Check the three failure columns in `treatments.csv` and that the report is unchanged.
 

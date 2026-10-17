@@ -12,11 +12,11 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 |---|---|---|---|---|
 | C1 Failure inputs | `c1-failure-inputs` (`main`) | #28 | #21, #22, #23 (`docs/tickets/04`–`06`); #36, #37 (`14`, `15`) | D7 rework built (tickets 14–15), tested manually on dev |
 | C2 Failure calculation | `c2-failure-calculation` (C1) | #29 | #24, #25, #26 (`07`–`09`) | D6/D7 rework built (tickets 16–17, #38, #39), tested manually on dev |
-| C3 Failure inputs in the export | `c3-failure-inputs-in-export` (C2) | #34 | #30, #31 (`10`, `11`) | Built, deployed to dev, manual check open; reopened for D7 (units column), ticket not written yet |
+| C3 Failure inputs in the export | `c3-failure-inputs-in-export` (C2) | #34 | #30, #31 (`10`, `11`); #40 (`18`) | D7 rework built (ticket 18), tested manually on dev |
 | C4 Explain treatment failure | not created yet (will be based on C2) | — | #32, #33 (`12`, `13`) | Tickets ready |
 | C5 Failure benchmark | — | — | — | Waits for decisions D1–D3 |
 
-**Dev** (https://dev.qmra.org) runs C1 + C2 (PR #29, commit `ff9891d`) since 2026-10-17. C3 is not on dev until it is pushed again.
+**Dev** (https://dev.qmra.org) runs C1 + C2 + C3 (PR #34, commit `dfa309f`) since 2026-10-17.
 
 **Review of 2026-09-28** (by a teammate):
 - **Statuses:** tickets 04–11 are set to "review".
@@ -36,6 +36,10 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
   - **Parallel units (#39, `ff9891d`):** the failure LRV follows from the number of parallel units; one unit gives LRV 0. Tests compare with the D7 table.
   - **Calculation time** (local, drinking water, 365 events, 5 steps): 0.069 s without failures, 0.117 s with failures in all five steps. Still to be recorded in PR #29.
   - **Manual check on dev** passed on 2026-10-17. C2 was merged forward into C3 (`464b31c`); the reference export was updated on purpose, see below.
+- **C3:** ticket 18 (#40) written and built:
+  - **Parallel units column (#40, `dfa309f`):** `treatments.csv` has the column "Number of parallel units" after the two failure columns, repeated on each step's three rows; assessments saved before C1 export 1. The reference export was updated on purpose by that column only.
+  - **Manual check on dev** passed on 2026-10-17, which also completes Ticket 11's check of the two failure columns and the unchanged report.
+- **Still open:** the release note in PR #34 and the calculation time in PR #29 (to be posted on GitHub); then C4 and C5.
 
 ## What each Change delivers
 

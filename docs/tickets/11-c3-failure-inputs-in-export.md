@@ -23,4 +23,4 @@ Review on 2026-09-28 (commit `a04e2f9`):
 
 - [x] Only `treatments.csv` changed in the reference export, in the same commit as the code; later commits touched only the test tolerance and the README.
 - [x] Assessments saved before C1 export 0 and 30, because the new fields have those defaults.
-- [ ] Manual check on dev from PR #34 still open: download an export with failure inputs, check the two columns and the unchanged report.
+- [x] Manual check on dev from PR #34 (done 2026-10-17 together with Ticket 18, #40, passed): download an export with failure inputs, check the two columns and the unchanged report.
