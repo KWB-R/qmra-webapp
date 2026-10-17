@@ -19,11 +19,11 @@ Source: Change C4 in `docs/failure_roadmap.md` (Small, no Spec), the same method
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done (the PR criterion is checked when the C4 pull request is opened)
 
-- [ ] `docs/source/` has a page "Treatment failure" covering the points above, linked from `index.rst`.
-- [ ] The formulas and the worked example's numbers on the page agree with ADR-0002, the worked example and the implemented calculation.
-- [ ] The page describes no worst-case full loss regardless of the duration and no overlap rules for combined failures.
-- [ ] The documentation builds without errors, checked in a local Sphinx environment (Sphinx isn't in the requirements).
-- [ ] The page uses the glossary terms and agrees with `CONTEXT.md` and the implemented calculation.
+- [x] `docs/source/` has a page "Treatment failure" covering the points above, linked from `index.rst`.
+- [x] The formulas and the worked example's numbers on the page agree with ADR-0002, the worked example and the implemented calculation.
+- [x] The page describes no worst-case full loss regardless of the duration and no overlap rules for combined failures.
+- [x] The documentation builds without errors, checked in a local Sphinx environment (Sphinx isn't in the requirements). Checked 2026-10-17 with Sphinx 9.1.0 and sphinx_rtd_theme: only the existing warning that `_static` does not exist.
+- [x] The page uses the glossary terms and agrees with `CONTEXT.md` and the implemented calculation.
 - [ ] The pull request marks the text as a draft for domain expert review.
