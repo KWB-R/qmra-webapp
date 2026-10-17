@@ -24,11 +24,11 @@ Source: Change C4 in `docs/failure_roadmap.md` (Small, no Spec), `CONTEXT.md` (T
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done (the PR criterion is checked when the C4 pull request is opened)
 
-- [ ] The FAQ has a question on treatment failure covering all points above, consistent with `CONTEXT.md` and the implemented calculation.
-- [ ] The FAQ's limitations mention that units of a step failing together are not modelled and that such a step is entered with one unit.
-- [ ] Step 4 of the configurator's guided tour mentions failure frequency, failure duration and the number of parallel units, with their units.
-- [ ] Nothing in the FAQ or the tour says that worst-case ignores the failure duration or describes overlap rules for combined failures.
-- [ ] Deferred UI wording (such as "tolerable risk level") and explanations of unrelated parts of the model are left as they are.
+- [x] The FAQ has a question on treatment failure covering all points above, consistent with `CONTEXT.md` and the implemented calculation.
+- [x] The FAQ's limitations mention that units of a step failing together are not modelled and that such a step is entered with one unit.
+- [x] Step 4 of the configurator's guided tour mentions failure frequency, failure duration and the number of parallel units, with their units.
+- [x] Nothing in the FAQ or the tour says that worst-case ignores the failure duration or describes overlap rules for combined failures.
+- [x] Deferred UI wording (such as "tolerable risk level") and explanations of unrelated parts of the model are left as they are.
 - [ ] The pull request marks the text as a draft for domain expert review.
