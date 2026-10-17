@@ -5,6 +5,7 @@ Welcome to QMRA's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   application_layers
 
 QMRA is a Django project which experiments with deploying state-of-the-art techniques 
 for Quantitative Microbial Risk Assessment (QMRA). 
