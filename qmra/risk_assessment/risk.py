@@ -51,68 +51,45 @@ def draw_failing_events(treatments: list[Treatment], events_per_year: int,
 
 
 def failing_steps(treatments: list[Treatment], failing_events: list[np.ndarray | None], group: PathogenGroup,
-                  bound: str) -> list[tuple[np.ndarray, float, int]]:
-    """The steps that fail on some days and then lose LRV for this pathogen group, as (their failing events, LRV
-    lost, failure duration). A step whose minimum or maximum LRV is 0 or below loses nothing when it fails (D4)."""
+                  bound: str) -> list[tuple[np.ndarray, float, int, int]]:
+    """The steps that fail on some days and then lose LRV for this pathogen group, as (their failing events, their
+    minimum or maximum LRV, failure duration, number of parallel units). A step whose LRV is 0 or below loses nothing
+    when it fails (D4)."""
     steps = []
     for t, failing in zip(treatments, failing_events):
-        lost = step_lrv(t, group, bound)
-        if failing is not None and lost > 0:
-            steps.append((failing, lost, t.failure_duration))
+        lrv = step_lrv(t, group, bound)
+        if failing is not None and lrv > 0:
+            steps.append((failing, lrv, t.failure_duration, t.parallel_units))
     return steps
 
 
-def worst_case_event_lrvs(worst_case_lrv: float, treatments: list[Treatment], failing_events: list[np.ndarray | None],
-                          group: PathogenGroup, shape: tuple) -> np.ndarray:
-    """Worst-case LRV of each exposure event: on a failure day the failing steps' positive minimum LRVs are lost for
-    the whole day, whatever the failure duration."""
-    event_lrvs = np.full(shape, worst_case_lrv, dtype=float)
-    for failing, lost, _ in failing_steps(treatments, failing_events, group, "min"):
-        event_lrvs[failing] -= lost
-    return event_lrvs
+def failure_lrv(lrv: float, parallel_units: int) -> float:
+    """LRV of a step while one of its parallel units is down (D7, ADR-0002): that unit's share of the water is not
+    treated, the others' is treated with the step's LRV, mixed by concentration. 0 for one unit, at most log10 of the
+    number of units."""
+    return -np.log10((parallel_units - 1) / parallel_units * 10 ** -lrv + 1 / parallel_units)
 
 
-def mixed_water_lrv_loss(failures: list[tuple[float, int]]) -> float:
-    """How much LRV the mixed water of a failure day loses in best-case (CONTEXT.md, Combined failure).
+def daily_lrv_loss(lrv: float, failure_duration: int, parallel_units: int) -> float:
+    """How much LRV a failing step loses on a failure day under the mixed-water assumption (ADR-0002).
 
-    `failures` holds (LRV lost, failure duration in minutes) of each step that fails that day and loses LRV for the
-    pathogen group. The consumed water mixes water treated during the failure events and in normal operation, in
-    proportion to the failure durations. Failure events that fit into one day do not overlap; two longer than a day
-    in total overlap only by the minutes beyond the day. Three or more longer than a day in total count like
-    worst-case: all these steps are down for the whole day.
+    The consumed water mixes water treated during the failure event, with the failure LRV, and water treated in
+    normal operation, in proportion to the failure duration. The mixture is averaged by concentration, never by LRV.
     """
-    total_duration = sum(duration for _, duration in failures)
-    all_lost = sum(lost for lost, _ in failures)
-    if len(failures) >= 3 and total_duration > MINUTES_PER_DAY:
-        return all_lost
-    overlap = max(0, total_duration - MINUTES_PER_DAY)
-    segments = [(lost, duration - overlap) for lost, duration in failures]
-    if overlap:
-        segments.append((all_lost, overlap))
-    normal_minutes = MINUTES_PER_DAY - sum(minutes for _, minutes in segments)
-    relative_concentration = normal_minutes + sum(minutes * 10 ** lost for lost, minutes in segments)
-    return np.log10(relative_concentration / MINUTES_PER_DAY)
+    failing_share = failure_duration / MINUTES_PER_DAY
+    daily_lrv = -np.log10(failing_share * 10 ** -failure_lrv(lrv, parallel_units)
+                          + (1 - failing_share) * 10 ** -lrv)
+    return lrv - daily_lrv
 
 
-def best_case_event_lrvs(best_case_lrv: float, treatments: list[Treatment], failing_events: list[np.ndarray | None],
-                         group: PathogenGroup, shape: tuple) -> np.ndarray:
-    """Best-case LRV of each exposure event: on a failure day, the LRV of the mixed water under the mixed-water
-    assumption, from the steps that lose their positive maximum LRV for this pathogen group. Each combination of
-    failing steps is calculated once."""
-    event_lrvs = np.full(shape, best_case_lrv, dtype=float)
-    steps = failing_steps(treatments, failing_events, group, "max")
-    if not steps:
-        return event_lrvs
-    # which of these steps fail on each event's day, as bits of one number
-    combination = np.zeros(shape, dtype=np.int64)
-    for bit, (failing, _, _) in enumerate(steps):
-        combination |= failing.astype(np.int64) << bit
-    for combination_code in np.unique(combination):
-        if combination_code == 0:
-            continue
-        failing_that_day = [(lost, duration) for bit, (_, lost, duration) in enumerate(steps)
-                            if combination_code >> bit & 1]
-        event_lrvs[combination == combination_code] = best_case_lrv - mixed_water_lrv_loss(failing_that_day)
+def event_lrvs_of_case(train_lrv: float, treatments: list[Treatment], failing_events: list[np.ndarray | None],
+                       group: PathogenGroup, bound: str, shape: tuple) -> np.ndarray:
+    """LRV of each exposure event in one case: best-case starts from every step's maximum LRV, worst-case from its
+    minimum LRV. On a failure day each failing step loses what its daily LRV lacks, so combined failures add up
+    without further rules (D6)."""
+    event_lrvs = np.full(shape, train_lrv, dtype=float)
+    for failing, lrv, failure_duration, parallel_units in failing_steps(treatments, failing_events, group, bound):
+        event_lrvs[failing] -= daily_lrv_loss(lrv, failure_duration, parallel_units)
     return event_lrvs
 
 
@@ -176,10 +153,10 @@ def assess_risk(risk_assessment: RiskAssessment, inflows, treatments, save=True)
         log_concentrations, sample_positions = sample_exposure_events(
             inflow.min, inflow.max, risk_assessment.events_per_year)
         event_lrvs = {
-            BEST_CASE: best_case_event_lrvs(lrvs[group]["max"], treatments, failing_events, group,
-                                            sample_positions.shape),
-            WORST_CASE: worst_case_event_lrvs(lrvs[group]["min"], treatments, failing_events, group,
-                                              sample_positions.shape),
+            BEST_CASE: event_lrvs_of_case(lrvs[group]["max"], treatments, failing_events, group, "max",
+                                          sample_positions.shape),
+            WORST_CASE: event_lrvs_of_case(lrvs[group]["min"], treatments, failing_events, group, "min",
+                                           sample_positions.shape),
         }
         cases = {case: get_annual_risk(log_concentrations, sample_positions, lrvs_of_case,
                                        risk_assessment.volume_per_event, dist)
