@@ -10,7 +10,7 @@ This Ticket also completes the manual check on dev that Ticket 11 left open.
 
 Delivered on branch `c3-failure-inputs-in-export` as part of the C3 pull request (#34). The pull request is tested on the dev environment again and not merged before the release (D5).
 
-Source: Change C3 in `docs/failure_roadmap.md` (Small, no Spec), roadmap decision D7, decisions of 2026-09-25 (report without inputs; failure columns repeated on the step's rows). GitHub issue: not created yet.
+Source: Change C3 in `docs/failure_roadmap.md` (Small, no Spec), roadmap decision D7, decisions of 2026-09-25 (report without inputs; failure columns repeated on the step's rows). GitHub issue #40.
 
 **Blocked by:** None (can start immediately; Tickets 14 and 15, which store the number of parallel units, are merged into this branch)
 
