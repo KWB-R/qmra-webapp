@@ -6,7 +6,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Row, Column, HTML, Submit
 
-from qmra.risk_assessment.forms import check_treatment_step
+from qmra.risk_assessment.forms import check_treatment_step, PARALLEL_UNITS_MESSAGE
 from qmra.user.models import User
 
 
@@ -140,6 +140,7 @@ class UserTreatment(models.Model):
     protozoa_max = models.FloatField(blank=True, null=True)
     failure_frequency = models.FloatField(default=0)  # failure days per year
     failure_duration = models.IntegerField(default=30)  # minutes
+    parallel_units = models.IntegerField(default=1)  # a failure event stops one of them (D7)
 
 
 class UserTreatmentForm(forms.ModelForm):
@@ -155,6 +156,7 @@ class UserTreatmentForm(forms.ModelForm):
             "protozoa_max",
             "failure_frequency",
             "failure_duration",
+            "parallel_units",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -173,6 +175,8 @@ class UserTreatmentForm(forms.ModelForm):
         self.fields['protozoa_max'].label = ""
         self.fields['failure_frequency'].label = "Failure frequency (days per year)"
         self.fields['failure_duration'].label = "Failure duration (minutes)"
+        self.fields['parallel_units'].label = "Number of parallel units"
+        self.fields['parallel_units'].error_messages['invalid'] = PARALLEL_UNITS_MESSAGE
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
             Field("name"),
@@ -185,7 +189,7 @@ class UserTreatmentForm(forms.ModelForm):
                 Column("viruses_min"), Column("viruses_max")),
             Row(Column(HTML(f"<label {label_style}>Protozoa LRV:</label>")),
                 Column("protozoa_min"), Column("protozoa_max")),
-            Row(Column("failure_frequency"), Column("failure_duration")),
+            Row(Column("failure_frequency"), Column("failure_duration"), Column("parallel_units")),
             Submit('submit', 'Submit')
         )
 

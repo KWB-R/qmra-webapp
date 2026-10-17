@@ -37,6 +37,7 @@ class Treatment(models.Model):
     protozoa_max = models.FloatField(blank=True, null=True)
     failure_frequency = models.FloatField(default=0)  # failure days per year
     failure_duration = models.IntegerField(default=30)  # minutes
+    parallel_units = models.IntegerField(default=1)  # a failure event stops one of them (D7)
 
     @classmethod
     def from_default(cls, default: QMRATreatment, risk_assessment):

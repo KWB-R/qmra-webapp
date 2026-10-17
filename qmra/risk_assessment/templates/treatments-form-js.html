@@ -21,6 +21,7 @@
             protozoa_max: { selector: "input[id*='protozoa_max']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             failure_frequency: { selector: "input[id*='failure_frequency']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
             failure_duration: { selector: "input[id*='failure_duration']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
+            parallel_units: { selector: "input[id*='parallel_units']", getter: (elem) => elem.value, setter: (elem, x) => { elem.value = x } },
         }
         constructor(div) {
             this.$form = div
