@@ -6,9 +6,9 @@ This Ticket closes the D6/D7 rework of C2: it includes the manual check on the d
 
 Delivered on branch `c2-failure-calculation` as part of the C2 pull request (#29). The pull request is tested on the dev environment again and not merged before the release (D5).
 
-Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-failure-calculation.md`), roadmap decision D7, ADR-0002. The Spec issue does not exist yet. GitHub issue: not created yet.
+Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-failure-calculation.md`), roadmap decision D7, ADR-0002. The Spec issue does not exist yet. GitHub issue #39.
 
-**Blocked by:** 16
+**Blocked by:** 16 (#38)
 
 **Status:** ready-for-agent
 

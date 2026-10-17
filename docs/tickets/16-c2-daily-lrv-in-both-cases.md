@@ -10,7 +10,7 @@ The result page, the reference-level exceedance, saved results and the export's 
 
 Delivered on branch `c2-failure-calculation` as part of the C2 pull request (#29). The pull request is not merged before the release (D5).
 
-Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-failure-calculation.md`), roadmap decision D6, ADR-0002, worked example `docs/failure-daily-lrv-example.md`. The Spec issue does not exist yet. GitHub issue: not created yet.
+Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-failure-calculation.md`), roadmap decision D6, ADR-0002, worked example `docs/failure-daily-lrv-example.md`. The Spec issue does not exist yet. GitHub issue #38.
 
 **Blocked by:** None (can start immediately)
 
