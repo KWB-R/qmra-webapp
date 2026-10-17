@@ -23,11 +23,12 @@ FAILURE_INPUT_RANGES = {
     "failure_frequency": (0, 365, "days per year"),
     "failure_duration": (1, 1440, "minutes"),
 }
+PARALLEL_UNITS_MESSAGE = "number of parallel units must be a whole number of 1 or more"
 
 
 def check_treatment_step(form, cleaned_data):
     """Minimum LRV at most maximum LRV per pathogen group, failure inputs within their ranges,
-    and a failure frequency above 0 only for a step with a positive LRV.
+    at least one parallel unit, and a failure frequency above 0 only for a step with a positive LRV.
 
     Shared by the configurator and the personal treatment step form. Whole minutes are enforced
     by the failure duration's field type; failure inputs a form does not have are skipped.
@@ -39,6 +40,10 @@ def check_treatment_step(form, cleaned_data):
         value = cleaned_data.get(field)
         if value is not None and not low <= value <= high:
             form.add_error(field, f"{field.replace('_', ' ')} must be between {low} and {high} {unit}")
+    # no upper limit: more units only raise the LRV during a failure (D7)
+    parallel_units = cleaned_data.get("parallel_units")
+    if parallel_units is not None and parallel_units < 1:
+        form.add_error("parallel_units", PARALLEL_UNITS_MESSAGE)
     # a failure removes only positive LRVs, so a step without one cannot fail (D4)
     has_positive_lrv = any(_zero_if_none(cleaned_data.get(field)) > 0 for pair in LRV_FIELDS for field in pair)
     if _zero_if_none(cleaned_data.get("failure_frequency")) > 0 and not has_positive_lrv:
@@ -184,6 +189,7 @@ class TreatmentForm(forms.ModelForm):
             "protozoa_max",
             "failure_frequency",
             "failure_duration",
+            "parallel_units",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -202,8 +208,11 @@ class TreatmentForm(forms.ModelForm):
         self.fields['protozoa_max'].label = ""
         self.fields['failure_frequency'].label = "Failure frequency (days per year)"
         self.fields['failure_duration'].label = "Failure duration (minutes)"
-        # leave whole minutes to the server check: the browser blocks hidden step cards without a message
+        self.fields['parallel_units'].label = "Number of parallel units"
+        # leave whole numbers to the server check: the browser blocks hidden step cards without a message
         self.fields['failure_duration'].widget.attrs['step'] = "any"
+        self.fields['parallel_units'].widget.attrs['step'] = "any"
+        self.fields['parallel_units'].error_messages['invalid'] = PARALLEL_UNITS_MESSAGE
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
             Field("name", css_class="disabled-input d-none"),
@@ -216,7 +225,7 @@ class TreatmentForm(forms.ModelForm):
                 Column("viruses_min"), Column("viruses_max")),
             Row(Column(HTML(f"<label {label_style}>Protozoa LRV:</label>")),
                 Column("protozoa_min"), Column("protozoa_max")),
-            Row(Column("failure_frequency"), Column("failure_duration")),
+            Row(Column("failure_frequency"), Column("failure_duration"), Column("parallel_units")),
             # Row(Column("DELETE"))
         )
 

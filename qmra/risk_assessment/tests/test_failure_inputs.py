@@ -82,7 +82,8 @@ def failure_inputs_per_step(data: dict) -> list[dict]:
     return [
         dict(name=data[f"treatments-{i}-name"],
              failure_frequency=float(data[f"treatments-{i}-failure_frequency"]),
-             failure_duration=int(data[f"treatments-{i}-failure_duration"]))
+             failure_duration=int(data[f"treatments-{i}-failure_duration"]),
+             parallel_units=int(data[f"treatments-{i}-parallel_units"]))
         for i in range(int(data["treatments-TOTAL_FORMS"]))
     ]
 
@@ -110,6 +111,7 @@ def layout(csv: bytes) -> list[str]:
 
 # high enough that failures change the results visibly instead of leaving them at a risk of 1
 HIGH_LRVS = dict(bacteria_min=3, bacteria_max=4, viruses_min=3, viruses_max=4, protozoa_min=3, protozoa_max=4)
+PARALLEL_UNITS_MESSAGE = "number of parallel units must be a whole number of 1 or more"
 LRVS = dict(bacteria_min=1, bacteria_max=2, viruses_min=1, viruses_max=2, protozoa_min=1, protozoa_max=2)
 
 
@@ -151,6 +153,13 @@ class TestFailureInputs(LoggedInTestCase):
         assert_that(float(data["treatments-__prefix__-failure_frequency"])).is_equal_to(0)
         assert_that(int(data["treatments-__prefix__-failure_duration"])).is_equal_to(30)
 
+    def test_new_step_card_shows_number_of_parallel_units_starting_at_1(self):
+        response = self.client.get(reverse("assessment"))
+
+        assert_that(response.content.decode()).contains("Number of parallel units")
+        data = configurator_data(response)
+        assert_that(int(data["treatments-__prefix__-parallel_units"])).is_equal_to(1)
+
     def test_bundled_step_starts_at_defaults(self):
         data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS)
@@ -158,27 +167,31 @@ class TestFailureInputs(LoggedInTestCase):
         assessment = self.save_new(data)
 
         assert_that(failure_inputs_per_step(self.reopen(assessment))).is_equal_to([
-            dict(name="Primary treatment", failure_frequency=0, failure_duration=30)
+            dict(name="Primary treatment", failure_frequency=0, failure_duration=30, parallel_units=1)
         ])
 
     def test_failure_inputs_survive_save_and_reopen_per_step(self):
         data = new_configurator(self.client)
         add_step(data, "Primary treatment", **LRVS, failure_frequency="0.5", failure_duration="15")
-        add_step(data, "Primary treatment", **LRVS, failure_frequency="12", failure_duration="600")
-        add_step(data, "Slow sand filtration", **LRVS, failure_frequency="365", failure_duration="1440")
+        add_step(data, "Primary treatment", **LRVS, failure_frequency="12", failure_duration="600",
+                 parallel_units="4")
+        add_step(data, "Slow sand filtration", **LRVS, failure_frequency="365", failure_duration="1440",
+                 parallel_units="2")
 
         assessment = self.save_new(data)
 
         assert_that(failure_inputs_per_step(self.reopen(assessment))).is_equal_to([
-            dict(name="Primary treatment", failure_frequency=0.5, failure_duration=15),
-            dict(name="Primary treatment", failure_frequency=12, failure_duration=600),
-            dict(name="Slow sand filtration", failure_frequency=365, failure_duration=1440),
+            dict(name="Primary treatment", failure_frequency=0.5, failure_duration=15, parallel_units=1),
+            dict(name="Primary treatment", failure_frequency=12, failure_duration=600, parallel_units=4),
+            dict(name="Slow sand filtration", failure_frequency=365, failure_duration=1440, parallel_units=2),
         ])
 
     def test_editing_stores_new_values_and_values_stay_with_their_step(self):
         data = new_configurator(self.client)
-        add_step(data, "Primary treatment", **LRVS, failure_frequency="1", failure_duration="10")
-        add_step(data, "Slow sand filtration", **LRVS, failure_frequency="2", failure_duration="20")
+        add_step(data, "Primary treatment", **LRVS, failure_frequency="1", failure_duration="10",
+                 parallel_units="3")
+        add_step(data, "Slow sand filtration", **LRVS, failure_frequency="2", failure_duration="20",
+                 parallel_units="2")
         add_step(data, "Primary treatment", **LRVS, failure_frequency="3", failure_duration="30")
         assessment = self.save_new(data)
 
@@ -186,12 +199,13 @@ class TestFailureInputs(LoggedInTestCase):
         data["treatments-0-DELETE"] = "on"
         data["treatments-2-failure_frequency"] = "4.5"
         data["treatments-2-failure_duration"] = "45"
+        data["treatments-2-parallel_units"] = "5"
         response = self.post_configurator(data, assessment)
 
         assert_that(response.status_code).is_equal_to(302)
         assert_that(failure_inputs_per_step(self.reopen(assessment))).is_equal_to([
-            dict(name="Slow sand filtration", failure_frequency=2, failure_duration=20),
-            dict(name="Primary treatment", failure_frequency=4.5, failure_duration=45),
+            dict(name="Slow sand filtration", failure_frequency=2, failure_duration=20, parallel_units=2),
+            dict(name="Primary treatment", failure_frequency=4.5, failure_duration=45, parallel_units=5),
         ])
 
     def test_out_of_range_or_fractional_values_are_rejected_with_a_message(self):
@@ -227,6 +241,28 @@ class TestFailureInputs(LoggedInTestCase):
 
                 assert_that(response.status_code).is_equal_to(302)
 
+    def test_number_of_parallel_units_below_1_or_fractional_is_rejected_with_a_message(self):
+        for units in ["0", "-1", "1.5"]:
+            with self.subTest(units=units):
+                data = new_configurator(self.client)
+                add_step(data, "Primary treatment", **LRVS, parallel_units=units)
+
+                response = self.post_configurator(data)
+
+                assert_that(response.status_code).is_equal_to(200)
+                assert_that(field_errors(response, "treatments-0-parallel_units")).is_equal_to([PARALLEL_UNITS_MESSAGE])
+                assert_that(RiskAssessment.objects.filter(user=self.user).count()).is_equal_to(0)
+
+    def test_any_whole_number_of_parallel_units_of_1_or_more_is_accepted(self):
+        for units in ["1", "2", "1000"]:
+            with self.subTest(units=units):
+                data = new_configurator(self.client)
+                add_step(data, "Primary treatment", **LRVS, parallel_units=units)
+
+                response = self.post_configurator(data)
+
+                assert_that(response.status_code).is_equal_to(302)
+
     def test_assessment_from_before_failure_inputs_reopens_with_defaults(self):
         assessment = RiskAssessment.objects.create(user=self.user, events_per_year=365, volume_per_event=1)
         for pathogen in ["Rotavirus", "Campylobacter jejuni", "Cryptosporidium parvum"]:
@@ -234,7 +270,7 @@ class TestFailureInputs(LoggedInTestCase):
         Treatment.objects.create(risk_assessment=assessment, name="Primary treatment", **LRVS)
 
         assert_that(failure_inputs_per_step(self.reopen(assessment))).is_equal_to([
-            dict(name="Primary treatment", failure_frequency=0, failure_duration=30)
+            dict(name="Primary treatment", failure_frequency=0, failure_duration=30, parallel_units=1)
         ])
 
     @staticmethod
@@ -289,8 +325,12 @@ class TestFailureInputs(LoggedInTestCase):
         data = self.reopen(assessment)
         data["treatments-0-failure_frequency"] = "20"
         data["treatments-1-failure_frequency"] = "365"
+        data["treatments-1-parallel_units"] = "4"
         self.post_configurator(data, assessment)
 
+        steps = failure_inputs_per_step(self.reopen(assessment))
+        assert_that(steps[0]["failure_frequency"]).is_equal_to(20)
+        assert_that(steps[1]["parallel_units"]).is_equal_to(4)
         assert_that(self.results(assessment)).is_not_equal_to(results_before)
         export_after = self.export(assessment)
         assert_that(sorted(export_after)).is_equal_to(sorted(export_before))
@@ -356,7 +396,19 @@ class TestGuestFailureInputs(TestCase):
         response = self.client.get(reverse("assessment"))
 
         assert_that(response.content.decode()).contains(
-            "Failure frequency (days per year)", "Failure duration (minutes)")
+            "Failure frequency (days per year)", "Failure duration (minutes)", "Number of parallel units")
+
+    def test_guest_step_card_starts_at_1_parallel_unit(self):
+        data = configurator_data(self.client.get(reverse("assessment")))
+
+        assert_that(int(data["treatments-__prefix__-parallel_units"])).is_equal_to(1)
+
+    def test_guest_result_accepts_any_whole_number_of_parallel_units_of_1_or_more(self):
+        for units in ["1", "2", "1000"]:
+            with self.subTest(units=units):
+                response = self.guest_result(parallel_units=units)
+
+                assert_that(response.status_code).is_equal_to(200)
 
     def test_guest_result_with_failure_inputs_is_shown_and_not_stored(self):
         response = self.guest_result(failure_frequency="12", failure_duration="60")
@@ -371,6 +423,9 @@ class TestGuestFailureInputs(TestCase):
              "failure frequency must be between 0 and 365 days per year"),
             (dict(failure_duration="2.5"), "treatments-0-failure_duration", "Enter a whole number."),
             (dict(bacteria_min="3", bacteria_max="1"), "treatments-0-bacteria_min", "min. must be less than max"),
+            (dict(parallel_units="0"), "treatments-0-parallel_units", PARALLEL_UNITS_MESSAGE),
+            (dict(parallel_units="-1"), "treatments-0-parallel_units", PARALLEL_UNITS_MESSAGE),
+            (dict(parallel_units="1.5"), "treatments-0-parallel_units", PARALLEL_UNITS_MESSAGE),
         ]
         for step_values, field, message in cases:
             with self.subTest(field=field, message=message):
@@ -414,7 +469,7 @@ def personal_step_form(response) -> str:
 class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
 
     def create_personal_step(self, name="Plant UV", **values):
-        data = dict(name=name, **LRVS, failure_frequency="0", failure_duration="30")
+        data = dict(name=name, **LRVS, failure_frequency="0", failure_duration="30", parallel_units="1")
         data.update(values)
         return self.client.post(reverse("treatment"), data, HTTP_REFERER=reverse("assessment"))
 
@@ -423,7 +478,7 @@ class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
 
     def failure_inputs(self, name: str) -> tuple:
         step = self.personal_steps()[name]
-        return step["failure_frequency"], step["failure_duration"]
+        return step["failure_frequency"], step["failure_duration"], step["parallel_units"]
 
     def test_form_shows_failure_fields_with_units_and_defaults(self):
         form = personal_step_form(self.client.get(reverse("assessment")))
@@ -432,11 +487,17 @@ class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
         assert_that(form).matches(r'name="failure_frequency" value="0"')
         assert_that(form).matches(r'name="failure_duration" value="30"')
 
+    def test_form_shows_number_of_parallel_units_starting_at_1(self):
+        form = personal_step_form(self.client.get(reverse("assessment")))
+
+        assert_that(form).contains("Number of parallel units")
+        assert_that(form).matches(r'name="parallel_units" value="1"')
+
     def test_failure_inputs_appear_in_the_owners_list(self):
-        response = self.create_personal_step(failure_frequency="2.5", failure_duration="90")
+        response = self.create_personal_step(failure_frequency="2.5", failure_duration="90", parallel_units="3")
 
         assert_that(response.status_code).is_equal_to(302)
-        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90))
+        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90, 3))
 
     def test_other_users_do_not_see_the_personal_step(self):
         self.create_personal_step(failure_frequency="2.5", failure_duration="90")
@@ -454,6 +515,10 @@ class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
             (dict(failure_duration=""), "This field is required."),
             (dict(NO_LRVS, failure_frequency="1"), D4_MESSAGE),
             (dict(bacteria_min="3", bacteria_max="1"), "min. must be less than max"),
+            (dict(parallel_units="0"), PARALLEL_UNITS_MESSAGE),
+            (dict(parallel_units="-1"), PARALLEL_UNITS_MESSAGE),
+            (dict(parallel_units="1.5"), PARALLEL_UNITS_MESSAGE),
+            (dict(parallel_units=""), "This field is required."),
         ]
         for values, message in cases:
             with self.subTest(message=message, values=values):
@@ -467,6 +532,8 @@ class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
         cases = {
             "bounds low": dict(failure_frequency="0", failure_duration="1"),
             "bounds high": dict(failure_frequency="365", failure_duration="1440"),
+            "2 parallel units": dict(parallel_units="2"),
+            "1000 parallel units": dict(parallel_units="1000"),
             "no positive LRV, frequency 0": dict(NO_LRVS, failure_frequency="0"),
             **{case: dict(lrvs, failure_frequency="1") for case, lrvs in D4_ACCEPTED.items()},
         }
@@ -480,16 +547,16 @@ class TestPersonalTreatmentStepFailureInputs(LoggedInTestCase):
     def test_personal_step_from_before_failure_inputs_offers_defaults(self):
         UserTreatment.objects.create(user=self.user, name="Old step", **LRVS)
 
-        assert_that(self.failure_inputs("Old step")).is_equal_to((0, 30))
+        assert_that(self.failure_inputs("Old step")).is_equal_to((0, 30, 1))
 
     def test_changing_the_copy_in_an_assessment_leaves_the_personal_step_unchanged(self):
-        self.create_personal_step(failure_frequency="2.5", failure_duration="90")
+        self.create_personal_step(failure_frequency="2.5", failure_duration="90", parallel_units="3")
         data = new_configurator(self.client)
-        add_step(data, "Plant UV", **LRVS, failure_frequency="10", failure_duration="15")
+        add_step(data, "Plant UV", **LRVS, failure_frequency="10", failure_duration="15", parallel_units="5")
 
         assessment = self.save_new(data)
 
         assert_that(failure_inputs_per_step(configurator_data(
             self.client.get(reverse("assessment", args=[assessment.id]))))).is_equal_to([
-                dict(name="Plant UV", failure_frequency=10, failure_duration=15)])
-        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90))
+                dict(name="Plant UV", failure_frequency=10, failure_duration=15, parallel_units=5)])
+        assert_that(self.failure_inputs("Plant UV")).is_equal_to((2.5, 90, 3))
