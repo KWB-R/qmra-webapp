@@ -72,7 +72,7 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
   - A fixed benchmark assessment is exported and compared with `qmra/risk_assessment/tests/reference_export/`: the same files, identical text, and each number within 0.1 % relative. Plots are only checked for presence.
   - `UPDATE_REFERENCE_EXPORT=1` rewrites the reference on purpose (see the README there).
 - **Failure columns (#31, `a04e2f9`):** `treatments.csv` has "Failure frequency (days per year)" and "Failure duration (minutes)", repeated on each step's three rows. The HTML report stays without inputs.
-- **For the release notes:** `treatments.csv` has two new columns at the end.
+- **For the release notes:** `treatments.csv` has three new columns at the end: "Failure frequency (days per year)", "Failure duration (minutes)" and, since ticket 18 (#40), "Number of parallel units".
 - **Reference export updated on 2026-10-17 (`464b31c`):** after D6, the worst-case ("Minimum LRV") results of the benchmark assessment are lower, because worst-case now uses the failure duration; the reference-level exceedance in the report drops from "min" to "none" twice. Best-case values, files and columns are unchanged.
 - **For the release notes:** worst-case results of assessments with failures are lower than with the first version (D6, ADR-0002); the reference-level exceedance can drop from "min" to "none".
 

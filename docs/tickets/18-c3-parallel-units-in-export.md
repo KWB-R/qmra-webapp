@@ -16,10 +16,10 @@ Source: Change C3 in `docs/failure_roadmap.md` (Small, no Spec), roadmap decisio
 
 **Status:** ready-for-agent
 
-- [ ] `treatments.csv` has the column "Number of parallel units" after the two failure columns, with each step's value on all three of its rows.
-- [ ] An assessment saved with a number of parallel units exports exactly those values per step, and an assessment saved before C1 exports 1.
-- [ ] No other file of the export package changes; the HTML report shows no inputs, as before.
-- [ ] The reference export is updated in the same commit, by the new column only, and the reference test passes.
+- [x] `treatments.csv` has the column "Number of parallel units" after the two failure columns, with each step's value on all three of its rows.
+- [x] An assessment saved with a number of parallel units exports exactly those values per step, and an assessment saved before C1 exports 1.
+- [x] No other file of the export package changes; the HTML report shows no inputs, as before.
+- [x] The reference export is updated in the same commit, by the new column only, and the reference test passes.
 - [ ] The change is noted for the release notes in `docs/progress.md` and in the C3 pull request.
 - [ ] Manual check on the dev environment, announced to the team first (also completes Ticket 11's open check):
   - Download the export of an assessment with failure inputs, including a number of parallel units above 1.

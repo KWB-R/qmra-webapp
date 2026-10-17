@@ -263,11 +263,16 @@ class TestFailureInputs(LoggedInTestCase):
 
                 assert_that(response.status_code).is_equal_to(302)
 
-    def test_assessment_from_before_failure_inputs_reopens_with_defaults(self):
+    def assessment_from_before_failure_inputs(self) -> RiskAssessment:
+        """An assessment stored without failure inputs, as before C1: its treatment step has the defaults."""
         assessment = RiskAssessment.objects.create(user=self.user, events_per_year=365, volume_per_event=1)
         for pathogen in ["Rotavirus", "Campylobacter jejuni", "Cryptosporidium parvum"]:
             Inflow.objects.create(risk_assessment=assessment, pathogen=pathogen, min=10, max=100)
         Treatment.objects.create(risk_assessment=assessment, name="Primary treatment", **LRVS)
+        return assessment
+
+    def test_assessment_from_before_failure_inputs_reopens_with_defaults(self):
+        assessment = self.assessment_from_before_failure_inputs()
 
         assert_that(failure_inputs_per_step(self.reopen(assessment))).is_equal_to([
             dict(name="Primary treatment", failure_frequency=0, failure_duration=30, parallel_units=1)
@@ -275,10 +280,12 @@ class TestFailureInputs(LoggedInTestCase):
 
     @staticmethod
     def exported_failure_inputs(export: dict) -> list[tuple]:
-        """(treatment, pathogen group, failure frequency, failure duration) of each row of the exported treatment table."""
+        """(treatment, pathogen group, failure frequency, failure duration, number of parallel units) of each row of
+        the exported treatment table."""
         table = pd.read_csv(io.BytesIO(export[TREATMENTS_CSV]))
-        return list(table[["Treatment", "Pathogen group", "Failure frequency (days per year)",
-                           "Failure duration (minutes)"]].itertuples(index=False, name=None))
+        columns = ["Treatment", "Pathogen group", "Failure frequency (days per year)", "Failure duration (minutes)",
+                   "Number of parallel units"]
+        return list(table[columns].itertuples(index=False, name=None))
 
     def saved_assessment_with_two_steps(self) -> RiskAssessment:
         data = new_configurator(self.client)
@@ -300,7 +307,7 @@ class TestFailureInputs(LoggedInTestCase):
         assert_that(self.results(assessment)).is_equal_to(results_before)
         # the export records the new durations in the treatment table; everything else stays identical
         export_after = self.export(assessment)
-        durations = {duration for *_, duration in self.exported_failure_inputs(export_after)}
+        durations = set(pd.read_csv(io.BytesIO(export_after[TREATMENTS_CSV]))["Failure duration (minutes)"])
         export_after.pop(TREATMENTS_CSV)
         export_before.pop(TREATMENTS_CSV)
         assert_that(export_after).is_equal_to(export_before)
@@ -308,14 +315,22 @@ class TestFailureInputs(LoggedInTestCase):
 
     def test_export_records_the_failure_inputs_of_each_step(self):
         data = new_configurator(self.client)
-        add_step(data, "Primary treatment", **HIGH_LRVS, failure_frequency="12.5", failure_duration="90")
+        add_step(data, "Primary treatment", **HIGH_LRVS, failure_frequency="12.5", failure_duration="90",
+                 parallel_units="3")
         add_step(data, "Slow sand filtration", **HIGH_LRVS)
         assessment = self.save_new(data)
 
         groups = ["Viruses", "Bacteria", "Protozoa"]
         assert_that(self.exported_failure_inputs(self.export(assessment))).is_equal_to(
-            [("Primary treatment", group, 12.5, 90) for group in groups]
-            + [("Slow sand filtration", group, 0, 30) for group in groups])
+            [("Primary treatment", group, 12.5, 90, 3) for group in groups]
+            + [("Slow sand filtration", group, 0, 30, 1) for group in groups])
+
+    def test_export_of_an_assessment_from_before_failure_inputs_records_the_defaults(self):
+        assessment = self.assessment_from_before_failure_inputs()
+
+        groups = ["Viruses", "Bacteria", "Protozoa"]
+        assert_that(self.exported_failure_inputs(self.export(assessment))).is_equal_to(
+            [("Primary treatment", group, 0, 30, 1) for group in groups])
 
     def test_export_keeps_its_files_and_columns_with_failures(self):
         assessment = self.saved_assessment_with_two_steps()

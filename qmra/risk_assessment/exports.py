@@ -31,6 +31,7 @@ def treatments_as_df(treatments: QuerySet[Treatment]) -> pd.DataFrame:
             # a step's failure inputs apply to all its pathogen groups
             "Failure frequency (days per year)": [t.failure_frequency] * 3,
             "Failure duration (minutes)": [t.failure_duration] * 3,
+            "Number of parallel units": [t.parallel_units] * 3,
         })]
     return pd.concat(dfs)
 
