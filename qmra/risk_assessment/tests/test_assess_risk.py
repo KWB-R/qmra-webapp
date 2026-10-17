@@ -450,3 +450,35 @@ class TestDailyLrv(TestCase):
                     case_statistics(normal[pathogen], "minimum_lrv"))
                 assert_that(failing[pathogen]["infection_maximum_lrv_median"]).is_greater_than(
                     normal[pathogen]["infection_maximum_lrv_median"])
+
+
+class TestParallelUnits(TestCase):
+
+    def test_failure_lrv_matches_the_d7_table(self):
+        # docs/review-2026-10-dev-scenarios.md, F2: the LRV a step keeps while one of its units is down
+        for normal_lrv, units, expected_lrv in [(4, 2, 0.30), (4, 4, 0.60), (4, 10, 1.00),
+                                                (1, 2, 0.26), (1, 4, 0.49), (1, 10, 0.72)]:
+            with self.subTest(normal_lrv=normal_lrv, units=units):
+                failing = calculate([dict(all_groups(normal_lrv, normal_lrv), failure_frequency=365,
+                                          failure_duration=1440, parallel_units=units),
+                                     all_groups(NEVER_FAILING_LRV, NEVER_FAILING_LRV)])
+                train_lrv = NEVER_FAILING_LRV + expected_lrv
+                reference = calculate([all_groups(train_lrv, train_lrv)])
+
+                assert_both_cases_close(failing, reference, ROUNDING)
+
+    def test_more_parallel_units_never_raise_the_risk(self):
+        results = [calculate([dict(STRONG_STEP, failure_frequency=100, failure_duration=600, parallel_units=units),
+                              dict(WEAK_STEP, failure_frequency=100, failure_duration=600, parallel_units=units)])
+                   for units in [1, 2, 4, 10, 1000]]
+
+        for pathogen in PATHOGENS:
+            for case in ["minimum_lrv", "maximum_lrv"]:
+                for pair, (fewer, more) in enumerate(zip(results, results[1:])):
+                    with self.subTest(pathogen=pathogen, case=case, pair=pair):
+                        for with_fewer, with_more in zip(case_statistics(fewer[pathogen], case),
+                                                         case_statistics(more[pathogen], case)):
+                            assert_that(with_more).is_less_than_or_equal_to(with_fewer)
+        for case in ["minimum_lrv", "maximum_lrv"]:
+            median = [r["Rotavirus"][f"infection_{case}_median"] for r in results]
+            assert_that(median[-1]).described_as(case).is_less_than(median[0])

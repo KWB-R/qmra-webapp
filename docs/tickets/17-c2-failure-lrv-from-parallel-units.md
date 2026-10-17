@@ -12,11 +12,11 @@ Source: Spec C2 Failure calculation, revision for D6 and D7 (`docs/specs/c2-fail
 
 **Status:** ready-for-agent
 
-- [ ] The calculation reads each treatment step's number of parallel units and uses the failure LRV in the daily LRV of both cases.
-- [ ] A step with one parallel unit gives the same results as in Ticket 16.
-- [ ] A step with LRV 4 always failing for the whole day with 2, 4 or 10 parallel units gives the same results as a train in which that step has LRV 0.30, 0.60 or 1.00 (the D7 table, allowing for its two-decimal rounding).
-- [ ] Raising the number of parallel units never raises any mean.
-- [ ] All tests pass, and the export package keeps its files and columns with failures.
+- [x] The calculation reads each treatment step's number of parallel units and uses the failure LRV in the daily LRV of both cases.
+- [x] A step with one parallel unit gives the same results as in Ticket 16.
+- [x] A step with LRV 4 always failing for the whole day with 2, 4 or 10 parallel units gives the same results as a train in which that step has LRV 0.30, 0.60 or 1.00 (the D7 table, allowing for its two-decimal rounding).
+- [x] Raising the number of parallel units never raises any mean.
+- [x] All tests pass, and the export package keeps its files and columns with failures.
 - [ ] The calculation time of a drinking-water scenario (365 events per year) with failures is measured and recorded in the C2 pull request.
 - [ ] Manual check on the dev environment, announced to the team first:
   - Enter the worked example's two steps with failures and run them as a guest and as a registered user.

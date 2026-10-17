@@ -51,25 +51,34 @@ def draw_failing_events(treatments: list[Treatment], events_per_year: int,
 
 
 def failing_steps(treatments: list[Treatment], failing_events: list[np.ndarray | None], group: PathogenGroup,
-                  bound: str) -> list[tuple[np.ndarray, float, int]]:
+                  bound: str) -> list[tuple[np.ndarray, float, int, int]]:
     """The steps that fail on some days and then lose LRV for this pathogen group, as (their failing events, their
-    minimum or maximum LRV, failure duration). A step whose LRV is 0 or below loses nothing when it fails (D4)."""
+    minimum or maximum LRV, failure duration, number of parallel units). A step whose LRV is 0 or below loses nothing
+    when it fails (D4)."""
     steps = []
     for t, failing in zip(treatments, failing_events):
         lrv = step_lrv(t, group, bound)
         if failing is not None and lrv > 0:
-            steps.append((failing, lrv, t.failure_duration))
+            steps.append((failing, lrv, t.failure_duration, t.parallel_units))
     return steps
 
 
-def daily_lrv_loss(lrv: float, failure_duration: int) -> float:
+def failure_lrv(lrv: float, parallel_units: int) -> float:
+    """LRV of a step while one of its parallel units is down (D7, ADR-0002): that unit's share of the water is not
+    treated, the others' is treated with the step's LRV, mixed by concentration. 0 for one unit, at most log10 of the
+    number of units."""
+    return -np.log10((parallel_units - 1) / parallel_units * 10 ** -lrv + 1 / parallel_units)
+
+
+def daily_lrv_loss(lrv: float, failure_duration: int, parallel_units: int) -> float:
     """How much LRV a failing step loses on a failure day under the mixed-water assumption (ADR-0002).
 
-    The consumed water mixes water treated during the failure event, with LRV 0, and water treated in normal
-    operation, in proportion to the failure duration. The mixture is averaged by concentration, never by LRV.
+    The consumed water mixes water treated during the failure event, with the failure LRV, and water treated in
+    normal operation, in proportion to the failure duration. The mixture is averaged by concentration, never by LRV.
     """
     failing_share = failure_duration / MINUTES_PER_DAY
-    daily_lrv = -np.log10(failing_share + (1 - failing_share) * 10 ** -lrv)
+    daily_lrv = -np.log10(failing_share * 10 ** -failure_lrv(lrv, parallel_units)
+                          + (1 - failing_share) * 10 ** -lrv)
     return lrv - daily_lrv
 
 
@@ -79,8 +88,8 @@ def event_lrvs_of_case(train_lrv: float, treatments: list[Treatment], failing_ev
     minimum LRV. On a failure day each failing step loses what its daily LRV lacks, so combined failures add up
     without further rules (D6)."""
     event_lrvs = np.full(shape, train_lrv, dtype=float)
-    for failing, lrv, failure_duration in failing_steps(treatments, failing_events, group, bound):
-        event_lrvs[failing] -= daily_lrv_loss(lrv, failure_duration)
+    for failing, lrv, failure_duration, parallel_units in failing_steps(treatments, failing_events, group, bound):
+        event_lrvs[failing] -= daily_lrv_loss(lrv, failure_duration, parallel_units)
     return event_lrvs
 
 
