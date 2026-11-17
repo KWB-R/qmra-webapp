@@ -17,7 +17,7 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 | C4 Explain treatment failure | `c4-failure-explanations` (C3) | #41 | #32, #33 (`12`, `13`) | Built; texts are drafts for domain expert review; manual check on dev open |
 | C5 Failure benchmark | — | — | — | Waits for decisions D1–D3 |
 
-**Dev** (https://dev.qmra.org) ran C1 + C2 + C3 (PR #34, commit `dfa309f`) from 2026-10-17. Opening PR #41 on 2026-11-17 deploys C1–C4 (commit `36e18ef`).
+**Dev** (https://dev.qmra.org) ran C1 + C2 + C3 (PR #34, commit `dfa309f`) from 2026-10-17. PR #41 (opened 2026-11-17) should deploy C1–C4, but no GitHub Actions run started for it, nor any run in the repository since 2026-10-17; the cause (Actions settings, minutes or billing) needs someone with admin rights on the repository. Until then dev still runs C1–C3.
 
 **Review of 2026-09-28** (by a teammate):
 - **Statuses:** tickets 04–11 are set to "review".
