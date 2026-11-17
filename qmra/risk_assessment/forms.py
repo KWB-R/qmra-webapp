@@ -14,6 +14,42 @@ from qmra.user.models import User
 def _zero_if_none(x): return x if x is not None else 0
 
 
+LRV_FIELDS = [
+    ("bacteria_min", "bacteria_max"),
+    ("viruses_min", "viruses_max"),
+    ("protozoa_min", "protozoa_max"),
+]
+FAILURE_INPUT_RANGES = {
+    "failure_frequency": (0, 365, "days per year"),
+    "failure_duration": (1, 1440, "minutes"),
+}
+PARALLEL_UNITS_MESSAGE = "number of parallel units must be a whole number of 1 or more"
+
+
+def check_treatment_step(form, cleaned_data):
+    """Minimum LRV at most maximum LRV per pathogen group, failure inputs within their ranges,
+    at least one parallel unit, and a failure frequency above 0 only for a step with a positive LRV.
+
+    Shared by the configurator and the personal treatment step form. Whole minutes are enforced
+    by the failure duration's field type; failure inputs a form does not have are skipped.
+    """
+    for min_field, max_field in LRV_FIELDS:
+        if _zero_if_none(cleaned_data.get(min_field, 0)) > _zero_if_none(cleaned_data.get(max_field, 0)):
+            form.add_error(min_field, "min. must be less than max")
+    for field, (low, high, unit) in FAILURE_INPUT_RANGES.items():
+        value = cleaned_data.get(field)
+        if value is not None and not low <= value <= high:
+            form.add_error(field, f"{field.replace('_', ' ')} must be between {low} and {high} {unit}")
+    # no upper limit: more units only raise the LRV during a failure (D7)
+    parallel_units = cleaned_data.get("parallel_units")
+    if parallel_units is not None and parallel_units < 1:
+        form.add_error("parallel_units", PARALLEL_UNITS_MESSAGE)
+    # a failure removes only positive LRVs, so a step without one cannot fail (D4)
+    has_positive_lrv = any(_zero_if_none(cleaned_data.get(field)) > 0 for pair in LRV_FIELDS for field in pair)
+    if _zero_if_none(cleaned_data.get("failure_frequency")) > 0 and not has_positive_lrv:
+        form.add_error("failure_frequency", "failure frequency must be 0 for a treatment step without a positive LRV")
+
+
 class RiskAssessmentForm(forms.ModelForm):
     source_name = forms.ChoiceField()
     exposure_name = forms.ChoiceField()
@@ -150,7 +186,10 @@ class TreatmentForm(forms.ModelForm):
             'viruses_min',
             'viruses_max',
             "protozoa_min",
-            "protozoa_max"
+            "protozoa_max",
+            "failure_frequency",
+            "failure_duration",
+            "parallel_units",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -167,6 +206,13 @@ class TreatmentForm(forms.ModelForm):
         self.fields['viruses_max'].label = ""
         self.fields['protozoa_min'].label = ""
         self.fields['protozoa_max'].label = ""
+        self.fields['failure_frequency'].label = "Failure frequency (days per year)"
+        self.fields['failure_duration'].label = "Failure duration (minutes)"
+        self.fields['parallel_units'].label = "Number of parallel units"
+        # leave whole numbers to the server check: the browser blocks hidden step cards without a message
+        self.fields['failure_duration'].widget.attrs['step'] = "any"
+        self.fields['parallel_units'].widget.attrs['step'] = "any"
+        self.fields['parallel_units'].error_messages['invalid'] = PARALLEL_UNITS_MESSAGE
         label_style = "class='text-muted text-center w-100' style='margin-top: .4em;'"
         self.helper.layout = Layout(
             Field("name", css_class="disabled-input d-none"),
@@ -179,24 +225,13 @@ class TreatmentForm(forms.ModelForm):
                 Column("viruses_min"), Column("viruses_max")),
             Row(Column(HTML(f"<label {label_style}>Protozoa LRV:</label>")),
                 Column("protozoa_min"), Column("protozoa_max")),
+            Row(Column("failure_frequency"), Column("failure_duration"), Column("parallel_units")),
             # Row(Column("DELETE"))
         )
 
     def clean(self):
         cleaned_data = super().clean()
-        b_min = _zero_if_none(cleaned_data.get("bacteria_min", 0))
-        b_max = _zero_if_none(cleaned_data.get("bacteria_max", 0))
-        v_min = _zero_if_none(cleaned_data.get("viruses_min", 0))
-        v_max = _zero_if_none(cleaned_data.get("viruses_max", 0))
-        p_min = _zero_if_none(cleaned_data.get("protozoa_min", 0))
-        p_max = _zero_if_none(cleaned_data.get("protozoa_max", 0))
-        msg = "min. must be less than max"
-        if b_min > b_max:
-            self.add_error("bacteria_min", msg)
-        if v_min > v_max:
-            self.add_error("viruses_min", msg)
-        if p_min > p_max:
-            self.add_error("protozoa_min", msg)
+        check_treatment_step(self, cleaned_data)
         return cleaned_data
 
 

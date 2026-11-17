@@ -108,7 +108,37 @@
     <p>Yes, the tool is developed based on international guidelines for water safety and QMRA, ensuring that your
     assessments are aligned with best practices and standards. The specific guidelines used are accessible via the "Reference"
         tab of the risk assessment configuration page.</p>
-    <h5>13. What are the limitations of this tool?</h5>
+    <h5>13. How does the tool model treatment failure?</h5>
+    <p>A treatment step does not always work as planned. Each treatment step can be given three failure inputs:</p>
+    <ul>
+        <li>Failure frequency (days per year): on how many days per year the step is expected to have a failure
+            event, from 0 to 365.
+            The default of 0 means the step never fails.</li>
+        <li>Failure duration (minutes): how long one failure event lasts on average, from 1 to 1440 minutes (one
+            day).</li>
+        <li>Number of parallel units: how many equal units share the water of the step, a whole number of 1 or more
+            (default 1).</li>
+    </ul>
+    <p>For each exposure event, the tool draws at random whether it falls on a failure day of a step, with a
+        probability of failure frequency / 365. Each step is drawn on its own.</p>
+    <p><b>Failure LRV:</b> a failure event stops one of the parallel units while the others keep working. The water of
+        the stopped unit is not treated, the rest is treated with the step's normal LRV. A step with one unit therefore
+        has an LRV of 0 during the failure. A step with N units keeps at most log<sub>10</sub> N, for example 0.3 with
+        two parallel units, however high its normal LRV is. We call this the failure LRV.</p>
+    <p><b>Daily LRV:</b> the tool follows the mixed-water assumption: the water used on a failure day is a mixture of
+        water treated during the failure event and water treated in normal operation, in proportion to the failure
+        duration. The two are mixed by pathogen concentration, not by averaging LRVs. For example, a step with an LRV
+        of 4 and one unit that fails for 60 minutes has a daily LRV of 1.38 on that day; a plain average of the LRVs
+        would give 3.83, which is far too optimistic.</p>
+    <p><b>Best-case and worst-case</b> use the same rule. They differ only in the LRV a step starts from: its maximum
+        LRV in best-case and its minimum LRV in worst-case. The failure duration therefore affects both cases.</p>
+    <p><b>Combined failure:</b> if several steps fail on the same day, each failing step gets its own daily LRV and
+        these are added up with the LRVs of the other steps. This is the same as if each failure event happened at a
+        random time of day, independently of the other steps.</p>
+    <p>A failure removes only the positive LRVs of a step. LRVs of 0 or below, for example to simulate
+        recontamination, stay unchanged during a failure, and a step without any positive LRV cannot be given failure
+        days.</p>
+    <h5>14. What are the limitations of this tool?</h5>
     <p>While the QMRA Tool is a powerful resource for assessing microbial risks in water reuse schemes, it does have some
     limitations:</p>
     <ul>
@@ -130,6 +160,8 @@
         <li>Uncertainty Handling: While the tool allows for sensitivity analysis and input ranges, it may not fully capture
     all uncertainties associated with pathogen behavior, human exposure, and health outcomes. Some complex interactions
     and rare events might not be fully modeled.</li>
+        <li>Treatment failure: units of a treatment step that fail together, for example through a shared power supply,
+    are not modeled. Enter such a step with one unit.</li>
         <li>Limited Scope: The tool is designed specifically for microbial risk assessment. It does not account for chemical
     or physical hazards that may also be present in water reuse schemes, nor does it assess long-term health impacts
     beyond the scope of microbial risks.</li>
