@@ -1,7 +1,8 @@
 # Progress: treatment failure (C1–C5)
 
-Status: 2026-10-17. Work of 2026-09-24 to 2026-09-28 on the Changes in `docs/failure_roadmap.md`,
-and the rework after the dev review of October 2026 (D6, D7).
+Status: 2026-11-17. Work of 2026-09-24 to 2026-09-28 on the Changes in `docs/failure_roadmap.md`,
+the rework after the dev review of October 2026 (D6, D7), and C4 (2026-10-17, pull request
+opened 2026-11-17).
 Nothing is merged into `main` (roadmap decision D5): each Change is a draft pull request that
 targets `main` only so that the pipeline deploys it to dev. The production jobs run only for
 `main` itself.
@@ -13,10 +14,10 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 | C1 Failure inputs | `c1-failure-inputs` (`main`) | #28 | #21, #22, #23 (`docs/tickets/04`–`06`); #36, #37 (`14`, `15`) | D7 rework built (tickets 14–15), tested manually on dev |
 | C2 Failure calculation | `c2-failure-calculation` (C1) | #29 | #24, #25, #26 (`07`–`09`) | D6/D7 rework built (tickets 16–17, #38, #39), tested manually on dev |
 | C3 Failure inputs in the export | `c3-failure-inputs-in-export` (C2) | #34 | #30, #31 (`10`, `11`); #40 (`18`) | D7 rework built (ticket 18), tested manually on dev |
-| C4 Explain treatment failure | not created yet (will be based on C2) | — | #32, #33 (`12`, `13`) | Tickets ready |
+| C4 Explain treatment failure | `c4-failure-explanations` (C3) | #41 | #32, #33 (`12`, `13`) | Built; texts are drafts for domain expert review; manual check on dev open |
 | C5 Failure benchmark | — | — | — | Waits for decisions D1–D3 |
 
-**Dev** (https://dev.qmra.org) runs C1 + C2 + C3 (PR #34, commit `dfa309f`) since 2026-10-17.
+**Dev** (https://dev.qmra.org) ran C1 + C2 + C3 (PR #34, commit `dfa309f`) from 2026-10-17. Opening PR #41 on 2026-11-17 deploys C1–C4 (commit `36e18ef`).
 
 **Review of 2026-09-28** (by a teammate):
 - **Statuses:** tickets 04–11 are set to "review".
@@ -39,7 +40,9 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 - **C3:** ticket 18 (#40) written and built:
   - **Parallel units column (#40, `dfa309f`):** `treatments.csv` has the column "Number of parallel units" after the two failure columns, repeated on each step's three rows; assessments saved before C1 export 1. The reference export was updated on purpose by that column only.
   - **Manual check on dev** passed on 2026-10-17, which also completes Ticket 11's check of the two failure columns and the unchanged report.
-- **Still open:** the release note in PR #34 and the calculation time in PR #29 (to be posted on GitHub); then C4 and C5.
+- **Still open:** the release note in PR #34 and the calculation time in PR #29 (to be posted on GitHub); then C5. C4 followed on 2026-10-17, see below.
+
+**C4 (2026-10-17, PR #41 opened 2026-11-17):** based on C3 (`ed28879`) so that the C4 tickets and the export are there. Tickets 12 (#32, `520dc8b`) and 13 (#33, `0cfa9c8`) built, plus report texts (`36e18ef`). All texts are drafts written by Claude, for domain expert review before the release. The full suite passes (83 tests, 12 of them new for C4).
 
 ## What each Change delivers
 
@@ -80,6 +83,16 @@ targets `main` only so that the pipeline deploys it to dev. The production jobs 
 - **Reference export updated on 2026-10-17 (`464b31c`):** after D6, the worst-case ("Minimum LRV") results of the benchmark assessment are lower, because worst-case now uses the failure duration; the reference-level exceedance in the report drops from "min" to "none" twice. Best-case values, files and columns are unchanged.
 - **For the release notes:** worst-case results of assessments with failures are lower than with the first version (D6, ADR-0002); the reference-level exceedance can drop from "min" to "none".
 
+### C4 Explain treatment failure (#41)
+
+- **FAQ and guided tour (#32, `520dc8b`):**
+  - new FAQ question 13 on treatment failure: the three failure inputs, failure days per exposure event, the failure LRV from the number of parallel units, the daily LRV under the mixed-water assumption for both cases, combined failures and D4;
+  - the limitations question (now 14) says that units of a step failing together are not modelled; such a step is entered with one unit;
+  - step 4 of the guided tour names the three failure fields with their units;
+  - tests (`test_failure_explanations`) check that the inputs are named and that none of the replaced rules appear.
+- **Sphinx page "Treatment failure" (#33, `0cfa9c8`):** linked from `index.rst`. Formulas, ranges, the D7 table, the worked example, and how the method differs from the source (ADR-0001, ADR-0002). Tests (`test_failure_docs`) compare the page's numbers with the implemented calculation. The documentation builds locally with Sphinx 9.1.0.
+- **Report texts (`36e18ef`):** `docs/report/failure-approach-main-text` (idea, decisions, an example calculated with the tool) and `failure-approach-annex` (algorithm, all equations, a hand calculation, an R script), as Markdown with `.docx` built by pandoc.
+
 ## Decisions made during implementation
 
 All on 2026-09-25 unless noted. The documents named are updated.
@@ -97,17 +110,18 @@ All on 2026-09-25 unless noted. The documents named are updated.
 - **C3: failure columns are repeated on each step's three rows** of `treatments.csv`.
 - **C3: a reference export test is added**, comparing numbers within 0.1 %. CI's processor and math library differ from this server's by up to 10⁻⁵ relative in tiny best-case probabilities.
 - **C4: texts are drafted by Claude** and reviewed by a domain expert before the release. Step 4 of the guided tour is extended, and a new Sphinx page is added.
-- **C3 and C4 are based on C2,** so dev keeps C1 + C2 while they are tested.
+- **C3 is based on C2,** so dev keeps C1 + C2 while it is tested.
+- **C4 is based on C3** (changed 2026-10-17, `ed28879`), so that the C4 tickets and the export are there. Dev runs C1–C4 from PR #41 on.
 
 ## Open items
 
 **Checks still to do**
 - **C1 (#28):** real-data check; "I can explain this Change".
-- **C2 (#29):** calculation time measured on dev and recorded in the PR (ticket 09, #26); real-data check; "I can explain this Change".
-- **C3 (#34):** manual check on dev, from the list in the PR; real-data check; "I can explain this Change".
+- **C2 (#29):** calculation time recorded in the PR (measured locally, see above; ticket 09, #26); real-data check; "I can explain this Change".
+- **C3 (#34):** release note in the PR updated for the third column; real-data check; "I can explain this Change".
+- **C4 (#41):** manual check on dev, from the list in the PR; domain expert review of the FAQ, the tour, the Sphinx page and the report texts; `code-review`; "I can explain this Change".
 
 **Work not started**
-- **C4:** #32 (FAQ and guided tour) and #33 (Sphinx page) can start now.
 - **C5:** needs decisions D1 (tolerance), D2 (who writes the independent script) and D3 (who signs off). The script must implement the combined-failure rule of 2026-09-25.
 
 **Known issues and risks**
@@ -118,5 +132,5 @@ All on 2026-09-25 unless noted. The documents named are updated.
 - **Unpinned dependencies:** numpy and pandas aren't pinned; reproducibility across releases is an open question for Architecture.
 - **Housekeeping:**
   - the C1 and C2 Spec issues were never created (`#___` in the roadmap);
-  - the local branch `c2-failure-calculation` on the Controlled server is behind GitHub (the review commits of 2026-09-28) and holds one ticket commit (`5ca99b1`) that is on GitHub only through `c3-failure-inputs-in-export`. Update it from GitHub before working on it again.
-  - The GitHub command-line login on the Controlled server has expired (`HTTP 401`); issues and pull requests can't be updated from there until someone logs in again.
+  - the local branch `c2-failure-calculation` matches GitHub again (checked 2026-11-17).
+  - The GitHub command line works again on the Controlled server (2026-11-17): PR #41 was opened from there.
